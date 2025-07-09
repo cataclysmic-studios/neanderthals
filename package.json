@@ -1,0 +1,27 @@
+{
+  "name": "neanderthals",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "rbxtsc",
+    "watch": "rbxtsc -w"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@rbxts/compiler-types": "^3.0.0-types.0",
+    "@rbxts/types": "^1.0.861",
+    "@runicly/rbxts-transformer-flamework": "^1.3.3",
+    "rbxts-transform-debug": "github:roblox-aurora/rbxts-transform-debug",
+    "roblox-ts": "^3.0.0",
+    "ts-toolbelt": "^9.6.0",
+    "typescript": "^5.5.3"
+  },
+  "dependencies": {
+    "@flamework/core": "^1.3.1",
+    "@rbxts/services": "^1.5.5",
+    "@rbxts/tether": "^1.3.21"
+  }
+}
