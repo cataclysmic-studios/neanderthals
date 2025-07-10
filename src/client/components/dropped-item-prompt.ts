@@ -29,5 +29,4 @@ export class DroppedItemPrompt extends DestroyableComponent<{}, BillboardGui> im
       }
     }));
   }
-
 }

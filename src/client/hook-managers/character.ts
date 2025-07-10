@@ -20,5 +20,10 @@ export class CharacterController implements OnStart {
       for (const obj of removeListeners)
         obj.onCharacterRemove(character as never);
     });
+
+    const existingCharacter = player.Character;
+    if (existingCharacter)
+      for (const obj of addListeners)
+        obj.onCharacterAdd(existingCharacter as never);
   }
 }

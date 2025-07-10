@@ -1,6 +1,7 @@
 import { Controller } from "@flamework/core";
 import { Trash } from "@rbxts/trash";
 
+import type { OnCharacterAdd } from "client/hooks";
 import { Message, messaging } from "shared/messaging";
 import { playerGUI } from "client/constants";
 
@@ -11,18 +12,28 @@ const { delay } = task;
 const DAMAGE_DISPLAY_LIFETIME = 1;
 
 @Controller()
-export class MainUIController {
+export class MainUIController implements OnCharacterAdd {
   private readonly screen = playerGUI.WaitForChild("Main");
   private readonly damageDisplay = this.screen.DamageDisplay;
   private readonly stats = this.screen.Stats;
   private readonly damageTrash = new Trash;
+  private hunger = 100;
 
   public constructor(
     private readonly character: CharacterController
   ) {
-    this.updateStats(100);
-    messaging.client.on(Message.UpdateHunger, hunger => this.updateStats(hunger));
+    messaging.client.on(Message.UpdateHunger, hunger => this.updateStats(this.hunger = hunger));
     messaging.client.on(Message.ShowDamageDisplay, humanoid => this.showDamageDisplay(humanoid));
+  }
+
+  public onCharacterAdd(character: CharacterModel): void {
+    this.updateStats();
+    const humanoid = character.Humanoid;
+    const conn = humanoid.GetPropertyChangedSignal("Health").Connect(() => {
+      this.updateStats();
+      if (humanoid.Health > 0) return;
+      conn.Disconnect();
+    });
   }
 
   public enableDamageDisplay(humanoid: Humanoid): void {
@@ -49,7 +60,7 @@ export class MainUIController {
     this.damageTrash.add(delay(lifetime, () => this.disableDamageDisplay()));
   }
 
-  private updateStats(hunger: number): void {
+  private updateStats(hunger = this.hunger): void {
     const humanoid = this.character.getHumanoid();
     if (!humanoid) return;
 
