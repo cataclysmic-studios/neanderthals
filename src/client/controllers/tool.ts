@@ -3,10 +3,11 @@ import { UserInputService } from "@rbxts/services";
 import { Trash } from "@rbxts/trash";
 
 import { Message, messaging } from "shared/messaging";
-import { assets } from "shared/constants";
-import { weldTool } from "shared/utility";
+import { getItemByID, weldTool } from "shared/utility";
+import { TOOL_IDS } from "shared/structs/item-id";
 
 import type { CharacterController } from "./character";
+import type { ReplicaController } from "./replica";
 
 @Controller()
 export class ToolController {
@@ -14,7 +15,8 @@ export class ToolController {
   private equipped?: ToolItem;
 
   public constructor(
-    private readonly character: CharacterController
+    private readonly character: CharacterController,
+    private readonly replica: ReplicaController
   ) {
     character.died.Connect(() => this.unequip());
 
@@ -24,7 +26,7 @@ export class ToolController {
       if (this.hasEquipped())
         this.unequip();
       else
-        this.equip(assets.Items["God Rock"]);
+        this.equip(this.getTools().first()!); // TODO: hotbar
     });
   }
 
@@ -53,5 +55,11 @@ export class ToolController {
 
   public hasEquipped(): boolean {
     return this.equipped !== undefined;
+  }
+
+  private getTools(): ToolItem[] {
+    return this.replica.data.inventory
+      .filter(id => TOOL_IDS.has(id))
+      .mapFiltered(getItemByID) as ToolItem[];
   }
 }

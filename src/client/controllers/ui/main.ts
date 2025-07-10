@@ -26,13 +26,14 @@ export class MainUIController {
   }
 
   public enableDamageDisplay(humanoid: Humanoid): void {
-    const healthBar = this.damageDisplay.Health;
+    const { damageDisplay } = this;
+    const healthBar = damageDisplay.Health;
     const health = humanoid.Health;
     healthBar.Amount.Text = tostring(health); // TODO: comma format
     healthBar.Bar.Size = UDim2.fromScale(health / humanoid.MaxHealth, 1);
 
-    this.damageDisplay.Title.Text = humanoid.Parent!.Name.upper();
-    this.damageDisplay.Visible = true;
+    damageDisplay.Title.Text = humanoid.Parent!.Name.upper();
+    damageDisplay.Visible = true;
   }
 
   public disableDamageDisplay(): void {
@@ -42,15 +43,19 @@ export class MainUIController {
   private showDamageDisplay(humanoid: Humanoid) {
     this.damageTrash.purge();
     this.enableDamageDisplay(humanoid);
-    this.damageTrash.add(delay(DAMAGE_DISPLAY_LIFETIME, () => this.disableDamageDisplay()));
+
+    const isDead = humanoid.Health <= 0;
+    const lifetime = DAMAGE_DISPLAY_LIFETIME * (isDead ? 0.5 : 1);
+    this.damageTrash.add(delay(lifetime, () => this.disableDamageDisplay()));
   }
 
   private updateStats(hunger: number): void {
     const humanoid = this.character.getHumanoid();
     if (!humanoid) return;
 
-    this.stats.BagSpace.Bar.Size = UDim2.fromScale(0, 1);
-    this.stats.Hunger.Bar.Size = UDim2.fromScale(hunger / 100, 1);
-    this.stats.Health.Bar.Size = UDim2.fromScale(humanoid.Health / humanoid.MaxHealth, 1);
+    const { stats } = this;
+    stats.BagSpace.Bar.Size = UDim2.fromScale(0, 1);
+    stats.Hunger.Bar.Size = UDim2.fromScale(hunger / 100, 1);
+    stats.Health.Bar.Size = UDim2.fromScale(humanoid.Health / humanoid.MaxHealth, 1);
   }
 }

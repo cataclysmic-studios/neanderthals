@@ -60,6 +60,15 @@ export function weldTool(toolTemplate: ToolItem, character: CharacterModel, tras
 }
 
 const items = assets.Items.GetChildren() as Model[];
+const itemCache = new Map<ItemID | number, Model>;
 export function getItemByID(id: ItemID | number): Maybe<Model> {
-  return items.find(item => item.GetAttribute("ID") === id);
+  const cachedItem = itemCache.get(id);
+  if (cachedItem)
+    return cachedItem;
+
+  const item = items.find(item => item.GetAttribute("ID") === id);
+  if (item)
+    itemCache.set(id, item);
+
+  return item;
 }
