@@ -1,7 +1,12 @@
+type ToolName = ExtractKeys<ReplicatedStorage["Assets"]["Items"], ToolItem>;
 interface ToolItem extends Model {
   Handle: BasePart & {
     HandWeld: Weld;
   };
+}
+
+interface StructureModel extends Model {
+  Humanoid: Humanoid;
 }
 
 interface CharacterModel extends Model {

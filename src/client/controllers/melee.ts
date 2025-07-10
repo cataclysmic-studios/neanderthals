@@ -6,10 +6,9 @@ import { assets } from "shared/constants";
 
 import type { CharacterController } from "./character";
 import type { AnimationController } from "./animation";
+import { Message, messaging } from "shared/messaging";
 
 const SWING_COOLDOWN = 0.45;
-
-type DamageType = "Entity" | "Structure";
 
 @Controller()
 export class MeleeController implements OnTick {
@@ -27,7 +26,7 @@ export class MeleeController implements OnTick {
       if (this.hasEquipped())
         this.unequip();
       else
-        this.equip(assets.Items.Rock);
+        this.equip(assets.Items["God Rock"]);
     });
   }
 
@@ -81,8 +80,9 @@ export class MeleeController implements OnTick {
     const raycastParams = new RaycastParams;
     raycastParams.AddToFilter(character);
 
+    const tool = this.equippedTool!;
+    const hitboxSize = tool.GetAttribute<Vector3>("HitboxSize") ?? vector.one;
     const rootCFrame = root.CFrame;
-    const hitboxSize = this.equippedTool!.GetAttribute<Vector3>("HitboxSize") ?? vector.one;
     const result = World.Blockcast(rootCFrame, hitboxSize, rootCFrame.LookVector, raycastParams);
     if (!result) return;
 
@@ -92,15 +92,10 @@ export class MeleeController implements OnTick {
     const humanoid = hitModel.FindFirstChildOfClass("Humanoid");
     if (!humanoid) return;
 
-    this.dealDamage(humanoid);
-  }
-
-  private dealDamage(humanoid: Humanoid): void {
-    const damageType = humanoid.GetAttribute<DamageType>("DamageType");
-    if (!damageType) return;
-
-    const damage = this.equippedTool!.GetAttribute<number>(damageType + "Damage") ?? 0;
-    humanoid.TakeDamage(damage);
+    messaging.server.emit(Message.Damage, {
+      humanoid,
+      toolName: tool.Name as never
+    });
   }
 
   private isClickHeld(): boolean {
