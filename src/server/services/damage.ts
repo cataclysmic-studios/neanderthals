@@ -17,14 +17,14 @@ export class DamageService implements OnStart {
 
   public damage(player: Player, humanoid: Humanoid, toolName: ToolName): void {
     const damageType = humanoid.GetAttribute<DamageType>("DamageType");
-    if (!damageType) return;
+    if (damageType === undefined) return;
 
     const tool = assets.Items[toolName];
     if (!tool)
       return stopHacking(player);
 
     const damage = tool.GetAttribute<number>(damageType + "Damage");
-    if (!damage) return;
+    if (damage === undefined) return;
 
     const targetModel = humanoid.Parent;
     if (!targetModel || !targetModel.IsA("Model")) return;
