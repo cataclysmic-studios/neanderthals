@@ -7,13 +7,14 @@ import { $nameof } from "rbxts-transform-debug";
 import { assets } from "shared/constants";
 import { dropItem } from "shared/utility";
 import { type StructureConfig } from "shared/structs/structure-config";
+import { CreatesDropsComponent } from "server/base-components/creates-drops";
 
 const DEFAULT_RESPAWN_TIME = 60;
 
 @Component({
   tag: $nameof<Structure>()
 })
-export class Structure extends BaseComponent<{}, StructureModel> implements OnStart {
+export class Structure extends CreatesDropsComponent<{}, StructureModel> implements OnStart {
   public readonly config = require(this.instance.Config) as StructureConfig;
 
   private readonly aliveTrash = new Trash;
@@ -32,7 +33,7 @@ export class Structure extends BaseComponent<{}, StructureModel> implements OnSt
     if (!this.alive) return;
     this.alive = false;
     this.aliveTrash.purge();
-    this.createDrops();
+    this.createDrops(this.config.drops);
     this.toggleVisibility(false);
 
     const { noRespawn = false, respawnTime = DEFAULT_RESPAWN_TIME } = this.config;
@@ -64,14 +65,5 @@ export class Structure extends BaseComponent<{}, StructureModel> implements OnSt
       part.CanQuery = on;
       part.CanTouch = on;
     }
-  }
-
-  private createDrops(): void {
-    const pivot = this.instance.GetPivot();
-    const { drops } = this.config;
-    if (!drops) return;
-
-    for (const [dropName, count] of drops)
-      dropItem(assets.Items[dropName], pivot, count);
   }
 }

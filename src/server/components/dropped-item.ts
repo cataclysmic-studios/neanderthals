@@ -60,9 +60,9 @@ export class DroppedItem extends DestroyableComponent<{ ID: number } & DroppedIt
 
     dragDetector.MaxActivationDistance = DRAG_DISTANCE;
     dragDetector.DragStyle = Enum.DragDetectorDragStyle.TranslateViewPlane;
-    dragDetector.MaxForce = 1500;
+    dragDetector.MaxForce = 2000;
     dragDetector.MaxTorque = 1000;
-    dragDetector.Responsiveness = 50;
+    dragDetector.Responsiveness = 55;
     dragDetector.Parent = instance;
   }
 

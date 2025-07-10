@@ -10,8 +10,8 @@ interface ToolItem extends Model {
 }
 
 interface StructureModel extends Model {
-  Humanoid: Humanoid;
   Config: ModuleScript;
+  Humanoid: Humanoid;
 }
 
 interface CreatureServerModel extends Model {
@@ -20,6 +20,7 @@ interface CreatureServerModel extends Model {
 }
 
 interface CreatureModel extends Model {
+  Config: ModuleScript;
   Humanoid: Humanoid & {
     Animator: Animator;
   };

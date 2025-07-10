@@ -9,7 +9,9 @@ export class PlayersService implements OnStart {
     const addListeners = new Set<OnPlayerAdd>;
     const removeListeners = new Set<OnPlayerRemove>;
     Modding.onListenerAdded<OnPlayerAdd>(obj => addListeners.add(obj));
+    Modding.onListenerRemoved<OnPlayerAdd>(obj => addListeners.delete(obj));
     Modding.onListenerAdded<OnPlayerRemove>(obj => removeListeners.add(obj));
+    Modding.onListenerRemoved<OnPlayerRemove>(obj => removeListeners.delete(obj));
 
     Players.PlayerAdded.Connect(player => {
       for (const obj of addListeners)

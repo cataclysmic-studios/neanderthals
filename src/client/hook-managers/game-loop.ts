@@ -10,6 +10,7 @@ export class GameLoopController implements OnStart {
   public onStart(): void {
     const onFixedListeners = new Set<OnFixed>;
     Modding.onListenerAdded<OnFixed>(obj => onFixedListeners.add(obj));
+    Modding.onListenerRemoved<OnFixed>(obj => onFixedListeners.delete(obj));
 
     const elapsedMap = new Map<OnFixed, number>;
     const fixedRateSeconds = 1 / FIXED_RATE;

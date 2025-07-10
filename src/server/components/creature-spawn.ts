@@ -3,9 +3,12 @@ import { Component, BaseComponent } from "@flamework/components";
 import { Workspace as World } from "@rbxts/services";
 import { $nameof } from "rbxts-transform-debug";
 
+import type { OnPlayerAdd } from "server/hooks";
 import { Message, messaging } from "shared/messaging";
 import { assets } from "shared/constants";
-import { OnPlayerAdd } from "server/hooks";
+import { dropItem } from "shared/utility";
+import type { CreatureConfig } from "shared/structs/creature-config";
+import { CreatesDropsComponent } from "server/base-components/creates-drops";
 
 interface Attributes {
   readonly CreatureSpawn_Rate: number;
@@ -19,11 +22,13 @@ let cumulativeCreatureID = 0;
     CreatureSpawn_Rate: 60
   }
 })
-export class CreatureSpawn extends BaseComponent<Attributes, BasePart> implements OnStart, OnPlayerAdd {
+export class CreatureSpawn extends CreatesDropsComponent<Attributes, BasePart> implements OnStart, OnPlayerAdd {
   private readonly name = this.instance.Name as CreatureName;
   private readonly template = assets.Creatures[this.name];
   private readonly spawnRate = this.attributes.CreatureSpawn_Rate;
+  private readonly config = require(this.template.Config) as CreatureConfig;
   private readonly creatureSize: Vector3;
+
   private creature?: CreatureServerModel;
 
   public constructor() {
@@ -39,17 +44,20 @@ export class CreatureSpawn extends BaseComponent<Attributes, BasePart> implement
 
   public onPlayerAdd(player: Player): void {
     if (!this.creature) return;
-
     if (!player.Character)
       player.CharacterAdded.Wait();
 
-    // hydrate creature
+    this.hydrate(player);
+  }
+
+  private hydrate(player: Player): void {
+    const creature = this.creature!;
     task.wait(0.5);
     messaging.client.emit(player, Message.SpawnCreature, {
       name: this.name,
-      id: this.creature.GetAttribute<number>("ID")!,
-      position: this.creature.GetPivot().Position,
-      health: this.creature.Humanoid.Health
+      id: creature.GetAttribute<number>("ID")!,
+      position: creature.GetPivot().Position,
+      health: creature.Humanoid.Health
     });
   }
 
@@ -57,12 +65,14 @@ export class CreatureSpawn extends BaseComponent<Attributes, BasePart> implement
     if (this.creature) return;
 
     const creature = assets.CreatureServerModel.Clone();
-    const humanoid = new Instance("Humanoid");
+    const humanoid = creature.Humanoid;
     const maxHealth = this.template.Humanoid.MaxHealth;
     humanoid.MaxHealth = maxHealth;
     humanoid.Health = maxHealth;
-    humanoid.Died.Once(() => this.onDied());
-    humanoid.Parent = creature;
+    humanoid.GetPropertyChangedSignal("Health").Connect(() => {
+      if (humanoid.Health > 0) return;
+      this.onDied();
+    });
 
     const cframe = this.getSpawnCFrame();
     const id = cumulativeCreatureID++;
@@ -82,6 +92,9 @@ export class CreatureSpawn extends BaseComponent<Attributes, BasePart> implement
 
   private onDied(): void {
     task.delay(this.spawnRate, () => this.spawn());
+    this.createDrops(this.config.drops);
+    this.creature?.Destroy();
+    this.creature = undefined;
     cumulativeCreatureID--;
   }
 
@@ -90,6 +103,6 @@ export class CreatureSpawn extends BaseComponent<Attributes, BasePart> implement
     const spawnOffset = -this.instance.Size.Y / 2;
 
     return this.instance.CFrame
-      .add(Vector3.yAxis.mul(creatureOffset + spawnOffset));
+      .add(Vector3.yAxis.mul(creatureOffset + spawnOffset + 1));
   }
 }

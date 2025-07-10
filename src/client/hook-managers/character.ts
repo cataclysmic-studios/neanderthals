@@ -9,7 +9,9 @@ export class CharacterController implements OnStart {
     const addListeners = new Set<OnCharacterAdd>;
     const removeListeners = new Set<OnCharacterRemove>;
     Modding.onListenerAdded<OnCharacterAdd>(obj => addListeners.add(obj));
+    Modding.onListenerRemoved<OnCharacterAdd>(obj => addListeners.delete(obj));
     Modding.onListenerAdded<OnCharacterRemove>(obj => removeListeners.add(obj));
+    Modding.onListenerRemoved<OnCharacterRemove>(obj => removeListeners.delete(obj));
 
     const player = Players.LocalPlayer;
     player.CharacterAdded.Connect(character => {
