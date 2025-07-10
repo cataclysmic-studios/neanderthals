@@ -32,7 +32,7 @@ export class Structure extends BaseComponent<{}, StructureModel> implements OnSt
     task.delay(this.config.respawnTime ?? DEFAULT_RESPAWN_TIME, () => this.spawn());
   }
 
-  private spawn(toggleVisiblity = true): void {
+  private spawn(resetState = true): void {
     if (this.alive) return;
 
     const { instance, trash } = this;
@@ -44,8 +44,10 @@ export class Structure extends BaseComponent<{}, StructureModel> implements OnSt
       this.kill();
     }));
 
-    if (toggleVisiblity)
+    if (resetState) {
       this.toggleVisibility(true);
+      humanoid.Health = humanoid.MaxHealth;
+    }
   }
 
   private toggleVisibility(on: boolean): void {
