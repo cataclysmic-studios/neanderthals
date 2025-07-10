@@ -2,11 +2,11 @@ import { Controller } from "@flamework/core";
 import { UserInputService } from "@rbxts/services";
 import { Trash } from "@rbxts/trash";
 
+import { Message, messaging } from "shared/messaging";
 import { assets } from "shared/constants";
 import { weldTool } from "shared/utility";
 
 import type { CharacterController } from "./character";
-import { Message, messaging } from "shared/messaging";
 
 @Controller()
 export class ToolController {

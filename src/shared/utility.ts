@@ -2,6 +2,9 @@ import { Workspace as World } from "@rbxts/services";
 import { getChildrenOfType } from "@rbxts/instance-utility";
 import type { Trash } from "@rbxts/trash";
 
+import { ItemID } from "./structs/item-id";
+import { assets } from "./constants";
+
 const ITEM_DECAY_TIME = 360;
 
 export function stopHacking(player: Player, reason = "unspecified"): void {
@@ -54,4 +57,9 @@ export function weldTool(toolTemplate: ToolItem, character: CharacterModel, tras
   tool.Parent = character;
 
   return tool;
+}
+
+const items = assets.Items.GetChildren() as Model[];
+export function getItemByID(id: ItemID | number): Maybe<Model> {
+  return items.find(item => item.GetAttribute("ID") === id);
 }

@@ -1,21 +1,28 @@
 import { Controller } from "@flamework/core";
+import { Trash } from "@rbxts/trash";
 
 import { Message, messaging } from "shared/messaging";
 import { playerGUI } from "client/constants";
 
 import type { CharacterController } from "../character";
 
+const { delay } = task;
+
+const DAMAGE_DISPLAY_LIFETIME = 1;
+
 @Controller()
 export class MainUIController {
   private readonly screen = playerGUI.WaitForChild("Main");
   private readonly damageDisplay = this.screen.DamageDisplay;
   private readonly stats = this.screen.Stats;
+  private readonly damageTrash = new Trash;
 
   public constructor(
     private readonly character: CharacterController
   ) {
     this.updateStats(100);
     messaging.client.on(Message.UpdateHunger, hunger => this.updateStats(hunger));
+    messaging.client.on(Message.ShowDamageDisplay, humanoid => this.showDamageDisplay(humanoid));
   }
 
   public enableDamageDisplay(humanoid: Humanoid): void {
@@ -30,6 +37,12 @@ export class MainUIController {
 
   public disableDamageDisplay(): void {
     this.damageDisplay.Visible = false;
+  }
+
+  private showDamageDisplay(humanoid: Humanoid) {
+    this.damageTrash.purge();
+    this.enableDamageDisplay(humanoid);
+    this.damageTrash.add(delay(DAMAGE_DISPLAY_LIFETIME, () => this.disableDamageDisplay()));
   }
 
   private updateStats(hunger: number): void {

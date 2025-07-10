@@ -1,39 +1,25 @@
 import { Controller, type OnTick } from "@flamework/core";
 import { UserInputService, Workspace as World } from "@rbxts/services";
-import { Trash } from "@rbxts/trash";
 
 import { Message, messaging } from "shared/messaging";
 import { assets } from "shared/constants";
 
 import type { CharacterController } from "./character";
 import type { AnimationController } from "./animation";
-import type { MainUIController } from "./ui/main";
-import { ToolController } from "./tool";
-
-const { delay } = task;
+import type { ToolController } from "./tool";
 
 const SWING_COOLDOWN = 0.45;
-const DAMAGE_DISPLAY_LIFETIME = 1;
+const SWING_ANIMATION = assets.Animations.Swing;
 
 @Controller()
 export class MeleeController implements OnTick {
-  private readonly damageTrash = new Trash;
   private isSwinging = false;
 
   public constructor(
     private readonly character: CharacterController,
     private readonly animation: AnimationController,
-    private readonly tool: ToolController,
-    private readonly mainUI: MainUIController
-  ) {
-    messaging.client.on(Message.ShowDamageDisplay, humanoid => this.showDamageDisplay(humanoid));
-  }
-
-  private showDamageDisplay(humanoid: Humanoid) {
-    this.damageTrash.purge();
-    this.mainUI.enableDamageDisplay(humanoid);
-    this.damageTrash.add(delay(DAMAGE_DISPLAY_LIFETIME, () => this.mainUI.disableDamageDisplay()));
-  }
+    private readonly tool: ToolController
+  ) { }
 
   public onTick(): void {
     if (!this.tool.hasEquipped()) return;
@@ -45,7 +31,7 @@ export class MeleeController implements OnTick {
     if (this.isSwinging) return;
     this.isSwinging = true;
 
-    this.animation.play(assets.Animations.Swing, { fadeTime: 0 });
+    this.animation.play(SWING_ANIMATION, { fadeTime: 0 });
     this.raycast();
 
     task.wait(SWING_COOLDOWN);
