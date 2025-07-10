@@ -1,12 +1,10 @@
 import { Service, type OnStart } from "@flamework/core";
 
 import { Message, messaging } from "shared/messaging";
-import { assets } from "shared/constants";
+import { assets, XZ } from "shared/constants";
 import { stopHacking } from "shared/utility";
 
 const { magnitude } = vector;
-
-const MAX_MELEE_DISTANCE = 12;
 
 type DamageType = "Entity" | "Structure";
 
@@ -37,8 +35,9 @@ export class DamageService implements OnStart {
     const playerPosition = character.GetPivot().Position;
     const hitboxSize = tool.GetAttribute<Vector3>("HitboxSize")!;
     const distance = magnitude(modelPosition.sub(playerPosition));
-    const checkRange = magnitude(hitboxSize) * 2;
-    if (distance > checkRange)
+    const [_, targetSize] = targetModel.GetBoundingBox();
+    const maxRange = magnitude(hitboxSize) * 2 + magnitude(targetSize.mul(XZ));
+    if (distance > maxRange)
       return stopHacking(player, "out of melee range");
 
     humanoid.TakeDamage(damage);
