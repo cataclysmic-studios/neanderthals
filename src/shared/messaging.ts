@@ -16,7 +16,9 @@ export const enum Message {
   UpdateHunger,
   InitializeData,
   DataLoaded,
-  DataUpdated
+  DataUpdated,
+  PickUpDrop,
+  EatDrop
 }
 
 export interface MessageData {
@@ -29,4 +31,6 @@ export interface MessageData {
   [Message.UpdateHunger]: u8;
   [Message.InitializeData]: undefined;
   [Message.DataUpdated]: PlayerData;
+  [Message.PickUpDrop]: u8;
+  [Message.EatDrop]: u8;
 }

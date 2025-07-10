@@ -7,7 +7,13 @@ export const ItemID = objectFromEntries(
     .filter(([_, id]) => id !== undefined)
 );
 
+/** Items which are tools */
 export const TOOL_IDS = new Set<number>([
   ItemID.Rock,
   ItemID.GodRock
+]);
+
+/** Items which may only have one copy in a players inventory */
+export const EXCLUSIVE_IDS = new Set<number>([
+  ItemID.Rock
 ]);

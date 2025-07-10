@@ -4,7 +4,7 @@ import { Players } from "@rbxts/services";
 
 import { Message, messaging } from "shared/messaging";
 import { assets, XZ } from "shared/constants";
-import { stopHacking } from "shared/utility";
+import { distanceBetween, stopHacking } from "shared/utility";
 
 import type { Structure } from "server/components/structure";
 
@@ -56,10 +56,9 @@ export class DamageService implements OnStart {
     const modelPosition = targetModel.GetPivot().Position;
     const playerPosition = character.GetPivot().Position;
     const hitboxSize = tool.GetAttribute<Vector3>("HitboxSize")!;
-    const distance = magnitude(modelPosition.sub(playerPosition));
     const [_, targetSize] = targetModel.GetBoundingBox();
     const maxRange = magnitude(hitboxSize) * 2 + magnitude(targetSize.mul(XZ));
-    if (distance > maxRange)
+    if (distanceBetween(modelPosition, playerPosition) > maxRange)
       return stopHacking(player, "out of melee range");
 
     const currentHealth = humanoid.Health;

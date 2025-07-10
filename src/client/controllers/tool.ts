@@ -58,8 +58,9 @@ export class ToolController {
   }
 
   private getTools(): ToolItem[] {
-    return this.replica.data.inventory
+    return [...this.replica.data.inventory]
+      .map(([id]) => id)
       .filter(id => TOOL_IDS.has(id))
-      .mapFiltered(getItemByID) as ToolItem[];
+      .mapFiltered(getItemByID<ToolItem>);
   }
 }

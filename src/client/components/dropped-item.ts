@@ -1,40 +1,42 @@
 import type { OnStart } from "@flamework/core";
-import { Component } from "@flamework/components";
+import { Component, type Components } from "@flamework/components";
 import { $nameof } from "rbxts-transform-debug";
 
 import type { OnCharacterAdd } from "client/hooks";
 import type { OnFixed } from "shared/hooks";
+import { Message, messaging } from "shared/messaging";
 import { player } from "client/constants";
 import { assets } from "shared/constants";
+import { distanceBetween } from "shared/utility";
+import type { DroppedItemAttributes } from "shared/structs/dropped-item-attributes";
 
 import DestroyableComponent from "shared/base-components/destroyable";
+import type { DroppedItemPrompt } from "./dropped-item-prompt";
 import type { CharacterController } from "client/controllers/character";
-
-const { magnitude } = vector;
 
 const PROMPT_UI = assets.UI.DroppedItemUI;
 
-interface Attributes {
-  readonly DisplayName?: string;
-  readonly FoodItem?: boolean;
-}
-
 @Component({ tag: $nameof<DroppedItem>() })
-export class DroppedItem extends DestroyableComponent<Attributes, Model> implements OnStart, OnFixed, OnCharacterAdd {
+export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Model> implements OnStart, OnFixed, OnCharacterAdd {
   private readonly highlight = this.trash.add(new Instance("Highlight"));
   private readonly dragDetector = this.instance.FindFirstChildOfClass("DragDetector")!;
-  private readonly prompt = PROMPT_UI.Clone();
+  private readonly promptUI = PROMPT_UI.Clone();
   private readonly mouse = player.GetMouse();
   private readonly displayName = (this.attributes.DisplayName ?? this.instance.Name).upper();
   private readonly isFood = this.attributes.FoodItem ?? false;
   private readonly maxDistance = this.dragDetector.MaxActivationDistance;
+  private destroyed = false;
 
   public constructor(
+    private readonly components: Components,
     private readonly character: CharacterController
   ) { super(); }
 
   public onStart(): void {
-    const { instance, highlight, prompt } = this;
+    const { trash, instance, highlight, promptUI } = this;
+    trash.add(() => this.destroyed = true);
+    trash.linkToInstance(instance);
+
     highlight.FillColor = new Color3(1, 1, 1);
     highlight.OutlineColor = new Color3(0, 0, 0);
     highlight.FillTransparency = 0.85;
@@ -43,12 +45,21 @@ export class DroppedItem extends DestroyableComponent<Attributes, Model> impleme
     highlight.Adornee = instance;
     highlight.Parent = instance;
 
-    prompt.Enabled = false;
-    prompt.Adornee = instance;
-    prompt.Parent = instance;
+    promptUI.Enabled = false;
+    promptUI.Adornee = instance;
+    promptUI.Parent = instance;
+
+    const prompt = trash.add(this.components.addComponent<DroppedItemPrompt>(promptUI));
+    prompt.consumed.Once(message => {
+      if (message === Message.EatDrop && !this.isFood) return;
+      messaging.server.emit(message, this.attributes.DropID);
+      this.destroy();
+    });
   }
 
   public onFixed(): void {
+    if (this.destroyed) return;
+
     const target = this.mouse.Target;
     if (!target)
       return this.toggleHover(false);
@@ -59,13 +70,9 @@ export class DroppedItem extends DestroyableComponent<Attributes, Model> impleme
     if (!targetModel.HasTag($nameof<DroppedItem>()))
       return this.toggleHover(false);
 
-    const characterPosition = this.character.getPosition();
-    if (!characterPosition)
-      return this.toggleHover(false);
-
+    const characterPosition = this.character.getPositionOrDefault();
     const position = targetModel.GetPivot().Position;
-    const distance = magnitude(characterPosition.sub(position));
-    if (distance >= this.maxDistance)
+    if (distanceBetween(characterPosition, position) >= this.maxDistance)
       return this.toggleHover(false);
 
     this.toggleHover(true);
@@ -76,7 +83,7 @@ export class DroppedItem extends DestroyableComponent<Attributes, Model> impleme
   }
 
   private toggleHover(on: boolean): void {
-    const { highlight, prompt } = this;
+    const { highlight, promptUI } = this;
     const dragging = this.dragDetector.ReferenceInstance;
     if (!dragging || on) {
       if (highlight.Enabled === on) return;
@@ -84,9 +91,9 @@ export class DroppedItem extends DestroyableComponent<Attributes, Model> impleme
     }
 
     if (dragging && on) return;
-    if (prompt.Enabled === on) return;
-    prompt.ItemName.Text = this.displayName;
-    prompt.Eat.TextTransparency = this.isFood ? 0 : 1;
-    prompt.Enabled = on;
+    if (promptUI.Enabled === on) return;
+    promptUI.ItemName.Text = this.displayName;
+    promptUI.Eat.TextTransparency = this.isFood ? 0 : 1;
+    promptUI.Enabled = on;
   }
 }

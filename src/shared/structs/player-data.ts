@@ -1,11 +1,13 @@
-import type { u8 } from "@rbxts/serio";
+import type { u8, u16, HashMap } from "@rbxts/serio";
 
 import { ItemID } from "./item-id";
 
 export interface PlayerData {
-  readonly inventory: u8[];
+  readonly inventory: HashMap<u8, u16, u16>;
 }
 
 export const INITIAL_DATA: PlayerData = {
-  inventory: [ItemID.Rock]
+  inventory: new Map([
+    [ItemID.Rock, 1]
+  ])
 };

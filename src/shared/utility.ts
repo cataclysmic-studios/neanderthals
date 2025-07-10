@@ -4,15 +4,19 @@ import type { Trash } from "@rbxts/trash";
 
 import { assets } from "./constants";
 
+const { magnitude } = vector;
+
 const ITEM_DECAY_TIME = 360;
 
 export function stopHacking(player: Player, reason = "unspecified"): void {
   return player.Kick("nice try dum dum\nreason: " + reason);
 }
 
+let cumulativeDropID = 0;
 // TODO: collision shit
 export function dropItem(item: PVInstance, pivot: CFrame, count = 1): void {
   for (const _ of $range(1, count)) {
+    const id = cumulativeDropID++;
     const drop = item.Clone();
     const parts = getParts(drop);
     for (const part of parts) {
@@ -20,7 +24,9 @@ export function dropItem(item: PVInstance, pivot: CFrame, count = 1): void {
       part.Anchored = false;
       part.CanCollide = true;
     }
+    drop.SetAttribute("DropID", id);
     drop.PivotTo(pivot);
+    drop.Destroying.Once(() => cumulativeDropID--);
     drop.Parent = World;
 
     task.delay(3, () => {
@@ -60,18 +66,22 @@ export function weldTool(toolTemplate: ToolItem, character: CharacterModel, tras
 
 const items = assets.Items.GetChildren() as Model[];
 const itemCache = new Map<number, Model>;
-export function getItemByID(id: number): Maybe<Model> {
+export function getItemByID<T extends Model = Model>(id: number): Maybe<T> {
   const cachedItem = itemCache.get(id);
   if (cachedItem)
-    return cachedItem;
+    return cachedItem as T;
 
   const item = items.find(item => item.GetAttribute("ID") === id);
   if (item)
     itemCache.set(id, item);
 
-  return item;
+  return item as T;
 }
 
 export function objectFromEntries<K extends string | number | symbol, V>(entries: [K, V][]): Record<K, V> {
   return new Map(entries) as never; // goat hack
+}
+
+export function distanceBetween(a: Vector3, b: Vector3) {
+  return magnitude(a.sub(b));
 }
