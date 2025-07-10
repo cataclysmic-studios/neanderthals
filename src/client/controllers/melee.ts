@@ -8,8 +8,11 @@ import type { CharacterController } from "./character";
 import type { AnimationController } from "./animation";
 import type { ToolController } from "./tool";
 
+const { normalize, magnitude } = vector;
+
 const SWING_COOLDOWN = 0.45;
 const SWING_ANIMATION = assets.Animations.Swing;
+const VISUALIZE_HITBOX = false;
 
 @Controller()
 export class MeleeController implements OnTick {
@@ -46,7 +49,13 @@ export class MeleeController implements OnTick {
 
     const hitboxSize = this.tool.getHitboxSize();
     const rootCFrame = root.CFrame;
-    const result = World.Blockcast(rootCFrame, hitboxSize, rootCFrame.LookVector, raycastParams);
+    const direction = rootCFrame.LookVector;
+    const distance = magnitude(direction);
+    const origin = rootCFrame.add(direction.mul(distance / 2));
+    if (VISUALIZE_HITBOX)
+      visualizeHitbox(origin, direction, hitboxSize);
+
+    const result = World.Blockcast(origin, hitboxSize, direction, raycastParams);
     if (!result) return;
 
     const hitModel = result.Instance.FindFirstAncestorOfClass("Model");
@@ -62,4 +71,22 @@ export class MeleeController implements OnTick {
   private isClickHeld(): boolean {
     return UserInputService.IsMouseButtonPressed(Enum.UserInputType.MouseButton1);
   }
+}
+
+function visualizeHitbox(origin: CFrame, direction: Vector3, hitboxSize: Vector3): void {
+  const distance = magnitude(direction);
+  const castOffset = normalize(direction).mul(distance / 2);
+  const castCenterCFrame = origin.mul(new CFrame(castOffset));
+  const hitboxPart = new Instance("Part");
+  hitboxPart.Size = hitboxSize.add(new Vector3(0, 0, distance));
+  hitboxPart.CFrame = castCenterCFrame;
+  hitboxPart.Anchored = true;
+  hitboxPart.CanCollide = false;
+  hitboxPart.Transparency = 0.5;
+  hitboxPart.Color = Color3.fromRGB(255, 0, 0);
+  hitboxPart.Material = Enum.Material.Neon;
+  hitboxPart.Name = "HitboxCastPath";
+  hitboxPart.Parent = game.Workspace;
+
+  task.delay(0.15, () => hitboxPart.Destroy());
 }
