@@ -1,5 +1,5 @@
 import { Controller, type OnTick } from "@flamework/core";
-import { UserInputService } from "@rbxts/services";
+import { UserInputService, Workspace as World } from "@rbxts/services";
 import { Trash } from "@rbxts/trash";
 
 import { assets } from "shared/constants";
@@ -7,7 +7,9 @@ import { assets } from "shared/constants";
 import type { CharacterController } from "./character";
 import type { AnimationController } from "./animation";
 
-const SWING_COOLDOWN = 0.8;
+const SWING_COOLDOWN = 0.45;
+
+type DamageType = "Entity" | "Structure";
 
 @Controller()
 export class MeleeController implements OnTick {
@@ -19,6 +21,7 @@ export class MeleeController implements OnTick {
     private readonly character: CharacterController,
     private readonly animation: AnimationController
   ) {
+    character.died.Connect(() => this.unequip());
     UserInputService.InputBegan.Connect((input) => {
       if (input.KeyCode !== Enum.KeyCode.One) return;
       if (this.hasEquipped())
@@ -66,9 +69,38 @@ export class MeleeController implements OnTick {
     this.isSwinging = true;
 
     this.animation.play(assets.Animations.Swing, { fadeTime: 0 });
+    this.raycast();
 
     task.wait(SWING_COOLDOWN);
     this.isSwinging = false;
+  }
+
+  private raycast(): void {
+    const character = this.character.get()!;
+    const root = character.HumanoidRootPart;
+    const raycastParams = new RaycastParams;
+    raycastParams.AddToFilter(character);
+
+    const rootCFrame = root.CFrame;
+    const hitboxSize = this.equippedTool!.GetAttribute<Vector3>("HitboxSize") ?? vector.one;
+    const result = World.Blockcast(rootCFrame, hitboxSize, rootCFrame.LookVector, raycastParams);
+    if (!result) return;
+
+    const hitModel = result.Instance.FindFirstAncestorOfClass("Model");
+    if (!hitModel) return;
+
+    const humanoid = hitModel.FindFirstChildOfClass("Humanoid");
+    if (!humanoid) return;
+
+    this.dealDamage(humanoid);
+  }
+
+  private dealDamage(humanoid: Humanoid): void {
+    const damageType = humanoid.GetAttribute<DamageType>("DamageType");
+    if (!damageType) return;
+
+    const damage = this.equippedTool!.GetAttribute<number>(damageType + "Damage") ?? 0;
+    humanoid.TakeDamage(damage);
   }
 
   private isClickHeld(): boolean {
