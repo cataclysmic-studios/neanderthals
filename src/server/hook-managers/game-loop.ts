@@ -27,6 +27,6 @@ export class GameLoopService implements OnStart {
 
         elapsedMap.set(obj, newElapsed);
       }
-    })
+    });
   }
 }

@@ -40,7 +40,11 @@ export class CreatureSpawn extends BaseComponent<Attributes, BasePart> implement
   public onPlayerAdd(player: Player): void {
     if (!this.creature) return;
 
+    if (!player.Character)
+      player.CharacterAdded.Wait();
+
     // hydrate creature
+    task.wait(0.5);
     messaging.client.emit(player, Message.SpawnCreature, {
       name: this.name,
       id: this.creature.GetAttribute<number>("ID")!,
@@ -57,11 +61,12 @@ export class CreatureSpawn extends BaseComponent<Attributes, BasePart> implement
     const maxHealth = this.template.Humanoid.MaxHealth;
     humanoid.MaxHealth = maxHealth;
     humanoid.Health = maxHealth;
+    humanoid.Died.Once(() => this.onDied());
     humanoid.Parent = creature;
 
     const cframe = this.getSpawnCFrame();
     const id = cumulativeCreatureID++;
-    humanoid.Died.Once(() => this.onDied());
+    creature.Name = [this.name, "-", id].join("");
     creature.SetAttribute("ID", id);
     creature.PivotTo(cframe);
     creature.Parent = World.CreatureServerStorage;

@@ -16,7 +16,6 @@ export class ToolReplicationController implements OnStart {
 
   public equip(player: Player, tool: ToolItem): void {
     const character = safeCast<CharacterModel>(player.Character);
-    print(character)
     if (!character) return;
 
     const trash = new Trash;

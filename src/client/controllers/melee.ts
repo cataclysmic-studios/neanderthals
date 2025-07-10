@@ -8,6 +8,7 @@ import { assets } from "shared/constants";
 import type { CharacterController } from "./character";
 import type { AnimationController } from "./animation";
 import type { ToolController } from "./tool";
+import type { DamageController } from "./damage";
 
 const { normalize, magnitude } = vector;
 
@@ -22,7 +23,8 @@ export class MeleeController implements OnFixed {
   public constructor(
     private readonly character: CharacterController,
     private readonly animation: AnimationController,
-    private readonly tool: ToolController
+    private readonly tool: ToolController,
+    private readonly damage: DamageController
   ) { }
 
   public onFixed(): void {
@@ -62,11 +64,7 @@ export class MeleeController implements OnFixed {
     const hitModel = result.Instance.FindFirstAncestorOfClass("Model");
     if (!hitModel) return;
 
-    const humanoid = hitModel.FindFirstChildOfClass("Humanoid");
-    if (!humanoid) return;
-
-    const toolName = this.tool.getName();
-    messaging.server.emit(Message.Damage, { humanoid, toolName });
+    this.damage.deal(hitModel);
   }
 
   private isClickHeld(): boolean {

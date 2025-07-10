@@ -4,7 +4,7 @@ import { Players } from "@rbxts/services";
 
 import { Message, messaging } from "shared/messaging";
 import { assets, XZ } from "shared/constants";
-import { distanceBetween, stopHacking } from "shared/utility";
+import { distanceBetween, getServerCreatureByID, stopHacking } from "shared/utility";
 
 import type { Structure } from "server/components/structure";
 
@@ -21,14 +21,29 @@ export class DamageService implements OnStart {
 
   public onStart(): void {
     messaging.server.on(Message.Damage, (player, { humanoid, toolName }) => this.damage(player, humanoid, toolName));
+    messaging.server.on(Message.DamageCreature, (player, { id, toolName }) => this.damageCreature(player, id, toolName));
   }
 
-  public damage(player: Player, humanoid: Humanoid, toolName: ToolName): void {
+  private damageCreature(player: Player, id: number, toolName: ToolName): void {
+    const creature = getServerCreatureByID(id);
+    if (!creature)
+      return warn(`Failed to damage creature with ID ${id}: creature not found`);
+
+    const humanoid = creature.Humanoid;
+    this.damage(player, humanoid, toolName, true);
+    messaging.client.emitAll(Message.CreatureHealthChange, {
+      id,
+      health: humanoid.Health,
+      attacker: player
+    });
+  }
+
+  private damage(player: Player, humanoid: Humanoid, toolName: ToolName, isCreature = false): void {
     const targetModel = humanoid.Parent;
     if (!targetModel || !targetModel.IsA("Model")) return;
 
     const targetPlayer = Players.GetPlayerFromCharacter(targetModel);
-    const damageType = targetPlayer ? "Entity" : humanoid.GetAttribute<DamageType>("DamageType");
+    const damageType = targetPlayer || isCreature ? "Entity" : humanoid.GetAttribute<DamageType>("DamageType");
     if (damageType === undefined) return;
 
     const tool = assets.Items[toolName];
@@ -66,6 +81,7 @@ export class DamageService implements OnStart {
     if (currentHealth !== newHealth)
       humanoid.Health = newHealth;
 
+    if (isCreature) return;
     messaging.client.emit(player, Message.ShowDamageDisplay, humanoid);
   }
 }

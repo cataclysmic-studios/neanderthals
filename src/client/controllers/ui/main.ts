@@ -3,9 +3,10 @@ import { Trash } from "@rbxts/trash";
 
 import type { OnCharacterAdd } from "client/hooks";
 import { Message, messaging } from "shared/messaging";
-import { playerGUI } from "client/constants";
+import { player, playerGUI } from "client/constants";
 
 import type { CharacterController } from "../character";
+import { getClientCreatureByID } from "shared/utility";
 
 const { delay } = task;
 
@@ -24,6 +25,14 @@ export class MainUIController implements OnCharacterAdd {
   ) {
     messaging.client.on(Message.UpdateHunger, hunger => this.updateStats(this.hunger = hunger));
     messaging.client.on(Message.ShowDamageDisplay, humanoid => this.showDamageDisplay(humanoid));
+    messaging.client.on(Message.CreatureHealthChange, ({ id, health, attacker }) => {
+      if (player !== attacker) return;
+
+      const creature = getClientCreatureByID(id);
+      if (!creature) return;
+
+      this.showDamageDisplay(creature.Name, health, creature.Humanoid.MaxHealth);
+    });
   }
 
   public onCharacterAdd(character: CharacterModel): void {
@@ -36,28 +45,32 @@ export class MainUIController implements OnCharacterAdd {
     });
   }
 
-  public enableDamageDisplay(humanoid: Humanoid): void {
-    const { damageDisplay } = this;
+  private showDamageDisplay(humanoid: Humanoid): void;
+  private showDamageDisplay(name: string, health: number, maxHealth: number): void;
+  private showDamageDisplay(humanoid: Humanoid | string, health?: number, maxHealth?: number): void {
+    const { damageTrash, damageDisplay } = this;
+    damageTrash.purge();
+
     const healthBar = damageDisplay.Health;
-    const health = humanoid.Health;
+    if (!typeIs(humanoid, "string")) {
+      health = humanoid.Health;
+      maxHealth = humanoid.MaxHealth;
+    }
+
     healthBar.Amount.Text = tostring(health); // TODO: comma format
-    healthBar.Bar.Size = UDim2.fromScale(health / humanoid.MaxHealth, 1);
+    healthBar.Bar.Size = UDim2.fromScale(health! / maxHealth!, 1);
 
-    damageDisplay.Title.Text = humanoid.Parent!.Name.upper();
+    const name = typeIs(humanoid, "string") ? humanoid : humanoid.Parent!.Name.upper();
+    damageDisplay.Title.Text = name;
     damageDisplay.Visible = true;
+
+    const isAlive = health! > 0;
+    const lifetime = DAMAGE_DISPLAY_LIFETIME * (isAlive ? 1 : 0.5);
+    damageTrash.add(delay(lifetime, () => this.damageDisplay.Visible = false));
   }
 
-  public disableDamageDisplay(): void {
-    this.damageDisplay.Visible = false;
-  }
+  private enableDamageDisplay(health: number, maxHealth: number): void {
 
-  private showDamageDisplay(humanoid: Humanoid) {
-    this.damageTrash.purge();
-    this.enableDamageDisplay(humanoid);
-
-    const isDead = humanoid.Health <= 0;
-    const lifetime = DAMAGE_DISPLAY_LIFETIME * (isDead ? 0.5 : 1);
-    this.damageTrash.add(delay(lifetime, () => this.disableDamageDisplay()));
   }
 
   private updateStats(hunger = this.hunger): void {

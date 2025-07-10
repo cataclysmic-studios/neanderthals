@@ -12,7 +12,7 @@ export class ReplicaController implements OnStart {
     messaging.server.emit(Message.InitializeData);
   }
 
-  public onDataUpdate(data: PlayerData): void {
+  private onDataUpdate(data: PlayerData): void {
     (this as { data: PlayerData }).data = data;
   }
 }

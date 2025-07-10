@@ -13,11 +13,15 @@ export class PlayersService implements OnStart {
 
     Players.PlayerAdded.Connect(player => {
       for (const obj of addListeners)
-        obj.onPlayerAdd(player);
+        task.defer(() => obj.onPlayerAdd(player));
     });
     Players.PlayerRemoving.Connect(player => {
       for (const obj of removeListeners)
-        obj.onPlayerRemove(player);
+        task.spawn(() => obj.onPlayerRemove(player));
     });
+
+    for (const player of Players.GetPlayers())
+      for (const obj of addListeners)
+        task.defer(() => obj.onPlayerAdd(player));
   }
 }

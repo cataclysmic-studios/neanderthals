@@ -74,3 +74,16 @@ export function distanceBetween(a: Vector3, b: Vector3) {
 export function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
 }
+
+export function getServerCreatureByID(id: number): Maybe<CreatureServerModel> {
+  return World.CreatureServerStorage
+    .GetChildren()
+    .find((creature): creature is CreatureServerModel => creature.GetAttribute("ID") === id);
+}
+
+export function getClientCreatureByID(id: number): Maybe<CreatureModel> {
+  return World
+    .FindFirstChild("CreatureClientStorage")!
+    .GetChildren()
+    .find((creature): creature is CreatureModel => creature.GetAttribute("ID") === id);
+}
