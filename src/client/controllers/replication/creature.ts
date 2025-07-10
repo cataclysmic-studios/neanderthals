@@ -5,10 +5,12 @@ import { Workspace as World } from "@rbxts/services";
 import type { OnFixed } from "shared/hooks";
 import { Message, messaging } from "shared/messaging";
 import { assets } from "shared/constants";
+import { findClientCreatureByID } from "shared/utility";
 import type { CreatureSpawnPacket, CreatureUpdatePacket } from "shared/structs/packets";
 
 import type { CreatureAnimator } from "client/components/replication/creature-animator";
 import type { CreatureSync } from "client/components/replication/creature-sync";
+import type { MainUIController } from "../ui/main";
 
 const storage = new Instance("Folder");
 storage.Name = "CreatureClientStorage";
@@ -26,13 +28,14 @@ function spawn({ name, id, position, health }: CreatureSpawnPacket): void {
   creature.AddTag("CreatureSync");
 }
 
-@Controller({ loadOrder: -1 })
+@Controller({ loadOrder: 0 })
 export class CreatureController implements OnFixed {
   public constructor(
-    private readonly components: Components
+    private readonly components: Components,
+    private readonly mainUI: MainUIController
   ) {
     messaging.client.on(Message.SpawnCreature, spawn);
-    messaging.client.on(Message.CreatureHealthChange, ({ id, health, attacker }) => this.onHealthChanged(id, health));
+    messaging.client.on(Message.CreatureHealthChange, ({ id, health }) => this.onHealthChanged(id, health));
     messaging.client.on(Message.UpdateCreatures, creatures => this.update(creatures));
     World.CreatureServerStorage.Destroy();
   }
@@ -44,10 +47,12 @@ export class CreatureController implements OnFixed {
   }
 
   private onHealthChanged(id: number, newHealth: number): void {
-    const synchronizer = this.getSync(id);
-    if (!synchronizer) return;
+    const creature = findClientCreatureByID(id);
+    if (!creature) return;
 
-    synchronizer.instance.Humanoid.Health = newHealth;
+    const humanoid = creature.Humanoid;
+    humanoid.Health = newHealth;
+    this.mainUI.showDamageDisplay(creature.Name, newHealth, humanoid.MaxHealth);
 
     if (newHealth > 0) return;
     this.despawn(id);

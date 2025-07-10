@@ -6,13 +6,13 @@ import { Message, messaging } from "shared/messaging";
 import { player, playerGUI } from "client/constants";
 
 import type { CharacterController } from "../character";
-import { getClientCreatureByID } from "shared/utility";
+import { findClientCreatureByID } from "shared/utility";
 
 const { delay } = task;
 
 const DAMAGE_DISPLAY_LIFETIME = 1;
 
-@Controller()
+@Controller({ loadOrder: -1 })
 export class MainUIController implements OnCharacterAdd {
   private readonly screen = playerGUI.WaitForChild("Main");
   private readonly damageDisplay = this.screen.DamageDisplay;
@@ -25,14 +25,6 @@ export class MainUIController implements OnCharacterAdd {
   ) {
     messaging.client.on(Message.UpdateHunger, hunger => this.updateStats(this.hunger = hunger));
     messaging.client.on(Message.ShowDamageDisplay, humanoid => this.showDamageDisplay(humanoid));
-    messaging.client.on(Message.CreatureHealthChange, ({ id, health, attacker }) => {
-      if (player !== attacker) return;
-
-      const creature = getClientCreatureByID(id);
-      if (!creature) return;
-
-      this.showDamageDisplay(creature.Name, health, creature.Humanoid.MaxHealth);
-    });
   }
 
   public onCharacterAdd(character: CharacterModel): void {
@@ -45,9 +37,9 @@ export class MainUIController implements OnCharacterAdd {
     });
   }
 
-  private showDamageDisplay(humanoid: Humanoid): void;
-  private showDamageDisplay(name: string, health: number, maxHealth: number): void;
-  private showDamageDisplay(humanoid: Humanoid | string, health?: number, maxHealth?: number): void {
+  public showDamageDisplay(humanoid: Humanoid): void;
+  public showDamageDisplay(name: string, health: number, maxHealth: number): void;
+  public showDamageDisplay(humanoid: Humanoid | string, health?: number, maxHealth?: number): void {
     const { damageTrash, damageDisplay } = this;
     damageTrash.purge();
 

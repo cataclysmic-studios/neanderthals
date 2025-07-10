@@ -1,4 +1,4 @@
-import { Workspace as World } from "@rbxts/services";
+import { CollectionService, Workspace as World } from "@rbxts/services";
 import { getChildrenOfType } from "@rbxts/instance-utility";
 import type { Trash } from "@rbxts/trash";
 
@@ -75,13 +75,13 @@ export function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
 }
 
-export function getServerCreatureByID(id: number): Maybe<CreatureServerModel> {
+export function findServerCreatureByID(id: number): Maybe<CreatureServerModel> {
   return World.CreatureServerStorage
     .GetChildren()
     .find((creature): creature is CreatureServerModel => creature.GetAttribute("ID") === id);
 }
 
-export function getClientCreatureByID(id: number): Maybe<CreatureModel> {
+export function findClientCreatureByID(id: number): Maybe<CreatureModel> {
   return World
     .FindFirstChild("CreatureClientStorage")!
     .GetChildren()
