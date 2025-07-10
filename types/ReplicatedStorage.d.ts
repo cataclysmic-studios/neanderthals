@@ -10,5 +10,12 @@ interface ReplicatedStorage extends Instance {
     Structures: Folder & {
 
     };
+    UI: Folder & {
+      DroppedItemUI: BillboardGui & {
+        ItemName: TextLabel;
+        PickUp: TextLabel;
+        Eat: TextLabel;
+      };
+    }
   };
 }
