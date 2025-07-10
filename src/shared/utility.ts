@@ -6,8 +6,6 @@ import { assets } from "./constants";
 
 const { magnitude } = vector;
 
-const ITEM_DECAY_TIME = 360;
-
 export function stopHacking(player: Player, reason = "unspecified"): void {
   return player.Kick("nice try dum dum\nreason: " + reason);
 }
@@ -18,34 +16,22 @@ export function dropItem(item: PVInstance, pivot: CFrame, count = 1): void {
   for (const _ of $range(1, count)) {
     const id = cumulativeDropID++;
     const drop = item.Clone();
-    const parts = getParts(drop);
-    for (const part of parts) {
-      part.FindFirstChildOfClass("Weld")?.Destroy();
-      part.Anchored = false;
-      part.CanCollide = true;
-    }
+    const parts = getPartsIncludingSelf(drop);
     drop.SetAttribute("DropID", id);
     drop.PivotTo(pivot);
     drop.Destroying.Once(() => cumulativeDropID--);
     drop.Parent = World;
-
-    task.delay(3, () => {
-      for (const part of parts) {
-        part.Anchored = true;
-        part.CanCollide = false;
-      }
-    });
-    task.delay(ITEM_DECAY_TIME, () => item.Destroy());
+    drop.AddTag("DroppedItem");
   }
 }
 
-function getParts(instance: Instance): BasePart[] {
+export function getPartsIncludingSelf(instance: Instance): BasePart[] {
   const parts: BasePart[] = [];
   if (instance.IsA("BasePart"))
     parts.push(instance);
 
   for (const child of getChildrenOfType(instance, "BasePart"))
-    for (const part of getParts(child))
+    for (const part of getPartsIncludingSelf(child))
       parts.push(part);
 
   return parts;

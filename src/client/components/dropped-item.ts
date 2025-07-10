@@ -6,17 +6,21 @@ import type { OnCharacterAdd } from "client/hooks";
 import type { OnFixed } from "shared/hooks";
 import { Message, messaging } from "shared/messaging";
 import { player } from "client/constants";
-import { assets } from "shared/constants";
-import { distanceBetween } from "shared/utility";
+import { assets, ITEM_DECAY_TIME } from "shared/constants";
+import { distanceBetween, getPartsIncludingSelf } from "shared/utility";
 import type { DroppedItemAttributes } from "shared/structs/dropped-item-attributes";
 
 import DestroyableComponent from "shared/base-components/destroyable";
 import type { DroppedItemPrompt } from "./dropped-item-prompt";
 import type { CharacterController } from "client/controllers/character";
+import { Workspace as World } from "@rbxts/services";
 
 const PROMPT_UI = assets.UI.DroppedItemUI;
 
-@Component({ tag: $nameof<DroppedItem>() })
+@Component({
+  tag: $nameof<DroppedItem>(),
+  ancestorWhitelist: [World]
+})
 export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Model> implements OnStart, OnFixed, OnCharacterAdd {
   private readonly highlight = this.trash.add(new Instance("Highlight"));
   private readonly dragDetector = this.instance.FindFirstChildOfClass("DragDetector")!;
@@ -37,6 +41,20 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
     trash.add(() => this.destroyed = true);
     trash.linkToInstance(instance);
 
+    const parts = getPartsIncludingSelf(instance);
+    for (const part of parts) {
+      part.FindFirstChildOfClass("Weld")?.Destroy();
+      part.Anchored = false;
+      part.CanCollide = true;
+    }
+    trash.add(task.delay(3, () => {
+      for (const part of parts) {
+        part.Anchored = true;
+        part.CanCollide = false;
+      }
+    }));
+    trash.add(task.delay(ITEM_DECAY_TIME, () => this.destroy()));
+
     highlight.FillColor = new Color3(1, 1, 1);
     highlight.OutlineColor = new Color3(0, 0, 0);
     highlight.FillTransparency = 0.85;
@@ -49,12 +67,13 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
     promptUI.Adornee = instance;
     promptUI.Parent = instance;
 
+    const dropID = this.attributes.DropID;
     const prompt = trash.add(this.components.addComponent<DroppedItemPrompt>(promptUI));
-    prompt.consumed.Once(message => {
+    trash.add(prompt.consumed.Once(message => {
       if (message === Message.EatDrop && !this.isFood) return;
-      messaging.server.emit(message, this.attributes.DropID);
+      messaging.server.emit(message, dropID);
       this.destroy();
-    });
+    }));
   }
 
   public onFixed(): void {
@@ -65,10 +84,13 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
       return this.toggleHover(false);
 
     const targetModel = target.FindFirstAncestorOfClass("Model");
-    if (!targetModel)
+    if (
+      !targetModel
+      || !targetModel.HasTag($nameof<DroppedItem>())
+      || targetModel !== this.instance
+    ) {
       return this.toggleHover(false);
-    if (!targetModel.HasTag($nameof<DroppedItem>()))
-      return this.toggleHover(false);
+    }
 
     const characterPosition = this.character.getPositionOrDefault();
     const position = targetModel.GetPivot().Position;

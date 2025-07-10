@@ -1,6 +1,8 @@
 import { Service } from "@flamework/core";
-import { DataService } from "./data";
+
 import { EXCLUSIVE_IDS } from "shared/structs/item-id";
+
+import type { DataService } from "./data";
 
 @Service()
 export class InventoryService {
