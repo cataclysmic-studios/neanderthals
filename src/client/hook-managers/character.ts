@@ -1,0 +1,24 @@
+import { Controller, Modding, type OnStart } from "@flamework/core";
+import { Players } from "@rbxts/services";
+
+import type { OnCharacterAdd, OnCharacterRemove } from "client/hooks/character";
+
+@Controller()
+export class CharacterController implements OnStart {
+  public onStart(): void {
+    const player = Players.LocalPlayer;
+    const addListeners = new Set<OnCharacterAdd>;
+    const removeListeners = new Set<OnCharacterRemove>;
+    Modding.onListenerAdded<OnCharacterAdd>(obj => addListeners.add(obj));
+    Modding.onListenerAdded<OnCharacterRemove>(obj => removeListeners.add(obj));
+
+    player.CharacterAdded.Connect(character => {
+      for (const obj of addListeners)
+        obj.onCharacterAdd(character as never);
+    });
+    player.CharacterRemoving.Connect(character => {
+      for (const obj of removeListeners)
+        obj.onCharacterRemove(character as never);
+    });
+  }
+}

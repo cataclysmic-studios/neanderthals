@@ -1,7 +1,7 @@
 interface ReplicatedStorage extends Instance {
   Assets: Folder & {
     Animations: Folder & {
-      Hit: Animation;
+      Swing: Animation;
     };
     Items: Folder & {
       Rock: ToolItem;
