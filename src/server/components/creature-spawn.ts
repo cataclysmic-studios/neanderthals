@@ -5,6 +5,7 @@ import { $nameof } from "rbxts-transform-debug";
 
 import { Message, messaging } from "shared/messaging";
 import { assets } from "shared/constants";
+import { OnPlayerAdd } from "server/hooks";
 
 interface Attributes {
   readonly CreatureSpawn_Rate: number;
@@ -18,7 +19,7 @@ let cumulativeCreatureID = 0;
     CreatureSpawn_Rate: 60
   }
 })
-export class CreatureSpawn extends BaseComponent<Attributes, BasePart> implements OnStart {
+export class CreatureSpawn extends BaseComponent<Attributes, BasePart> implements OnStart, OnPlayerAdd {
   private readonly name = this.instance.Name as CreatureName;
   private readonly template = assets.Creatures[this.name];
   private readonly spawnRate = this.attributes.CreatureSpawn_Rate;
@@ -36,6 +37,18 @@ export class CreatureSpawn extends BaseComponent<Attributes, BasePart> implement
     this.spawn();
   }
 
+  public onPlayerAdd(player: Player): void {
+    if (!this.creature) return;
+
+    // hydrate creature
+    messaging.client.emit(player, Message.SpawnCreature, {
+      name: this.name,
+      id: this.creature.GetAttribute<number>("ID")!,
+      position: this.creature.GetPivot().Position,
+      health: this.creature.Humanoid.Health
+    });
+  }
+
   private spawn(): void {
     if (this.creature) return;
 
@@ -47,12 +60,14 @@ export class CreatureSpawn extends BaseComponent<Attributes, BasePart> implement
     humanoid.Parent = creature;
 
     const cframe = this.getSpawnCFrame();
+    const id = cumulativeCreatureID++;
     humanoid.Died.Once(() => this.onDied());
+    creature.SetAttribute("ID", id);
     creature.PivotTo(cframe);
     creature.Parent = World.CreatureServerStorage;
     messaging.client.emitAll(Message.SpawnCreature, {
       name: this.name,
-      id: cumulativeCreatureID++,
+      id,
       position: cframe.Position,
       health: maxHealth
     });
