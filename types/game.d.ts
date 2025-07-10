@@ -1,4 +1,5 @@
 type StructureName = ExtractKeys<ReplicatedStorage["Assets"]["Structures"], Model>;
+type ItemName = ExtractKeys<ReplicatedStorage["Assets"]["Items"], Model>;
 
 type ToolName = ExtractKeys<ReplicatedStorage["Assets"]["Items"], ToolItem>;
 interface ToolItem extends Model {

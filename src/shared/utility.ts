@@ -2,7 +2,6 @@ import { Workspace as World } from "@rbxts/services";
 import { getChildrenOfType } from "@rbxts/instance-utility";
 import type { Trash } from "@rbxts/trash";
 
-import { ItemID } from "./structs/item-id";
 import { assets } from "./constants";
 
 const ITEM_DECAY_TIME = 360;
@@ -60,8 +59,8 @@ export function weldTool(toolTemplate: ToolItem, character: CharacterModel, tras
 }
 
 const items = assets.Items.GetChildren() as Model[];
-const itemCache = new Map<ItemID | number, Model>;
-export function getItemByID(id: ItemID | number): Maybe<Model> {
+const itemCache = new Map<number, Model>;
+export function getItemByID(id: number): Maybe<Model> {
   const cachedItem = itemCache.get(id);
   if (cachedItem)
     return cachedItem;
@@ -71,4 +70,8 @@ export function getItemByID(id: ItemID | number): Maybe<Model> {
     itemCache.set(id, item);
 
   return item;
+}
+
+export function objectFromEntries<K extends string | number | symbol, V>(entries: [K, V][]): Record<K, V> {
+  return new Map(entries) as never; // goat hack
 }
