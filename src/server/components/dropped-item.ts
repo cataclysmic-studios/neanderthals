@@ -5,10 +5,11 @@ import { $nameof } from "rbxts-transform-debug";
 import type { OnFixed } from "shared/hooks";
 import { Message, messaging } from "shared/messaging";
 import { getPartsIncludingSelf } from "shared/utility";
-import type { DroppedItemAttributes } from "shared/structs/dropped-item-attributes";
+import { DEFAULT_DROPPED_ITEM_ATTRIBUTES, type DroppedItemAttributes } from "shared/structs/dropped-item-attributes";
 
 import DestroyableComponent from "shared/base-components/destroyable";
 import type { InventoryService } from "server/services/inventory";
+import type { HungerService } from "server/services/hunger";
 
 const { magnitude } = vector;
 
@@ -16,7 +17,10 @@ const DRAG_DISTANCE = 24;
 const DECAY_TIME = 360;
 const MAX_SPEED = 60;
 
-@Component({ tag: $nameof<DroppedItem>() })
+@Component({
+  tag: $nameof<DroppedItem>(),
+  defaults: DEFAULT_DROPPED_ITEM_ATTRIBUTES
+})
 export class DroppedItem extends DestroyableComponent<{ ID: number } & DroppedItemAttributes, Model> implements OnStart, OnFixed {
   private readonly dragDetector = this.trash.add(new Instance("DragDetector"));
   private readonly parts = getPartsIncludingSelf(this.instance);
@@ -24,7 +28,8 @@ export class DroppedItem extends DestroyableComponent<{ ID: number } & DroppedIt
   private readonly dropID = this.attributes.DropID;
 
   public constructor(
-    private readonly inventory: InventoryService
+    private readonly inventory: InventoryService,
+    private readonly hunger: HungerService
   ) { super(); }
 
   public onStart(): void {
@@ -42,7 +47,8 @@ export class DroppedItem extends DestroyableComponent<{ ID: number } & DroppedIt
     }));
     trash.add(messaging.server.on(Message.EatDrop, (player, dropID) => {
       if (dropID !== this.dropID) return;
-      this.destroy();
+      if (!this.attributes.Food) return;
+      this.eat(player);
     }));
 
     trash.add(dragDetector.DragStart.Connect(() => {
@@ -64,6 +70,11 @@ export class DroppedItem extends DestroyableComponent<{ ID: number } & DroppedIt
     dragDetector.MaxTorque = 1000;
     dragDetector.Responsiveness = 55;
     dragDetector.Parent = instance;
+  }
+
+  public eat(player: Player): void {
+    this.hunger.eat(player, this.instance);
+    this.destroy();
   }
 
   public onFixed(): void {

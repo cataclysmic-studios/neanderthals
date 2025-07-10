@@ -3,10 +3,9 @@ import { Trash } from "@rbxts/trash";
 
 import type { OnCharacterAdd } from "client/hooks";
 import { Message, messaging } from "shared/messaging";
-import { player, playerGUI } from "client/constants";
+import { playerGUI } from "client/constants";
 
 import type { CharacterController } from "../character";
-import { findClientCreatureByID } from "shared/utility";
 
 const { delay } = task;
 
@@ -59,10 +58,6 @@ export class MainUIController implements OnCharacterAdd {
     const isAlive = health! > 0;
     const lifetime = DAMAGE_DISPLAY_LIFETIME * (isAlive ? 1 : 0.5);
     damageTrash.add(delay(lifetime, () => this.damageDisplay.Visible = false));
-  }
-
-  private enableDamageDisplay(health: number, maxHealth: number): void {
-
   }
 
   private updateStats(hunger = this.hunger): void {

@@ -9,7 +9,7 @@ import { Message, messaging } from "shared/messaging";
 import { player } from "client/constants";
 import { assets } from "shared/constants";
 import { distanceBetween } from "shared/utility";
-import type { DroppedItemAttributes } from "shared/structs/dropped-item-attributes";
+import { DEFAULT_DROPPED_ITEM_ATTRIBUTES, type DroppedItemAttributes } from "shared/structs/dropped-item-attributes";
 
 import DestroyableComponent from "shared/base-components/destroyable";
 import type { DroppedItemPrompt } from "./dropped-item-prompt";
@@ -19,7 +19,8 @@ const PROMPT_UI = assets.UI.DroppedItemUI;
 
 @Component({
   tag: $nameof<DroppedItem>(),
-  ancestorWhitelist: [World]
+  ancestorWhitelist: [World],
+  defaults: DEFAULT_DROPPED_ITEM_ATTRIBUTES
 })
 export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Model> implements OnStart, OnFixed, OnCharacterAdd {
   private readonly highlight = this.trash.add(new Instance("Highlight"));
@@ -27,7 +28,6 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
   private readonly promptUI = PROMPT_UI.Clone();
   private readonly mouse = player.GetMouse();
   private readonly displayName = (this.attributes.DisplayName ?? this.instance.Name).upper();
-  private readonly isFood = this.attributes.FoodItem ?? false;
   private readonly maxDistance = this.dragDetector.MaxActivationDistance;
   private destroyed = false;
 
@@ -56,7 +56,7 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
     const dropID = this.attributes.DropID;
     const prompt = trash.add(this.components.addComponent<DroppedItemPrompt>(promptUI));
     trash.add(prompt.consumed.Once(message => {
-      if (message === Message.EatDrop && !this.isFood) return;
+      if (message === Message.EatDrop && !this.attributes.Food) return;
       messaging.server.emit(message, dropID);
       this.destroy();
     }));
@@ -101,7 +101,7 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
     if (dragging && on) return;
     if (promptUI.Enabled === on) return;
     promptUI.ItemName.Text = this.displayName;
-    promptUI.Eat.TextTransparency = this.isFood ? 0 : 1;
+    promptUI.Eat.TextTransparency = this.attributes.Food ? 0 : 1;
     promptUI.Enabled = on;
   }
 }
