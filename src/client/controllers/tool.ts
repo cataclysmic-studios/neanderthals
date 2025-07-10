@@ -3,8 +3,10 @@ import { UserInputService } from "@rbxts/services";
 import { Trash } from "@rbxts/trash";
 
 import { assets } from "shared/constants";
+import { weldTool } from "shared/utility";
 
 import type { CharacterController } from "./character";
+import { Message, messaging } from "shared/messaging";
 
 @Controller()
 export class ToolController {
@@ -28,25 +30,17 @@ export class ToolController {
 
   public equip(tool: ToolItem): void {
     const character = this.character.get();
-    if (!character)
+    if (!character || !this.character.isAlive())
       return warn("Failed to equip tool: no character");
 
-    const { trash } = this;
-    const toEquip = trash.add(tool.Clone());
-    const handle = toEquip.Handle;
-    const handWeld = trash.add(handle.HandWeld);
-    const hand = character.RightHand;
-    handWeld.Parent = hand;
-    handWeld.Part0 = hand;
-    handWeld.Part1 = handle;
-    toEquip.Parent = character;
-
-    this.equipped = toEquip;
+    this.equipped = weldTool(tool, character, this.trash);
+    messaging.server.emit(Message.EquipTool, tool);
   }
 
   public unequip(): void {
     this.trash.purge();
     this.equipped = undefined;
+    messaging.server.emit(Message.UnequipTool);
   }
 
   public getHitboxSize(): Vector3 {

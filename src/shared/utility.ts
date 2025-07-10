@@ -1,5 +1,6 @@
 import { Workspace as World } from "@rbxts/services";
 import { getChildrenOfType } from "@rbxts/instance-utility";
+import type { Trash } from "@rbxts/trash";
 
 const ITEM_DECAY_TIME = 360;
 
@@ -40,4 +41,17 @@ function getParts(instance: Instance): BasePart[] {
       parts.push(part);
 
   return parts;
+}
+
+export function weldTool(toolTemplate: ToolItem, character: CharacterModel, trash: Trash): ToolItem {
+  const tool = trash.add(toolTemplate.Clone());
+  const handle = tool.Handle;
+  const handWeld = trash.add(handle.HandWeld);
+  const hand = character.RightHand;
+  handWeld.Parent = hand;
+  handWeld.Part0 = hand;
+  handWeld.Part1 = handle;
+  tool.Parent = character;
+
+  return tool;
 }
