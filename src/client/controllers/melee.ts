@@ -1,6 +1,7 @@
-import { Controller, type OnTick } from "@flamework/core";
+import { Controller } from "@flamework/core";
 import { UserInputService, Workspace as World } from "@rbxts/services";
 
+import type { OnFixed } from "shared/hooks";
 import { Message, messaging } from "shared/messaging";
 import { assets } from "shared/constants";
 
@@ -15,7 +16,7 @@ const SWING_ANIMATION = assets.Animations.Swing;
 const VISUALIZE_HITBOX = false;
 
 @Controller()
-export class MeleeController implements OnTick {
+export class MeleeController implements OnFixed {
   private isSwinging = false;
 
   public constructor(
@@ -24,7 +25,7 @@ export class MeleeController implements OnTick {
     private readonly tool: ToolController
   ) { }
 
-  public onTick(): void {
+  public onFixed(): void {
     if (!this.tool.hasEquipped()) return;
     if (!this.isClickHeld()) return;
     this.swing();
