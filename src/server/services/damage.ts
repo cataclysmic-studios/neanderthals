@@ -3,6 +3,7 @@ import { Service, type OnStart } from "@flamework/core";
 import { Message, messaging } from "shared/messaging";
 import { assets, XZ } from "shared/constants";
 import { stopHacking } from "shared/utility";
+import { Players } from "@rbxts/services";
 
 const { clamp } = math;
 const { magnitude } = vector;
@@ -16,7 +17,12 @@ export class DamageService implements OnStart {
   }
 
   public damage(player: Player, humanoid: Humanoid, toolName: ToolName): void {
-    const damageType = humanoid.GetAttribute<DamageType>("DamageType");
+
+    const targetModel = humanoid.Parent;
+    if (!targetModel || !targetModel.IsA("Model")) return;
+
+    const targetPlayer = Players.GetPlayerFromCharacter(targetModel);
+    const damageType = targetPlayer ? "Entity" : humanoid.GetAttribute<DamageType>("DamageType");
     if (damageType === undefined) return;
 
     const tool = assets.Items[toolName];
@@ -25,9 +31,6 @@ export class DamageService implements OnStart {
 
     const damage = tool.GetAttribute<number>(damageType + "Damage");
     if (damage === undefined) return;
-
-    const targetModel = humanoid.Parent;
-    if (!targetModel || !targetModel.IsA("Model")) return;
 
     const character = player.Character;
     if (!character) return;
