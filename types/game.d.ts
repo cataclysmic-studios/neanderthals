@@ -1,3 +1,5 @@
+type StructureName = ExtractKeys<ReplicatedStorage["Assets"]["Structures"], Model>;
+
 type ToolName = ExtractKeys<ReplicatedStorage["Assets"]["Items"], ToolItem>;
 interface ToolItem extends Model {
   Handle: BasePart & {

@@ -1,5 +1,7 @@
 export interface StructureConfig {
-  readonly respawnTime?: number;
   readonly xp: number;
-  readonly drops: ExtractKeys<ReplicatedStorage["Assets"]["Items"], Model>[];
+  readonly respawnTime?: number;
+  readonly noRespawn?: boolean;
+  readonly drops?: Map<ExtractKeys<ReplicatedStorage["Assets"]["Items"], Model>, number>;
+  readonly createsStructure?: StructureName;
 }

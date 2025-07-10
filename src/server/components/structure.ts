@@ -3,7 +3,10 @@ import { BaseComponent, Component } from "@flamework/components";
 import { Trash } from "@rbxts/trash";
 import { getDescendantsOfType } from "@rbxts/instance-utility";
 import { $nameof } from "rbxts-transform-debug";
-import { StructureConfig } from "shared/structs/structure-config";
+
+import { assets } from "shared/constants";
+import { dropItem } from "shared/utility";
+import { type StructureConfig } from "shared/structs/structure-config";
 
 const DEFAULT_RESPAWN_TIME = 60;
 
@@ -11,7 +14,7 @@ const DEFAULT_RESPAWN_TIME = 60;
   tag: $nameof<Structure>()
 })
 export class Structure extends BaseComponent<{}, StructureModel> implements OnStart {
-  private readonly trash = new Trash;
+  private readonly aliveTrash = new Trash;
   private readonly config = require(this.instance.Config) as StructureConfig;
   private readonly parts = getDescendantsOfType(this.instance, "BasePart");
   private readonly originalCollisions = new Map<BasePart, boolean>;
@@ -27,19 +30,22 @@ export class Structure extends BaseComponent<{}, StructureModel> implements OnSt
   private kill(): void {
     if (!this.alive) return;
     this.alive = false;
-    this.trash.purge();
+    this.aliveTrash.purge();
+    this.createDrops();
     this.toggleVisibility(false);
-    task.delay(this.config.respawnTime ?? DEFAULT_RESPAWN_TIME, () => this.spawn());
+
+    const { noRespawn = false, respawnTime = DEFAULT_RESPAWN_TIME } = this.config;
+    if (noRespawn) return;
+
+    task.delay(respawnTime, () => this.spawn());
   }
 
   private spawn(resetState = true): void {
     if (this.alive) return;
-
-    const { instance, trash } = this;
     this.alive = true;
 
-    const humanoid = instance.Humanoid;
-    trash.add(humanoid.GetPropertyChangedSignal("Health").Connect(() => {
+    const humanoid = this.instance.Humanoid;
+    this.aliveTrash.add(humanoid.GetPropertyChangedSignal("Health").Connect(() => {
       if (humanoid.Health > 0) return;
       this.kill();
     }));
@@ -57,5 +63,14 @@ export class Structure extends BaseComponent<{}, StructureModel> implements OnSt
       part.CanQuery = on;
       part.CanTouch = on;
     }
+  }
+
+  private createDrops(): void {
+    const pivot = this.instance.GetPivot();
+    const { drops } = this.config;
+    if (!drops) return;
+
+    for (const [dropName, count] of drops)
+      dropItem(assets.Items[dropName], pivot, count);
   }
 }

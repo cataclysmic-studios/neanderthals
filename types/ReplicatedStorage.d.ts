@@ -7,5 +7,8 @@ interface ReplicatedStorage extends Instance {
       Rock: ToolItem;
       ["God Rock"]: ToolItem;
     };
+    Structures: Folder & {
+
+    };
   };
 }
