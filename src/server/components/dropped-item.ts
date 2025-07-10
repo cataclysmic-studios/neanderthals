@@ -1,4 +1,5 @@
 import type { OnStart } from "@flamework/core";
+import { CollectionService } from "@rbxts/services";
 import { Component } from "@flamework/components";
 import { $nameof } from "rbxts-transform-debug";
 
@@ -7,8 +8,7 @@ import { Message, messaging } from "shared/messaging";
 import type { DroppedItemAttributes } from "shared/structs/dropped-item-attributes";
 
 import DestroyableComponent from "shared/base-components/destroyable";
-import type { DataService } from "server/services/data";
-import { CollectionService } from "@rbxts/services";
+import type { InventoryService } from "server/services/inventory";
 
 const DRAG_DISTANCE = 24;
 
@@ -17,7 +17,7 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
   private readonly dragDetector = this.trash.add(new Instance("DragDetector"));
 
   public constructor(
-    private readonly data: DataService
+    private readonly inventory: InventoryService
   ) { super(); }
 
   public onStart(): void {
@@ -32,6 +32,11 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
       if (!drop)
         return warn("Failed to find drop with ID", dropID);
 
+      const itemID = drop.GetAttribute<number>("ID");
+      if (itemID === undefined)
+        return warn("Drop @", drop.GetFullName(), "has no item ID");
+
+      this.inventory.addItem(player, itemID);
       this.destroy();
     }));
     trash.add(messaging.server.on(Message.EatDrop, (player, dropID) => {

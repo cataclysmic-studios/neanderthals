@@ -1,0 +1,22 @@
+import { Service } from "@flamework/core";
+import { DataService } from "./data";
+import { EXCLUSIVE_IDS } from "shared/structs/item-id";
+
+@Service()
+export class InventoryService {
+  public constructor(
+    private readonly data: DataService
+  ) { }
+
+  public async addItem(player: Player, id: number): Promise<boolean> {
+    const { inventory } = await this.data.get(player);
+    if (inventory.has(id) && EXCLUSIVE_IDS.has(id))
+      return false;
+
+    return await this.data.update(player, data => {
+      const itemCount = data.inventory.get(id);
+      data.inventory.set(id, itemCount !== undefined ? itemCount + 1 : 1);
+      return true;
+    });
+  }
+}

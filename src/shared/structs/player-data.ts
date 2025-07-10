@@ -8,6 +8,6 @@ export interface PlayerData {
 
 export const INITIAL_DATA: PlayerData = {
   inventory: new Map([
-    [ItemID.Rock, 1]
+    [ItemID.GodRock, 1]
   ])
 };
