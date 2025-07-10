@@ -3,19 +3,16 @@ import { BaseComponent, Component } from "@flamework/components";
 import { Trash } from "@rbxts/trash";
 import { getDescendantsOfType } from "@rbxts/instance-utility";
 import { $nameof } from "rbxts-transform-debug";
+import { StructureConfig } from "shared/structs/structure-config";
 
-interface Attributes {
-  readonly Structure_RespawnTime: number;
-}
+const DEFAULT_RESPAWN_TIME = 60;
 
 @Component({
-  tag: $nameof<Structure>(),
-  defaults: {
-    Structure_RespawnTime: 60
-  }
+  tag: $nameof<Structure>()
 })
-export class Structure extends BaseComponent<Attributes, StructureModel> implements OnStart {
+export class Structure extends BaseComponent<{}, StructureModel> implements OnStart {
   private readonly trash = new Trash;
+  private readonly config = require(this.instance.Config) as StructureConfig;
   private readonly parts = getDescendantsOfType(this.instance, "BasePart");
   private readonly originalCollisions = new Map<BasePart, boolean>;
   private alive = false;
@@ -32,6 +29,7 @@ export class Structure extends BaseComponent<Attributes, StructureModel> impleme
     this.alive = false;
     this.trash.purge();
     this.toggleVisibility(false);
+    task.delay(this.config.respawnTime ?? DEFAULT_RESPAWN_TIME, () => this.spawn());
   }
 
   private spawn(toggleVisiblity = true): void {

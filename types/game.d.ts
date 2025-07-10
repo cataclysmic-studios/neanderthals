@@ -7,6 +7,7 @@ interface ToolItem extends Model {
 
 interface StructureModel extends Model {
   Humanoid: Humanoid;
+  Config: ModuleScript;
 }
 
 interface CharacterModel extends Model {
