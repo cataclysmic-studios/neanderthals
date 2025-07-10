@@ -1,6 +1,6 @@
 import { Service, type OnTick } from "@flamework/core";
 
-import type { OnPlayerAdd, OnPlayerRemove } from "server/hooks/players";
+import type { OnPlayerAdd, OnPlayerRemove } from "server/hooks";
 import { Message, messaging } from "shared/messaging";
 
 const HUNGER_TICK_INTERVAL = 3.5;

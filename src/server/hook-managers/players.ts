@@ -1,7 +1,7 @@
 import { Service, Modding, type OnStart } from "@flamework/core";
 import { Players } from "@rbxts/services";
 
-import type { OnPlayerAdd, OnPlayerRemove } from "server/hooks/players";
+import type { OnPlayerAdd, OnPlayerRemove } from "server/hooks";
 
 @Service()
 export class PlayersService implements OnStart {

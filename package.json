@@ -25,6 +25,7 @@
     "@rbxts/flamework-meta-utils": "^1.0.7",
     "@rbxts/instance-utility": "^1.0.3",
     "@rbxts/lemon-signal": "^1.2.0",
+    "@rbxts/lyra": "^0.6.0",
     "@rbxts/serio": "^1.0.19",
     "@rbxts/services": "^1.5.5",
     "@rbxts/tether": "^1.3.21",

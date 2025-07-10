@@ -2,7 +2,7 @@ import { Controller } from "@flamework/core";
 import { Players } from "@rbxts/services";
 import Signal from "@rbxts/lemon-signal";
 
-import type { OnCharacterAdd } from "../hooks/character";
+import type { OnCharacterAdd } from "../hooks";
 
 const player = Players.LocalPlayer;
 async function promisifyEvent<Args extends unknown[]>(event: RBXScriptSignal<(...args: Args) => void>): Promise<Args> {

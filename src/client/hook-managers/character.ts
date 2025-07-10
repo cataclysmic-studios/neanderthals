@@ -1,7 +1,7 @@
 import { Controller, Modding, type OnStart } from "@flamework/core";
 import { Players } from "@rbxts/services";
 
-import type { OnCharacterAdd, OnCharacterRemove } from "client/hooks/character";
+import type { OnCharacterAdd, OnCharacterRemove } from "client/hooks";
 
 @Controller()
 export class CharacterController implements OnStart {
