@@ -1,19 +1,19 @@
 import type { OnStart } from "@flamework/core";
 import { Component, type Components } from "@flamework/components";
+import { Workspace as World } from "@rbxts/services";
 import { $nameof } from "rbxts-transform-debug";
 
 import type { OnCharacterAdd } from "client/hooks";
 import type { OnFixed } from "shared/hooks";
 import { Message, messaging } from "shared/messaging";
 import { player } from "client/constants";
-import { assets, ITEM_DECAY_TIME } from "shared/constants";
-import { distanceBetween, getPartsIncludingSelf } from "shared/utility";
+import { assets } from "shared/constants";
+import { distanceBetween } from "shared/utility";
 import type { DroppedItemAttributes } from "shared/structs/dropped-item-attributes";
 
 import DestroyableComponent from "shared/base-components/destroyable";
 import type { DroppedItemPrompt } from "./dropped-item-prompt";
 import type { CharacterController } from "client/controllers/character";
-import { Workspace as World } from "@rbxts/services";
 
 const PROMPT_UI = assets.UI.DroppedItemUI;
 
@@ -40,20 +40,6 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
     const { trash, instance, highlight, promptUI } = this;
     trash.add(() => this.destroyed = true);
     trash.linkToInstance(instance);
-
-    const parts = getPartsIncludingSelf(instance);
-    for (const part of parts) {
-      part.FindFirstChildOfClass("Weld")?.Destroy();
-      part.Anchored = false;
-      part.CanCollide = true;
-    }
-    trash.add(task.delay(3, () => {
-      for (const part of parts) {
-        part.Anchored = true;
-        part.CanCollide = false;
-      }
-    }));
-    trash.add(task.delay(ITEM_DECAY_TIME, () => this.destroy()));
 
     highlight.FillColor = new Color3(1, 1, 1);
     highlight.OutlineColor = new Color3(0, 0, 0);
@@ -106,7 +92,7 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
 
   private toggleHover(on: boolean): void {
     const { highlight, promptUI } = this;
-    const dragging = this.dragDetector.ReferenceInstance;
+    const dragging = this.dragDetector.PermissionPolicy === Enum.DragDetectorPermissionPolicy.Nobody;
     if (!dragging || on) {
       if (highlight.Enabled === on) return;
       highlight.Enabled = on;

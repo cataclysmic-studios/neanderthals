@@ -1,20 +1,27 @@
 import type { OnStart } from "@flamework/core";
-import { CollectionService } from "@rbxts/services";
 import { Component } from "@flamework/components";
 import { $nameof } from "rbxts-transform-debug";
 
 import type { OnFixed } from "shared/hooks";
 import { Message, messaging } from "shared/messaging";
+import { getPartsIncludingSelf } from "shared/utility";
 import type { DroppedItemAttributes } from "shared/structs/dropped-item-attributes";
 
 import DestroyableComponent from "shared/base-components/destroyable";
 import type { InventoryService } from "server/services/inventory";
 
+const { magnitude } = vector;
+
 const DRAG_DISTANCE = 24;
+const DECAY_TIME = 360;
+const MAX_SPEED = 60;
 
 @Component({ tag: $nameof<DroppedItem>() })
-export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Model> implements OnStart, OnFixed {
+export class DroppedItem extends DestroyableComponent<{ ID: number } & DroppedItemAttributes, Model> implements OnStart, OnFixed {
   private readonly dragDetector = this.trash.add(new Instance("DragDetector"));
+  private readonly parts = getPartsIncludingSelf(this.instance);
+  private readonly itemID = this.attributes.ID;
+  private readonly dropID = this.attributes.DropID;
 
   public constructor(
     private readonly inventory: InventoryService
@@ -24,50 +31,66 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
     const { trash, instance, dragDetector } = this;
     trash.linkToInstance(instance);
 
-    const itemDropID = this.attributes.DropID;
+    const queueFreeze = () => task.delay(2, () => this.freeze(true));
+    this.cleanup();
+    let freezeThread: Maybe<thread> = trash.add(queueFreeze());
+    trash.add(task.delay(DECAY_TIME, () => this.destroy()));
+
     trash.add(messaging.server.on(Message.PickUpDrop, (player, dropID) => {
-      if (dropID !== itemDropID) return;
-      const drops = CollectionService.GetTagged("DroppedItem") as Model[];
-      const drop = drops.find(drop => drop.GetAttribute("DropID") === dropID);
-      if (!drop)
-        return warn("Failed to find drop with ID", dropID);
-
-      const itemID = drop.GetAttribute<number>("ID");
-      if (itemID === undefined)
-        return warn("Drop @", drop.GetFullName(), "has no item ID");
-
-      this.inventory.addItem(player, itemID);
-      this.destroy();
+      if (dropID !== this.dropID) return;
+      this.pickUp(player);
     }));
     trash.add(messaging.server.on(Message.EatDrop, (player, dropID) => {
-      if (dropID !== itemDropID) return;
+      if (dropID !== this.dropID) return;
       this.destroy();
     }));
 
-    trash.add(dragDetector.DragStart.Connect(player => {
-      dragDetector.ReferenceInstance = player.Character?.FindFirstChild("HumanoidRootPart");
+    trash.add(dragDetector.DragStart.Connect(() => {
       dragDetector.PermissionPolicy = Enum.DragDetectorPermissionPolicy.Nobody;
+      this.freeze(false);
+      if (freezeThread) {
+        task.cancel(freezeThread);
+        freezeThread = undefined;
+      }
     }));
     trash.add(dragDetector.DragEnd.Connect(() => {
-      dragDetector.ReferenceInstance = undefined;
       dragDetector.PermissionPolicy = Enum.DragDetectorPermissionPolicy.Everybody;
+      freezeThread = queueFreeze();
     }));
 
     dragDetector.MaxActivationDistance = DRAG_DISTANCE;
     dragDetector.DragStyle = Enum.DragDetectorDragStyle.TranslateViewPlane;
-    dragDetector.MaxForce = 1000;
-    dragDetector.MaxTorque = 100;
-    dragDetector.Responsiveness = 100;
+    dragDetector.MaxForce = 1500;
+    dragDetector.MaxTorque = 1000;
+    dragDetector.Responsiveness = 50;
     dragDetector.Parent = instance;
   }
 
   public onFixed(): void {
-    // const reference = this.dragDetector.ReferenceInstance as Maybe<BasePart>;
-    // if (!reference) return;
+    const root = this.instance.PrimaryPart!;
+    const velocity = root.AssemblyLinearVelocity;
+    if (magnitude(velocity) <= MAX_SPEED) return;
 
-    // const { dragDetector } = this;
-    // const origin = reference.Position;
-    // dragDetector.MaxDragTranslation = origin.add(vector.one.mul(DRAG_DISTANCE));
-    // dragDetector.MinDragTranslation = origin.add(vector.one.mul(-DRAG_DISTANCE));
+    root.AssemblyLinearVelocity = velocity.div(2);
+  }
+
+  private pickUp(player: Player): void {
+    this.inventory.addItem(player, this.itemID);
+    this.destroy();
+  }
+
+  private cleanup(): void {
+    for (const part of this.parts)
+      part.FindFirstChildOfClass("Weld")?.Destroy();
+  }
+
+  private freeze(on: boolean): void {
+    for (const part of this.parts) {
+      part.Anchored = on;
+
+      if (!on) continue;
+      part.AssemblyLinearVelocity = vector.zero;
+      part.AssemblyAngularVelocity = vector.zero;
+    }
   }
 }
