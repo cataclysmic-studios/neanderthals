@@ -14,8 +14,9 @@ const DEFAULT_RESPAWN_TIME = 60;
   tag: $nameof<Structure>()
 })
 export class Structure extends BaseComponent<{}, StructureModel> implements OnStart {
+  public readonly config = require(this.instance.Config) as StructureConfig;
+
   private readonly aliveTrash = new Trash;
-  private readonly config = require(this.instance.Config) as StructureConfig;
   private readonly parts = getDescendantsOfType(this.instance, "BasePart");
   private readonly originalCollisions = new Map<BasePart, boolean>;
   private alive = false;

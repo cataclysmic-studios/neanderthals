@@ -4,4 +4,5 @@ export interface StructureConfig {
   readonly noRespawn?: boolean;
   readonly drops?: Map<ExtractKeys<ReplicatedStorage["Assets"]["Items"], Model>, number>;
   readonly createsStructure?: StructureName;
+  readonly minimumToolTier?: number;
 }
