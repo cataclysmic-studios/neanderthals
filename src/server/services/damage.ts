@@ -4,6 +4,7 @@ import { Message, messaging } from "shared/messaging";
 import { assets, XZ } from "shared/constants";
 import { stopHacking } from "shared/utility";
 
+const { clamp } = math;
 const { magnitude } = vector;
 
 type DamageType = "Entity" | "Structure";
@@ -40,6 +41,8 @@ export class DamageService implements OnStart {
     if (distance > maxRange)
       return stopHacking(player, "out of melee range");
 
-    humanoid.TakeDamage(damage);
+    const newHealth = clamp(humanoid.Health - damage, 0, humanoid.MaxHealth);
+    humanoid.Health = newHealth;
+    messaging.client.emit(player, Message.ShowDamageDisplay, humanoid);
   }
 }

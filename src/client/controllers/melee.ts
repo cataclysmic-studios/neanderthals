@@ -2,24 +2,32 @@ import { Controller, type OnTick } from "@flamework/core";
 import { UserInputService, Workspace as World } from "@rbxts/services";
 import { Trash } from "@rbxts/trash";
 
+import { Message, messaging } from "shared/messaging";
 import { assets } from "shared/constants";
 
 import type { CharacterController } from "./character";
 import type { AnimationController } from "./animation";
-import { Message, messaging } from "shared/messaging";
+import type { MainUIController } from "./ui/main";
+
+const { delay } = task;
 
 const SWING_COOLDOWN = 0.45;
+const DAMAGE_DISPLAY_LIFETIME = 1;
 
 @Controller()
 export class MeleeController implements OnTick {
   private readonly toolTrash = new Trash;
+  private readonly damageTrash = new Trash;
   private equippedTool?: ToolItem;
   private isSwinging = false;
 
   public constructor(
     private readonly character: CharacterController,
-    private readonly animation: AnimationController
+    private readonly animation: AnimationController,
+    private readonly mainUI: MainUIController
   ) {
+    messaging.client.on(Message.ShowDamageDisplay, humanoid => this.showDamageDisplay(humanoid));
+
     character.died.Connect(() => this.unequip());
     UserInputService.InputBegan.Connect((input) => {
       if (input.KeyCode !== Enum.KeyCode.One) return;
@@ -28,6 +36,12 @@ export class MeleeController implements OnTick {
       else
         this.equip(assets.Items["God Rock"]);
     });
+  }
+
+  private showDamageDisplay(humanoid: Humanoid) {
+    this.damageTrash.purge();
+    this.mainUI.enableDamageDisplay(humanoid);
+    this.damageTrash.add(delay(DAMAGE_DISPLAY_LIFETIME, () => this.mainUI.disableDamageDisplay()));
   }
 
   public onTick(): void {
