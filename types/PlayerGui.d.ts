@@ -7,5 +7,16 @@ interface PlayerGui extends BasePlayerGui {
         Amount: TextLabel;
       };
     };
+    Stats: {
+      BagSpace: Frame & {
+        Bar: Frame;
+      };
+      Hunger: Frame & {
+        Bar: Frame;
+      };
+      Health: Frame & {
+        Bar: Frame;
+      };
+    };
   };
 }

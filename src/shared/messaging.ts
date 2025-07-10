@@ -1,4 +1,5 @@
 import { MessageEmitter } from "@rbxts/tether";
+import type { u8 } from "@rbxts/serio";
 
 import type { DamagePacket, ToolEquipReplicationPacket } from "./structs/packets";
 
@@ -10,7 +11,8 @@ export const enum Message {
   EquipTool,
   UnequipTool,
   ReplicateEquipTool,
-  ReplicateUnequipTool
+  ReplicateUnequipTool,
+  UpdateHunger
 }
 
 export interface MessageData {
@@ -20,4 +22,5 @@ export interface MessageData {
   [Message.UnequipTool]: undefined;
   [Message.ReplicateEquipTool]: ToolEquipReplicationPacket; // just the slot number when inventory/hotbar is implemented
   [Message.ReplicateUnequipTool]: Player;
+  [Message.UpdateHunger]: u8;
 }
