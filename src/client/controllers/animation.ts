@@ -1,12 +1,9 @@
 import { Controller } from "@flamework/core";
 
 import { assets } from "shared/constants";
+import type { PlayAnimationOptions } from "shared/structs/animation";
 
 import type { CharacterController } from "./character";
-
-interface PlayAnimationOptions {
-  readonly fadeTime?: number;
-}
 
 @Controller()
 export class AnimationController {

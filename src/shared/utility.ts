@@ -16,7 +16,6 @@ export function dropItem(item: PVInstance, pivot: CFrame, count = 1): void {
   for (const _ of $range(1, count)) {
     const id = cumulativeDropID++;
     const drop = item.Clone();
-    const parts = getPartsIncludingSelf(drop);
     drop.SetAttribute("DropID", id);
     drop.PivotTo(pivot);
     drop.Destroying.Once(() => cumulativeDropID--);
@@ -70,4 +69,8 @@ export function objectFromEntries<K extends string | number | symbol, V>(entries
 
 export function distanceBetween(a: Vector3, b: Vector3) {
   return magnitude(a.sub(b));
+}
+
+export function lerp(a: number, b: number, t: number): number {
+  return a + (b - a) * t;
 }

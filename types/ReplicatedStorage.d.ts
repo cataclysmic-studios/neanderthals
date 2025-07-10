@@ -1,7 +1,11 @@
 interface ReplicatedStorage extends Instance {
   Assets: Folder & {
+    CreatureServerModel: CreatureServerModel;
     Animations: Folder & {
       Swing: Animation;
+    };
+    Creatures: Folder & {
+      Pig: CreatureModel;
     };
     Items: Folder & {
       Rock: ToolItem;

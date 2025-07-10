@@ -1,7 +1,12 @@
 import { MessageEmitter } from "@rbxts/tether";
 import type { u8 } from "@rbxts/serio";
 
-import type { DamagePacket, ToolEquipReplicationPacket } from "./structs/packets";
+import type {
+  CreatureSpawnPacket,
+  CreatureUpdatePacket,
+  DamagePacket,
+  ToolEquipReplicationPacket
+} from "./structs/packets";
 import type { PlayerData } from "./structs/player-data";
 
 export const messaging = MessageEmitter.create<MessageData>();
@@ -18,7 +23,9 @@ export const enum Message {
   DataLoaded,
   DataUpdated,
   PickUpDrop,
-  EatDrop
+  EatDrop,
+  SpawnCreature,
+  UpdateCreatures
 }
 
 export interface MessageData {
@@ -33,4 +40,6 @@ export interface MessageData {
   [Message.DataUpdated]: PlayerData;
   [Message.PickUpDrop]: u8;
   [Message.EatDrop]: u8;
+  [Message.SpawnCreature]: CreatureSpawnPacket;
+  [Message.UpdateCreatures]: CreatureUpdatePacket;
 }
