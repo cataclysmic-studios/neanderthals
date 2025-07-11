@@ -7,7 +7,7 @@ import Signal from "@rbxts/lemon-signal";
 import type { OnCharacterAdd } from "client/hooks";
 import { Message, messaging } from "shared/messaging";
 import { playerGUI } from "client/constants";
-import { getItemByID } from "shared/utility";
+import { calculateBagSpace, getBagSpace, getItemByID } from "shared/utility";
 
 import type { ReplicaController } from "../replica";
 import type { CharacterController } from "../character";
@@ -28,16 +28,18 @@ export class MainUIController implements OnCharacterAdd {
   private readonly damageTrash = new Trash;
   private hunger = 100;
 
-
   public constructor(
-    replica: ReplicaController,
+    private readonly replica: ReplicaController,
     private readonly character: CharacterController,
     private readonly tool: ToolController
   ) {
     messaging.client.on(Message.UpdateHunger, hunger => this.updateStats(this.hunger = hunger));
     messaging.client.on(Message.ShowDamageDisplay, humanoid => this.showDamageDisplay(humanoid));
 
-    replica.updated.Connect(data => this.updateHotbar(data.hotbar));
+    replica.updated.Connect(data => {
+      this.updateHotbar(data.hotbar);
+      this.updateStats();
+    });
     for (const button of this.hotbarButtons)
       button.MouseButton1Click.Connect(() => {
         const itemID = button.GetAttribute<number>("CurrentItem")!;
@@ -95,8 +97,10 @@ export class MainUIController implements OnCharacterAdd {
     const humanoid = this.character.getHumanoid();
     if (!humanoid) return;
 
-    const { stats } = this;
-    stats.BagSpace.Bar.Size = UDim2.fromScale(0, 1);
+    const { replica: { data }, stats } = this;
+    const maxBagSpace = getBagSpace(data.equippedGear);
+    const bagSpace = calculateBagSpace(data.hotbar, data.inventory);
+    stats.BagSpace.Bar.Size = UDim2.fromScale(bagSpace / maxBagSpace, 1);
     stats.Hunger.Bar.Size = UDim2.fromScale(hunger / 100, 1);
     stats.Health.Bar.Size = UDim2.fromScale(humanoid.Health / humanoid.MaxHealth, 1);
   }

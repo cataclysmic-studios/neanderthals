@@ -25,7 +25,6 @@ export const enum Message {
   ReplicateUnequipTool,
   UpdateHunger,
   InitializeData,
-  DataLoaded,
   DataUpdated,
   DropItem,
   PickUpDrop,
