@@ -23,8 +23,8 @@ export class CreatureSync extends DestroyableComponent<{ ID: number }, CreatureM
   public readonly id = this.attributes.ID;
 
   private readonly root = this.instance.PrimaryPart!;
-  private readonly snapshotBuffer: Snapshot[] = [];
-  private readonly timeOffset = new SmoothValue(4);
+  private timeOffset = new SmoothValue(4);
+  private snapshotBuffer: Snapshot[] = [];
   private rootCFrame = this.root.CFrame;
   private latestCFrame = this.rootCFrame;
   private timeNow = 0;
@@ -32,6 +32,10 @@ export class CreatureSync extends DestroyableComponent<{ ID: number }, CreatureM
   public constructor() {
     super();
     this.trash.linkToInstance(this.instance);
+    this.trash.add(() => {
+      this.snapshotBuffer = undefined!;
+      this.timeOffset = undefined!;
+    });
   }
 
   public onFixed(dt: number): void {

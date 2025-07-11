@@ -24,7 +24,7 @@ const PROMPT_UI = assets.UI.DroppedItemUI;
 })
 export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Model> implements OnStart, OnFixed, OnCharacterAdd {
   private readonly highlight = this.trash.add(new Instance("Highlight"));
-  private readonly dragDetector = this.instance.FindFirstChildOfClass("DragDetector")!;
+  private readonly dragDetector = this.instance.WaitForChild<DragDetector>("DragDetector");
   private readonly promptUI = PROMPT_UI.Clone();
   private readonly mouse = player.GetMouse();
   private readonly displayName = (this.attributes.DisplayName ?? this.instance.Name).upper();

@@ -13,10 +13,10 @@ export function stopHacking(player: Player, reason = "unspecified"): void {
 
 let cumulativeDropID = 0;
 // TODO: collision shit
-export function dropItem(item: PVInstance, pivot: CFrame, count = 1): void {
+export function dropItem(itemTemplate: PVInstance, pivot: CFrame, count = 1): void {
   for (const _ of $range(1, count)) {
     const id = cumulativeDropID++;
-    const drop = item.Clone();
+    const drop = itemTemplate.Clone();
     drop.SetAttribute("DropID", id);
     drop.PivotTo(pivot);
     drop.Destroying.Once(() => cumulativeDropID--);

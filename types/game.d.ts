@@ -1,4 +1,4 @@
-interface ItemFrame extends Frame {
+interface ItemButton extends ImageButton {
   Viewport: ViewportFrame;
   Count: TextLabel;
 }

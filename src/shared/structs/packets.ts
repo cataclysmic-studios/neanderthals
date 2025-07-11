@@ -1,4 +1,13 @@
-import { u16, i24, Vector, List, Transform } from "@rbxts/serio";
+import { u8, u16, i24, Vector, List, Transform } from "@rbxts/serio";
+
+export type DropID = u8;
+export type ItemID = u8;
+export type CreatureID = u16;
+
+export interface DropItemPacket {
+  readonly id: ItemID;
+  readonly position: Vector<i24>;
+}
 
 interface BaseDamagePacket {
   readonly toolName: ToolName;
@@ -8,7 +17,6 @@ export interface DamagePacket extends BaseDamagePacket {
   readonly humanoid: Humanoid;
 }
 
-export type CreatureID = u16;
 export interface CreatureDamagePacket extends BaseDamagePacket {
   readonly id: CreatureID;
 }
@@ -32,7 +40,7 @@ export interface CreatureSpawnPacket {
 }
 
 export interface SyncedCreatureData {
-  readonly id: u16;
+  readonly id: CreatureID;
   readonly cframe: Transform<i24>;
 }
 

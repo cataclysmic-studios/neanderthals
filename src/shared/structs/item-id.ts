@@ -13,7 +13,7 @@ export const TOOL_IDS = new Set<number>([
   ItemID.GodRock
 ]);
 
-/** Items which may only have one copy in a players inventory */
+/** Items which may only have one copy in a players inventory and may not be dropped */
 export const EXCLUSIVE_IDS = new Set<number>([
   ItemID.Rock
 ]);

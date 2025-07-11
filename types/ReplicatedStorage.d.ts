@@ -20,7 +20,7 @@ interface ReplicatedStorage extends Instance {
         PickUp: TextLabel;
         Eat: TextLabel;
       };
-      InventoryItem: ItemFrame;
+      InventoryItem: ItemButton;
     }
   };
 }
