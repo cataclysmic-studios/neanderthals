@@ -1,18 +1,38 @@
 import { Controller } from "@flamework/core";
-import { Players } from "@rbxts/services";
 import Signal from "@rbxts/lemon-signal";
 
 import type { OnCharacterAdd } from "../hooks";
+import { FixedUpdateRate, type OnFixed } from "shared/hooks";
+import { player } from "client/constants";
+import { Workspace as World } from "@rbxts/services";
+import { XZ } from "shared/constants";
 
-const player = Players.LocalPlayer;
+const { min } = math;
+const { lookAlong } = CFrame;
+const { normalize } = vector;
+
 async function promisifyEvent<Args extends unknown[]>(event: RBXScriptSignal<(...args: Args) => void>): Promise<Args> {
   return new Promise(resolve => event.Once((...args) => resolve(args)));
 }
 
 @Controller({ loadOrder: 0 })
-export class CharacterController implements OnCharacterAdd {
+@FixedUpdateRate(48)
+export class CharacterController implements OnFixed, OnCharacterAdd {
   public readonly spawned = new Signal<(model: CharacterModel) => void>;
   public readonly died = new Signal;
+
+  public onFixed(dt: number): void {
+    const root = this.getRoot();
+    if (!root) return;
+
+    const currentPivot = this.getPivotOrDefault();
+    const position = currentPivot.Position;
+    const camera = World.CurrentCamera!;
+    const lookVector = camera.CFrame.LookVector;
+    const direction = normalize(lookVector.mul(XZ));
+    const adjustedPivot = lookAlong(position, direction);
+    root.CFrame = currentPivot.Lerp(adjustedPivot, 3 * min(dt, 1));
+  }
 
   public async onCharacterAdd(character: CharacterModel): Promise<void> {
     this.spawned.Fire(character);
@@ -48,6 +68,17 @@ export class CharacterController implements OnCharacterAdd {
 
   public getPositionOrDefault(defaultPosition: Vector3 = vector.zero): Vector3 {
     return this.getPosition() ?? defaultPosition;
+  }
+
+  public getPivot(): Maybe<CFrame> {
+    const root = this.getRoot();
+    if (root === undefined) return;
+
+    return root.CFrame;
+  }
+
+  public getPivotOrDefault(defaultPivot = CFrame.identity): CFrame {
+    return this.getPivot() ?? defaultPivot;
   }
 
   public async mustGetPosition(): Promise<Vector3> {
