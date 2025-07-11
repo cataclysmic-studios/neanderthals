@@ -6,6 +6,7 @@ import { Message, messaging } from "shared/messaging";
 import { playerGUI } from "client/constants";
 
 import type { CharacterController } from "../character";
+import Signal from "@rbxts/lemon-signal";
 
 const { delay } = task;
 
@@ -13,7 +14,9 @@ const DAMAGE_DISPLAY_LIFETIME = 1;
 
 @Controller({ loadOrder: -1 })
 export class MainUIController implements OnCharacterAdd {
-  private readonly screen = playerGUI.WaitForChild("Main");
+  public readonly screen = playerGUI.WaitForChild("Main");
+  public readonly enabled = new Signal;
+
   private readonly damageDisplay = this.screen.DamageDisplay;
   private readonly stats = this.screen.Stats;
   private readonly damageTrash = new Trash;
@@ -34,6 +37,13 @@ export class MainUIController implements OnCharacterAdd {
       if (humanoid.Health > 0) return;
       conn.Disconnect();
     });
+  }
+
+  public toggle(on: boolean): void {
+    this.stats.Visible = on;
+
+    if (!on) return;
+    this.enabled.Fire();
   }
 
   public showDamageDisplay(humanoid: Humanoid): void;

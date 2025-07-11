@@ -7,7 +7,11 @@ interface PlayerGui extends BasePlayerGui {
         Amount: TextLabel;
       };
     };
-    Stats: {
+    Inventory: Frame & {
+      Content: ScrollingFrame;
+      Separator: Frame;
+    };
+    Stats: Frame & {
       BagSpace: Frame & {
         Bar: Frame;
       };

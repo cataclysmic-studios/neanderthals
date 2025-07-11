@@ -5,6 +5,7 @@ import { getItemByID } from "shared/utility";
 
 import type { ToolController } from "./tool";
 import type { ReplicaController } from "./replica";
+import type { InventoryUIController } from "./ui/inventory";
 
 type HotbarKey = typeof hotbarKeys[number];
 const hotbarKeys = [
@@ -23,7 +24,8 @@ const hotbarKeys = [
 export class InputController implements OnStart {
   public constructor(
     private readonly tool: ToolController,
-    private readonly replica: ReplicaController
+    private readonly replica: ReplicaController,
+    private readonly inventoryUI: InventoryUIController
   ) { }
 
   public onStart(): void {
@@ -39,6 +41,10 @@ export class InputController implements OnStart {
         case Enum.KeyCode.Eight:
         case Enum.KeyCode.Nine:
           this.onHotbarKeyPress(input.KeyCode);
+          break;
+
+        case Enum.KeyCode.B:
+          this.inventoryUI.toggle();
           break;
       }
     });

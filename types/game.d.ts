@@ -1,3 +1,8 @@
+interface ItemFrame extends Frame {
+  Viewport: ViewportFrame;
+  Count: TextLabel;
+}
+
 type StructureName = ExtractKeys<ReplicatedStorage["Assets"]["Structures"], Model>;
 type ItemName = ExtractKeys<ReplicatedStorage["Assets"]["Items"], Model>;
 type CreatureName = ExtractKeys<ReplicatedStorage["Assets"]["Creatures"], CreatureModel>;
