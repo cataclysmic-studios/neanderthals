@@ -21,7 +21,7 @@ const MAX_SPEED = 60;
   tag: $nameof<DroppedItem>(),
   defaults: DEFAULT_DROPPED_ITEM_ATTRIBUTES
 })
-export class DroppedItem extends DestroyableComponent<{ ID: number } & DroppedItemAttributes, Model> implements OnStart, OnFixed {
+export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Model> implements OnStart, OnFixed {
   private readonly dragDetector = this.trash.add(new Instance("DragDetector"));
   private readonly parts = getPartsIncludingSelf(this.instance);
   private readonly itemID = this.attributes.ID;

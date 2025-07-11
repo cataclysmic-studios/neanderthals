@@ -18,7 +18,7 @@ export class DataService implements OnStart, OnPlayerAdd, OnPlayerRemove {
   public readonly updated = new Signal<(player: Player, data: PlayerData) => void>;
 
   private readonly store = createPlayerStore({
-    name: $nameof<PlayerData>() + "_" + Scope.Proto,
+    name: $nameof<PlayerData>() + "_" + Scope.Proto + 2,
     template: INITIAL_DATA,
     schema: Flamework.createGuard<Writable<PlayerData>>(),
   });

@@ -2,7 +2,6 @@ import { Controller } from "@flamework/core";
 import { UserInputService, Workspace as World } from "@rbxts/services";
 
 import type { OnFixed } from "shared/hooks";
-import { Message, messaging } from "shared/messaging";
 import { assets } from "shared/constants";
 
 import type { CharacterController } from "./character";
@@ -15,6 +14,24 @@ const { normalize, magnitude } = vector;
 const SWING_COOLDOWN = 0.45;
 const SWING_ANIMATION = assets.Animations.Swing;
 const VISUALIZE_HITBOX = false;
+
+function visualizeHitbox(origin: CFrame, direction: Vector3, hitboxSize: Vector3): void {
+  const distance = magnitude(direction);
+  const castOffset = normalize(direction).mul(distance / 2);
+  const castCenterCFrame = origin.mul(new CFrame(castOffset));
+  const hitboxPart = new Instance("Part");
+  hitboxPart.Size = hitboxSize.add(new Vector3(0, 0, distance));
+  hitboxPart.CFrame = castCenterCFrame;
+  hitboxPart.Anchored = true;
+  hitboxPart.CanCollide = false;
+  hitboxPart.Transparency = 0.5;
+  hitboxPart.Color = Color3.fromRGB(255, 0, 0);
+  hitboxPart.Material = Enum.Material.Neon;
+  hitboxPart.Name = "HitboxCastPath";
+  hitboxPart.Parent = game.Workspace;
+
+  task.delay(0.15, () => hitboxPart.Destroy());
+}
 
 @Controller()
 export class MeleeController implements OnFixed {
@@ -70,22 +87,4 @@ export class MeleeController implements OnFixed {
   private isClickHeld(): boolean {
     return UserInputService.IsMouseButtonPressed(Enum.UserInputType.MouseButton1);
   }
-}
-
-function visualizeHitbox(origin: CFrame, direction: Vector3, hitboxSize: Vector3): void {
-  const distance = magnitude(direction);
-  const castOffset = normalize(direction).mul(distance / 2);
-  const castCenterCFrame = origin.mul(new CFrame(castOffset));
-  const hitboxPart = new Instance("Part");
-  hitboxPart.Size = hitboxSize.add(new Vector3(0, 0, distance));
-  hitboxPart.CFrame = castCenterCFrame;
-  hitboxPart.Anchored = true;
-  hitboxPart.CanCollide = false;
-  hitboxPart.Transparency = 0.5;
-  hitboxPart.Color = Color3.fromRGB(255, 0, 0);
-  hitboxPart.Material = Enum.Material.Neon;
-  hitboxPart.Name = "HitboxCastPath";
-  hitboxPart.Parent = game.Workspace;
-
-  task.delay(0.15, () => hitboxPart.Destroy());
 }

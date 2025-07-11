@@ -11,6 +11,7 @@ export class InventoryService {
   ) { }
 
   public async addItem(player: Player, id: number): Promise<boolean> {
+    id = tonumber(id)!;
     const { inventory } = await this.data.get(player);
     if (inventory.has(id) && EXCLUSIVE_IDS.has(id))
       return false;

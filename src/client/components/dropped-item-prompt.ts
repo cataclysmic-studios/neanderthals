@@ -21,12 +21,24 @@ export class DroppedItemPrompt extends DestroyableComponent<{}, BillboardGui> im
 
       switch (input.KeyCode) {
         case Enum.KeyCode.F:
-          this.consumed.Fire(Message.PickUpDrop);
+          this.consume(Message.PickUpDrop);
           break;
         case Enum.KeyCode.E:
-          this.consumed.Fire(Message.EatDrop);
+          this.consume(Message.EatDrop);
           break;
       }
     }));
+    this.trash.add(this.instance.GetPropertyChangedSignal("Enabled").Connect(() => {
+      if (!this.instance.Enabled) return;
+
+      if (UserInputService.IsKeyDown("F"))
+        this.consume(Message.PickUpDrop);
+      else if (UserInputService.IsKeyDown("E"))
+        this.consume(Message.EatDrop);
+    }));
+  }
+
+  private consume(message: Message.PickUpDrop | Message.EatDrop): void {
+    this.consumed.Fire(message);
   }
 }
