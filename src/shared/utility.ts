@@ -87,8 +87,3 @@ export function findClientCreatureByID(id: number): Maybe<CreatureModel> {
     .GetChildren()
     .find((creature): creature is CreatureModel => creature.GetAttribute("ID") === id);
 }
-
-export function findDropByID(dropID: number): Maybe<Model> {
-  const drops = CollectionService.GetTagged("DroppedItem") as Model[];
-  return drops.find(drop => drop.GetAttribute("DropID") === dropID);
-}
