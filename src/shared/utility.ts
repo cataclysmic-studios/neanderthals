@@ -52,16 +52,11 @@ export function weldTool(toolTemplate: ToolItem, character: CharacterModel, tras
 
 const items = assets.Items.GetChildren() as Model[];
 const itemCache = new Map<number, Model>;
+for (const item of items)
+  itemCache.set(item.GetAttribute<number>("ID")!, item);
+
 export function getItemByID<T extends Model = Model>(id: number): Maybe<T> {
-  const cachedItem = itemCache.get(id);
-  if (cachedItem)
-    return cachedItem as T;
-
-  const item = items.find(item => item.GetAttribute("ID") === id);
-  if (item)
-    itemCache.set(id, item);
-
-  return item as T;
+  return itemCache.get(id) as T;
 }
 
 export function objectFromEntries<K extends string | number | symbol, V>(entries: [K, V][]): Record<K, V> {

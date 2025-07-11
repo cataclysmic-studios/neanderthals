@@ -1,4 +1,4 @@
-import { Controller, type OnStart } from "@flamework/core";
+import { Controller, Modding, type OnStart } from "@flamework/core";
 import { UserInputService } from "@rbxts/services";
 
 import { getItemByID } from "shared/utility";
@@ -7,18 +7,7 @@ import type { ToolController } from "./tool";
 import type { ReplicaController } from "./replica";
 import type { InventoryUIController } from "./ui/inventory";
 
-type HotbarKey = typeof hotbarKeys[number];
-const hotbarKeys = [
-  Enum.KeyCode.One,
-  Enum.KeyCode.Two,
-  Enum.KeyCode.Three,
-  Enum.KeyCode.Four,
-  Enum.KeyCode.Five,
-  Enum.KeyCode.Six,
-  Enum.KeyCode.Seven,
-  Enum.KeyCode.Eight,
-  Enum.KeyCode.Nine
-] as const;
+const hotbarKeys = Modding.inspect<HotbarKeys>();
 
 @Controller()
 export class InputController implements OnStart {
@@ -37,9 +26,6 @@ export class InputController implements OnStart {
         case Enum.KeyCode.Four:
         case Enum.KeyCode.Five:
         case Enum.KeyCode.Six:
-        case Enum.KeyCode.Seven:
-        case Enum.KeyCode.Eight:
-        case Enum.KeyCode.Nine:
           this.onHotbarKeyPress(input.KeyCode);
           break;
 
@@ -51,15 +37,11 @@ export class InputController implements OnStart {
   }
 
   private onHotbarKeyPress(hotbarKey: HotbarKey): void {
-    const hotbarIndex = hotbarKeys.indexOf(hotbarKey);
+    const hotbarIndex = hotbarKeys.indexOf(hotbarKey.Name);
     const itemID = this.replica.data.hotbar[hotbarIndex];
     const tool = getItemByID<ToolItem>(itemID);
     if (!tool) return;
 
-    if (this.tool.hasEquipped(tool))
-      return this.tool.unequip();
-
-    this.tool.unequip();
-    this.tool.equip(tool);
+    this.tool.toggleEquipped(tool);
   }
 }

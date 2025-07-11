@@ -17,6 +17,14 @@ export class ToolController {
     character.died.Connect(() => this.unequip());
   }
 
+  public toggleEquipped(tool: ToolItem): void {
+    if (this.hasEquipped(tool))
+      return this.unequip();
+
+    this.unequip();
+    this.equip(tool);
+  }
+
   public equip(tool: ToolItem): void {
     const character = this.character.get();
     if (!character || !this.character.isAlive())

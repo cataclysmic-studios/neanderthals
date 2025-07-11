@@ -1,12 +1,17 @@
 import { Controller } from "@flamework/core";
 import { Trash } from "@rbxts/trash";
+import { getChildrenOfType } from "@rbxts/instance-utility";
+import ViewportModel from "@rbxts/viewport-model";
+import Signal from "@rbxts/lemon-signal";
 
 import type { OnCharacterAdd } from "client/hooks";
 import { Message, messaging } from "shared/messaging";
 import { playerGUI } from "client/constants";
+import { getItemByID } from "shared/utility";
 
+import type { ReplicaController } from "../replica";
 import type { CharacterController } from "../character";
-import Signal from "@rbxts/lemon-signal";
+import type { ToolController } from "../tool";
 
 const { delay } = task;
 
@@ -19,14 +24,30 @@ export class MainUIController implements OnCharacterAdd {
 
   private readonly damageDisplay = this.screen.DamageDisplay;
   private readonly stats = this.screen.Stats;
+  private readonly hotbarButtons = getChildrenOfType<"ImageButton", HotbarButton>(this.screen.Hotbar, "ImageButton");
   private readonly damageTrash = new Trash;
   private hunger = 100;
 
+
   public constructor(
-    private readonly character: CharacterController
+    replica: ReplicaController,
+    private readonly character: CharacterController,
+    private readonly tool: ToolController
   ) {
     messaging.client.on(Message.UpdateHunger, hunger => this.updateStats(this.hunger = hunger));
     messaging.client.on(Message.ShowDamageDisplay, humanoid => this.showDamageDisplay(humanoid));
+
+    replica.updated.Connect(data => this.updateHotbar(data.hotbar));
+    for (const button of this.hotbarButtons)
+      button.MouseButton1Click.Connect(() => {
+        const itemID = button.GetAttribute<number>("CurrentItem")!;
+        if (itemID === undefined) return;
+
+        const tool = getItemByID<ToolItem>(itemID);
+        if (!tool) return;
+
+        this.tool.toggleEquipped(tool);
+      });
   }
 
   public onCharacterAdd(character: CharacterModel): void {
@@ -78,5 +99,32 @@ export class MainUIController implements OnCharacterAdd {
     stats.BagSpace.Bar.Size = UDim2.fromScale(0, 1);
     stats.Hunger.Bar.Size = UDim2.fromScale(hunger / 100, 1);
     stats.Health.Bar.Size = UDim2.fromScale(humanoid.Health / humanoid.MaxHealth, 1);
+  }
+
+  private updateHotbar(hotbar: number[]): void {
+    const buttons = this.hotbarButtons;
+    let i = 0;
+
+    for (const id of hotbar) {
+      const button = buttons[i++];
+      if (this.hasHotbarItem(button))
+        this.removeHotbarItem(button);
+
+      this.addHotbarItem(button, id);
+    }
+  }
+
+  private addHotbarItem(hotbarButton: HotbarButton, id: number): void {
+    (ViewportModel as { GenerateViewport: Callback }).GenerateViewport(hotbarButton.Viewport, getItemByID(id)); // DUM DUM HACK BC THIS MODULE IS TYPED INCORRECTLY
+    hotbarButton.SetAttribute("CurrentItem", id);
+  }
+
+  private removeHotbarItem(hotbarButton: HotbarButton): void {
+    (ViewportModel as { CleanViewport: Callback }).CleanViewport(hotbarButton.Viewport);
+    hotbarButton.SetAttribute("CurrentItem", undefined);
+  }
+
+  private hasHotbarItem(hotbarButton: HotbarButton): boolean {
+    return hotbarButton.GetAttribute("CurrentItem") !== undefined;
   }
 }

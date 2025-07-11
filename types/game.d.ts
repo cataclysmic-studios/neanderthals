@@ -1,3 +1,17 @@
+interface HotbarButton extends ImageButton {
+  Viewport: ViewportFrame;
+}
+
+type HotbarKey = typeof Enum.KeyCode[HotbarKeys[number]];
+type HotbarKeys = [
+  "One",
+  "Two",
+  "Three",
+  "Four",
+  "Five",
+  "Six"
+];
+
 interface ItemButton extends ImageButton {
   Viewport: ViewportFrame;
   Count: TextLabel;
