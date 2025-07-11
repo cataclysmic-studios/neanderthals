@@ -8,6 +8,12 @@ import { INITIAL_DATA } from "shared/structs/player-data";
 import type { ReplicaController } from "../replica";
 import type { MainUIController } from "./main";
 
+const { rad } = math;
+const { identity, Angles: angles } = CFrame;
+
+const VIEWPORT_CAMERA_CFRAME = angles(rad(-30), 0, 0).add(vector.create(0.1, 2.4, 4.75));
+const ITEM_ROTATION = angles(0, rad(45), rad(45));
+
 @Controller()
 export class InventoryUIController {
   private readonly frame: PlayerGui["Main"]["Inventory"];
@@ -50,8 +56,6 @@ export class InventoryUIController {
   }
 
   private update(additions: Record<number, number>, deletions: Record<number, number>): void {
-    print("additions:", additions);
-    print("deletions:", deletions);
     for (const [id, diff] of pairs(additions)) {
       const frame = this.frames.get(id);
       if (frame) {
@@ -69,27 +73,40 @@ export class InventoryUIController {
       const frame = this.frames.get(id)!;
       const currentCount = this.lastInventory.get(id) ?? 0;
       if (currentCount - diff > 0) {
-        // update count
         frame.Count.Text = tostring(currentCount - diff);
         continue;
       }
 
-      this.frames.delete(id);
-      frame.Destroy();
+      this.deleteItemFrame(id);
     }
+  }
+
+  private deleteItemFrame(id: number): void {
+    this.frames.get(id)?.Destroy();
+    this.frames.delete(id);
   }
 
   private createItemFrame(itemID: number, count: number): ItemFrame {
     const itemTemplate = getItemByID(itemID);
     if (!itemTemplate)
-      return warn("Failed to create inventory frame: no item found for ID", itemID)!;
+      return warn("Failed to create inventory item frame: no item found with ID", itemID)!;
 
     const item = itemTemplate.Clone();
     const frame = assets.UI.InventoryItem.Clone();
     const viewport = frame.Viewport;
-    item.PivotTo(CFrame.identity);
+    const camera = new Instance("Camera");
+    camera.Focus = identity;
+    camera.CFrame = VIEWPORT_CAMERA_CFRAME;
+    camera.FieldOfView = 62;
+    camera.Parent = viewport;
+    viewport.CurrentCamera = camera;
+
+    item.PivotTo(ITEM_ROTATION);
     item.Parent = viewport;
-    (ViewportModel as { GenerateViewport: Callback }).GenerateViewport(viewport, item); // DUM DUM HACK BC THIS MODULE IS TYPED INCORRECTLY
+
+    const viewportModel = new ViewportModel(viewport, camera);
+    viewportModel.SetModel(item);
+    viewportModel.Calibrate();
 
     frame.Count.Text = tostring(count);
     frame.Parent = this.itemContainer;
