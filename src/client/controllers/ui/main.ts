@@ -115,7 +115,7 @@ export class MainUIController implements OnCharacterAdd {
   }
 
   private addHotbarItem(hotbarButton: HotbarButton, id: number): void {
-    (ViewportModel as { GenerateViewport: Callback }).GenerateViewport(hotbarButton.Viewport, getItemByID(id)); // DUM DUM HACK BC THIS MODULE IS TYPED INCORRECTLY
+    (ViewportModel as { GenerateViewport: Callback }).GenerateViewport(hotbarButton.Viewport, getItemByID(id)?.Clone()); // DUM DUM HACK BC THIS MODULE IS TYPED INCORRECTLY
     hotbarButton.SetAttribute("CurrentItem", id);
   }
 

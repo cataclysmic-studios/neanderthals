@@ -13,6 +13,8 @@ import DestroyableComponent from "shared/base-components/destroyable";
   ancestorWhitelist: [World]
 })
 export class DroppedItemPrompt extends DestroyableComponent<{}, BillboardGui> implements OnStart {
+  public static canConsume = true;
+
   public readonly consumed = this.trash.add(new Signal<(message: Message.PickUpDrop | Message.EatDrop) => void>);
 
   public onStart(): void {
@@ -39,6 +41,10 @@ export class DroppedItemPrompt extends DestroyableComponent<{}, BillboardGui> im
   }
 
   private consume(message: Message.PickUpDrop | Message.EatDrop): void {
+    if (!DroppedItemPrompt.canConsume) return;
+    DroppedItemPrompt.canConsume = false;
+    task.delay(0.06, () => DroppedItemPrompt.canConsume = true);
+
     this.consumed.Fire(message);
   }
 }
