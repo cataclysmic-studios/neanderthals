@@ -12,6 +12,18 @@ type HotbarKeys = [
   "Six"
 ];
 
+interface IngredientFrame extends Frame {
+  Title: TextLabel;
+  Viewport: ViewportFrame;
+}
+
+interface RecipeFrame extends Frame {
+  Title: TextLabel;
+  Viewport: ViewportFrame;
+  Craft: GuiButton;
+  Ingredients: Frame;
+}
+
 interface ItemButton extends ImageButton {
   Viewport: ViewportFrame;
   Count: TextLabel;

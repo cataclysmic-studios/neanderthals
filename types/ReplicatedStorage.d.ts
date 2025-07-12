@@ -10,6 +10,11 @@ interface ReplicatedStorage extends Instance {
     Items: Folder & {
       Rock: ToolItem;
       GodRock: ToolItem;
+      WoodAxe: ToolItem;
+      Leaves: Model;
+      Log: Model;
+      Stick: Model;
+      RawMeat: Model;
     };
     Structures: Folder & {
 
@@ -21,6 +26,8 @@ interface ReplicatedStorage extends Instance {
         Eat: TextLabel;
       };
       InventoryItem: ItemButton;
+      CraftingRecipeFrame: RecipeFrame;
+      IngredientFrame: IngredientFrame;
     }
   };
 }
