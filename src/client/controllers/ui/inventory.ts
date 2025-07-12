@@ -111,8 +111,17 @@ export class InventoryUIController {
     viewportModel.SetModel(item);
     viewportModel.Calibrate();
 
+    const isFood = item.GetAttribute<boolean>("Food") ?? false;
+    const isTool = item.GetAttribute("ToolTier") !== undefined;
     button.Name = item.Name;
     button.Count.Text = tostring(count);
+    trash.add(button.MouseButton1Click.Connect(() => {
+      if (isFood)
+        messaging.server.emit(Message.Eat, itemID);
+      else if (isTool) {
+        // TODO: add to hotbar
+      }
+    }));
     trash.add(button.MouseButton2Click.Connect(() => {
       const characterPivot = this.character.getPivot();
       if (!characterPivot) return;

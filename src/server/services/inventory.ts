@@ -21,28 +21,26 @@ export class InventoryService {
     });
   }
 
-  public async addItem(player: Player, id: number): Promise<boolean> {
+  public async addItem(player: Player, id: number, count = 1): Promise<boolean> {
     id = tonumber(id)!;
-    const { inventory } = await this.data.get(player);
-    if (inventory.has(id) && EXCLUSIVE_IDS.has(id))
+    if (await this.has(player, id) && EXCLUSIVE_IDS.has(id))
       return false;
 
     return await this.data.update(player, data => {
       const itemCount = data.inventory.get(id);
-      data.inventory.set(id, itemCount !== undefined ? itemCount + 1 : 1);
+      data.inventory.set(id, itemCount !== undefined ? itemCount + count : count);
       return true;
     });
   }
 
-  public async removeItem(player: Player, id: number): Promise<boolean> {
+  public async removeItem(player: Player, id: number, count = 1): Promise<boolean> {
     id = tonumber(id)!;
-    const { inventory } = await this.data.get(player);
-    if (!inventory.has(id) || EXCLUSIVE_IDS.has(id))
+    if (!await this.has(player, id) || EXCLUSIVE_IDS.has(id))
       return false;
 
     return await this.data.update(player, data => {
       const itemCount = data.inventory.get(id)!;
-      const newCount = itemCount - 1;
+      const newCount = itemCount - count;
       if (newCount <= 0)
         data.inventory.delete(id);
       else
@@ -50,5 +48,10 @@ export class InventoryService {
 
       return true;
     });
+  }
+
+  public async has(player: Player, id: number): Promise<boolean> {
+    const { inventory } = await this.data.get(player)
+    return inventory.has(id);
   }
 }

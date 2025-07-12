@@ -2,6 +2,9 @@ import { Service, type OnTick } from "@flamework/core";
 
 import type { OnPlayerAdd, OnPlayerRemove } from "server/hooks";
 import { Message, messaging } from "shared/messaging";
+import { getItemByID, stopHacking } from "shared/utility";
+
+import type { InventoryService } from "./inventory";
 
 const { clamp } = math;
 
@@ -11,6 +14,20 @@ const HUNGER_TICK_INTERVAL = 4;
 export class HungerService implements OnTick, OnPlayerAdd, OnPlayerRemove {
   private readonly playerHunger = new Map<Player, number>;
   private elapsed = 0;
+
+  public constructor(inventory: InventoryService) {
+    messaging.server.on(Message.Eat, async (player, id) => {
+      const item = getItemByID(id);
+      if (!item)
+        return stopHacking(player, "invalid item ID (no corresponding item) when eating item");
+
+      if (!await inventory.has(player, id))
+        return stopHacking(player, "attempt to eat item not in inventory");
+
+      inventory.removeItem(player, id);
+      this.eat(player, item);
+    });
+  }
 
   public onTick(dt: number): void {
     const elapsed = this.elapsed += dt;
