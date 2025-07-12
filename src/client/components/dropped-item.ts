@@ -79,7 +79,7 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
     }
 
     const characterPosition = this.character.getPositionOrDefault();
-    const position = targetModel.GetPivot().Position;
+    const position = targetModel.PrimaryPart!.Position;
     if (distanceBetween(characterPosition, position) >= this.maxDistance)
       return this.toggleHover(false);
 

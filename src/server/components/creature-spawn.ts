@@ -98,10 +98,10 @@ export class CreatureSpawn extends CreatesDropsComponent<Attributes, BasePart> i
 
   private despawn(): void {
     task.delay(this.spawnRate, () => this.spawn());
-    this.createDrops(this.config.drops);
 
     const { creature } = this;
     if (creature) {
+      this.createDrops(this.config.drops, creature.PrimaryPart!.CFrame);
       creature.Destroy();
       this.creature = undefined;
     }
