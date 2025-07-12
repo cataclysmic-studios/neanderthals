@@ -5,6 +5,7 @@ import { EXCLUSIVE_IDS } from "shared/structs/item-id";
 import type { DataService } from "./data";
 import { Message, messaging } from "shared/messaging";
 import { dropItem, getItemByID, stopHacking } from "shared/utility";
+import { PlayerData } from "shared/structs/player-data";
 
 @Service()
 export class InventoryService {
@@ -19,6 +20,12 @@ export class InventoryService {
       await this.removeItem(player, id);
       dropItem(item, new CFrame(position));
     });
+    messaging.server.on(Message.AddHotbarItem, (player, { id, slot }) =>
+      data.update(player, data => this.addHotbarItem(data, id, slot))
+    );
+    messaging.server.on(Message.RemoveHotbarItem, (player, slot) =>
+      data.update(player, data => this.removeHotbarItem(data, slot))
+    );
   }
 
   public async addItem(player: Player, id: number, count = 1): Promise<boolean> {
@@ -33,7 +40,7 @@ export class InventoryService {
     });
   }
 
-  public async removeItem(player: Player, id: number, count = 1): Promise<boolean> {
+  public async removeItem(player: Player, id: number, count = 1, after?: (data: DeepWritable<PlayerData>) => boolean): Promise<boolean> {
     id = tonumber(id)!;
     if (!await this.has(player, id) || EXCLUSIVE_IDS.has(id))
       return false;
@@ -46,12 +53,49 @@ export class InventoryService {
       else
         data.inventory.set(id, newCount);
 
+      if (after) {
+        const success = after(data);
+        if (!success)
+          return false;
+      }
+
       return true;
     });
+  }
+
+  public async getItemCount(player: Player, id: number): Promise<number> {
+    id = tonumber(id)!;
+    const { inventory } = await this.data.get(player);
+    return inventory.get(id) ?? 0;
   }
 
   public async has(player: Player, id: number): Promise<boolean> {
     const { inventory } = await this.data.get(player)
     return inventory.has(id);
+  }
+
+  private addHotbarItem(data: DeepWritable<PlayerData>, id: number, slot?: number): boolean {
+    data.inventory.delete(id);
+    if (slot === undefined)
+      data.hotbar.push(id);
+    else {
+      const success = this.removeHotbarItem(data, slot);
+      if (!success)
+        return false;
+
+      data.hotbar.insert(slot, id);
+    }
+
+    return true;
+  }
+
+  private removeHotbarItem(data: DeepWritable<PlayerData>, slot: number): boolean {
+    const id = data.hotbar[slot];
+    if (id === undefined)
+      return false;
+
+    data.hotbar[slot] = undefined!;
+    data.inventory.set(id as number, 1);
+    return true;
   }
 }

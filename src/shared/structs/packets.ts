@@ -4,6 +4,11 @@ export type DropID = u8;
 export type ItemID = u8;
 export type CreatureID = u16;
 
+export interface AddHotbarItemPacket {
+  readonly id: ItemID;
+  readonly slot?: u8;
+}
+
 export interface DropItemPacket {
   readonly id: ItemID;
   readonly position: Vector<i24>;

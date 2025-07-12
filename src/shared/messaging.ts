@@ -10,7 +10,8 @@ import type {
   CreatureHealthChangePacket,
   DropItemPacket,
   DropID,
-  ItemID
+  ItemID,
+  AddHotbarItemPacket
 } from "./structs/packets";
 import type { PlayerData } from "./structs/player-data";
 
@@ -33,7 +34,9 @@ export const enum Message {
   SpawnCreature,
   UpdateCreatures,
   CreatureHealthChange,
-  Eat
+  Eat,
+  AddHotbarItem,
+  RemoveHotbarItem
 }
 
 export interface MessageData {
@@ -54,4 +57,6 @@ export interface MessageData {
   [Message.CreatureHealthChange]: CreatureHealthChangePacket;
   [Message.UpdateCreatures]: CreatureUpdatePacket;
   [Message.Eat]: ItemID;
+  [Message.AddHotbarItem]: AddHotbarItemPacket;
+  [Message.RemoveHotbarItem]: u8;
 }

@@ -10,6 +10,7 @@ import type { ReplicaController } from "../replica";
 import type { CharacterController } from "../character";
 import type { MainUIController } from "./main";
 import { Message, messaging } from "shared/messaging";
+import { HotbarUIController } from "./hotbar";
 
 const { rad } = math;
 const { identity, Angles: angles } = CFrame;
@@ -32,7 +33,8 @@ export class InventoryUIController {
   public constructor(
     replica: ReplicaController,
     private readonly character: CharacterController,
-    private readonly mainUI: MainUIController
+    private readonly mainUI: MainUIController,
+    private readonly hotbar: HotbarUIController
   ) {
     const frame = this.frame = mainUI.screen.Inventory;
     this.itemContainer = frame.Content;
@@ -118,9 +120,8 @@ export class InventoryUIController {
     trash.add(button.MouseButton1Click.Connect(() => {
       if (isFood)
         messaging.server.emit(Message.Eat, itemID);
-      else if (isTool) {
-        // TODO: add to hotbar
-      }
+      else if (isTool)
+        this.hotbar.addItem(itemID);
     }));
     trash.add(button.MouseButton2Click.Connect(() => {
       const characterPivot = this.character.getPivot();
