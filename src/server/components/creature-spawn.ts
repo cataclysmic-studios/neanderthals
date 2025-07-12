@@ -1,14 +1,15 @@
 import type { OnStart } from "@flamework/core";
-import { Component, BaseComponent } from "@flamework/components";
+import { Component } from "@flamework/components";
 import { Workspace as World } from "@rbxts/services";
 import { $nameof } from "rbxts-transform-debug";
 
 import type { OnPlayerAdd } from "server/hooks";
 import { Message, messaging } from "shared/messaging";
 import { assets } from "shared/constants";
-import { dropItem } from "shared/utility";
 import type { CreatureConfig } from "shared/structs/creature-config";
+
 import { CreatesDropsComponent } from "server/base-components/creates-drops";
+import type { CreaturePathfindingService } from "server/services/creature";
 
 interface Attributes {
   readonly CreatureSpawn_Rate: number;
@@ -31,7 +32,9 @@ export class CreatureSpawn extends CreatesDropsComponent<Attributes, BasePart> i
 
   private creature?: CreatureServerModel;
 
-  public constructor() {
+  public constructor(
+    private readonly pathfinding: CreaturePathfindingService
+  ) {
     super();
 
     const [_, size] = this.template.GetBoundingBox();
@@ -66,16 +69,17 @@ export class CreatureSpawn extends CreatesDropsComponent<Attributes, BasePart> i
 
     const creature = assets.CreatureServerModel.Clone();
     const humanoid = creature.Humanoid;
-    const maxHealth = this.template.Humanoid.MaxHealth;
+    const templateHumanoid = this.template.Humanoid;
+    const maxHealth = templateHumanoid.MaxHealth;
     humanoid.MaxHealth = maxHealth;
     humanoid.Health = maxHealth;
     humanoid.GetPropertyChangedSignal("Health").Connect(() => {
       if (humanoid.Health > 0) return;
-      this.onDied();
+      this.despawn();
     });
 
-    const cframe = this.getSpawnCFrame();
     const id = cumulativeCreatureID++;
+    const cframe = this.getSpawnCFrame();
     creature.Name = [this.name, "-", id].join("");
     creature.SetAttribute("ID", id);
     creature.PivotTo(cframe);
@@ -87,14 +91,21 @@ export class CreatureSpawn extends CreatesDropsComponent<Attributes, BasePart> i
       health: maxHealth
     });
 
+    const speed = templateHumanoid.WalkSpeed;
     this.creature = creature;
+    this.pathfinding.registerCreature(creature, speed, this.creatureSize);
   }
 
-  private onDied(): void {
+  private despawn(): void {
     task.delay(this.spawnRate, () => this.spawn());
     this.createDrops(this.config.drops);
-    this.creature?.Destroy();
-    this.creature = undefined;
+
+    const { creature } = this;
+    if (creature) {
+      creature.Destroy();
+      this.creature = undefined;
+    }
+
     cumulativeCreatureID--;
   }
 

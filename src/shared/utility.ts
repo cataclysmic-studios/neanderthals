@@ -4,8 +4,9 @@ import type { Trash } from "@rbxts/trash";
 import type { HashMap } from "@rbxts/serio";
 
 import { assets } from "./constants";
-import { EquippedGear } from "./structs/player-data";
+import type { EquippedGear } from "./structs/player-data";
 
+const { huge: INF } = math;
 const { magnitude } = vector;
 
 export function stopHacking(player: Player, reason = "unspecified"): void {
@@ -148,4 +149,16 @@ export function recordDiff<K extends string | number | symbol, V>(
       result[key] = record1[key];
 
   return result;
+}
+
+export function isNaN(n: number): boolean {
+  return n !== n;
+}
+
+const MAX = 1e30;
+export function sanitizeVector({ X, Y, Z }: Vector3): Vector3 {
+  if (isNaN(X) || X >= MAX || X <= -MAX) X = 0;
+  if (isNaN(Y) || Y >= MAX || Y <= -MAX) Y = 0;
+  if (isNaN(Z) || Z >= MAX || Z <= -MAX) Z = 0;
+  return vector.create(X, Y, Z);
 }
