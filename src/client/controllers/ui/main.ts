@@ -12,6 +12,7 @@ import { calculateBagSpace, getBagSpace, getItemByID } from "shared/utility";
 import type { ReplicaController } from "../replica";
 import type { CharacterController } from "../character";
 import type { ToolController } from "../tool";
+import { StarterGui } from "@rbxts/services";
 
 const { delay } = task;
 
@@ -60,11 +61,12 @@ export class MainUIController implements OnCharacterAdd {
       if (humanoid.Health > 0) return;
       conn.Disconnect();
     });
+
+    StarterGui.SetCoreGuiEnabled("All", false);
+    StarterGui.SetCoreGuiEnabled("Chat", true);
   }
 
   public toggle(on: boolean): void {
-    this.stats.Visible = on;
-
     if (!on) return;
     this.enabled.Fire();
   }
