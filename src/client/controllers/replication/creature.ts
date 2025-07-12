@@ -1,4 +1,4 @@
-import { Controller } from "@flamework/core";
+import { Controller, OnTick } from "@flamework/core";
 import type { Components } from "@flamework/components";
 import { Workspace as World } from "@rbxts/services";
 
@@ -29,7 +29,7 @@ function spawn({ name, id, position, health }: CreatureSpawnPacket): void {
 }
 
 @Controller({ loadOrder: 0 })
-export class CreatureController implements OnFixed {
+export class CreatureController implements OnTick, OnFixed {
   public constructor(
     private readonly components: Components,
     private readonly mainUI: MainUIController
@@ -38,6 +38,18 @@ export class CreatureController implements OnFixed {
     messaging.client.on(Message.CreatureHealthChange, ({ id, health }) => this.onHealthChanged(id, health));
     messaging.client.on(Message.UpdateCreatures, creatures => this.update(creatures));
     World.CreatureServerStorage.Destroy();
+  }
+
+  public onTick(): void {
+    const synchronizers = this.components.getAllComponents<CreatureSync>();
+    const partList: BasePart[] = [];
+    const cframeList: CFrame[] = [];
+    for (const { root, cframe: rootCFrame } of synchronizers) {
+      partList.push(root);
+      cframeList.push(rootCFrame);
+    }
+
+    World.BulkMoveTo(partList, cframeList, Enum.BulkMoveMode.FireCFrameChanged);
   }
 
   public onFixed(): void {

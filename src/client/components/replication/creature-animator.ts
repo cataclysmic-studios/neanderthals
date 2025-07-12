@@ -19,6 +19,7 @@ export class CreatureAnimator extends DestroyableComponent<{ ID: number }, Creat
   private nextIdleTime = getNextIdleTime();
   private lastIdle = clock();
   private idle = false;
+  private walking = false;
 
   public constructor() {
     super();
@@ -34,6 +35,7 @@ export class CreatureAnimator extends DestroyableComponent<{ ID: number }, Creat
     const { lastIdle, idleAnimation } = this;
     if (lastIdle && clock() - lastIdle < this.nextIdleTime) return;
     if (this.isAnimationPlaying(idleAnimation)) return;
+    if (this.walking) return;
     if (this.idle) return;
     this.idle = true;
 
@@ -49,11 +51,17 @@ export class CreatureAnimator extends DestroyableComponent<{ ID: number }, Creat
     return this.idle;
   }
 
+  public isWalking(): boolean {
+    return this.walking;
+  }
+
   public startWalk(): void {
+    this.walking = true;
     this.playAnimation(this.walkAnimation);
   }
 
   public stopWalk(): void {
+    this.walking = false;
     this.loadAnimation(this.walkAnimation)?.Stop();
   }
 

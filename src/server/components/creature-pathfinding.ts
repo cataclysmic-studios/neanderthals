@@ -5,7 +5,7 @@ import DestroyableComponent from "shared/base-components/destroyable";
 
 import { FixedUpdateRate, type OnFixed } from "shared/hooks";
 import { distanceBetween, sanitizeVector } from "shared/utility";
-import { XZ } from "shared/constants";
+import { CREATURE_UPDATE_RATE, XZ } from "shared/constants";
 
 const { random, clamp } = math;
 const { normalize } = vector;
@@ -15,6 +15,7 @@ const UP50: Vector3 = vector.create(0, 50, 0);
 const DOWN100: Vector3 = vector.create(0, -100, 0);
 
 interface Attributes {
+  readonly ID: number;
   readonly CreaturePathfinding_Size: Vector3;
   readonly CreaturePathfinding_Speed: number;
 }
@@ -41,11 +42,14 @@ function getRandomPoint(creature: CreatureServerModel): Maybe<Vector3> {
 }
 
 @Component({ tag: $nameof<CreaturePathfinding>() })
-@FixedUpdateRate(12)
+@FixedUpdateRate(CREATURE_UPDATE_RATE)
 export class CreaturePathfinding extends DestroyableComponent<Attributes, CreatureServerModel> implements OnFixed {
+  public readonly id = this.attributes.ID;
+  public readonly root = this.instance.Root;
+  public cframe = CFrame.identity;
+
   private readonly size = this.attributes.CreaturePathfinding_Size;
   private readonly speed = this.attributes.CreaturePathfinding_Speed;
-  private readonly root = this.instance.Root;
   private readonly path = this.trash.add(PathfindingService.CreatePath({
     AgentCanClimb: false,
     AgentCanJump: false,
@@ -76,7 +80,7 @@ export class CreaturePathfinding extends DestroyableComponent<Attributes, Creatu
 
         this.isIdlePathing = true;
         this.trash.add(task.delay(random(4, 6), () => this.isIdlePathing = false));
-        this.trash.add(this.moveTo(point)).await();
+        this.moveTo(point).await();
         task.wait(0.1); // important
         this.moveToNextWaypoint();
       }
@@ -135,7 +139,8 @@ export class CreaturePathfinding extends DestroyableComponent<Attributes, Creatu
   private setCFrame(newPosition: Vector3): void {
     const direction = this.getMoveDirection();
     const heightAdjustedPosition = newPosition.mul(XZ).add(vector.create(0, this.size.Y / 2, 0));
-    this.root.CFrame = new CFrame(heightAdjustedPosition, heightAdjustedPosition.add(direction));
+    const lookAt = sanitizeVector(heightAdjustedPosition.add(direction));
+    this.cframe = this.root.CFrame = new CFrame(heightAdjustedPosition, lookAt);
   }
 
   private getMoveDirection(): Vector3 {

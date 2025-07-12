@@ -1,4 +1,4 @@
-import { u8, u16, i24, Vector, List, Transform } from "@rbxts/serio";
+import { u8, u16, f24, i24, Vector, List, Transform } from "@rbxts/serio";
 
 export type DropID = u8;
 export type ItemID = u8;
@@ -41,7 +41,7 @@ export interface CreatureSpawnPacket {
 
 export interface SyncedCreatureData {
   readonly id: CreatureID;
-  readonly cframe: Transform<i24>;
+  readonly cframe: Transform<f24>;
 }
 
 export type CreatureUpdatePacket = List<SyncedCreatureData, u16>;
