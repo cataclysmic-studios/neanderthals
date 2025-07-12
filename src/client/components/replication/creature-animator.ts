@@ -42,7 +42,7 @@ export class CreatureAnimator extends DestroyableComponent<{ ID: number }, Creat
     const idleLength = getNextIdleTime();
     task.delay(idleLength, () => this.idle = false);
 
-    this.playAnimation(idleAnimation, { fadeTime: 0 });
+    this.playAnimation(idleAnimation, { fadeTime: 0, priority: Enum.AnimationPriority.Idle });
     this.lastIdle = clock();
     this.nextIdleTime = getNextIdleTime();
   }
@@ -65,10 +65,14 @@ export class CreatureAnimator extends DestroyableComponent<{ ID: number }, Creat
     this.loadAnimation(this.walkAnimation)?.Stop();
   }
 
-  private playAnimation(animation: Animation, { fadeTime }: PlayAnimationOptions = {}): Maybe<AnimationTrack> {
+  private playAnimation(animation: Animation, { fadeTime, priority }: PlayAnimationOptions = {}): Maybe<AnimationTrack> {
     const track = this.loadAnimation(animation);
-    track?.Play(fadeTime);
+    if (!track) return;
 
+    if (priority)
+      track.Priority = priority;
+
+    track.Play(fadeTime);
     return track;
   }
 

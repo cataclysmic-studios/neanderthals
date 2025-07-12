@@ -79,8 +79,8 @@ export class CreaturePathfinding extends DestroyableComponent<Attributes, Creatu
         if (!point) return;
 
         this.isIdlePathing = true;
-        this.trash.add(task.delay(random(4, 6), () => this.isIdlePathing = false));
         this.moveTo(point).await();
+        this.trash.add(task.delay(random(6, 9), () => this.isIdlePathing = false));
         task.wait(0.1); // important
         this.moveToNextWaypoint();
       }
