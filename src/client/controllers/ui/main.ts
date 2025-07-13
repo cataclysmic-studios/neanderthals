@@ -1,12 +1,11 @@
 import { Controller } from "@flamework/core";
 import { StarterGui } from "@rbxts/services";
 import { Trash } from "@rbxts/trash";
-import { getChildrenOfType } from "@rbxts/instance-utility";
 import Signal from "@rbxts/lemon-signal";
 
 import type { OnCharacterAdd } from "client/hooks";
 import { Message, messaging } from "shared/messaging";
-import { playerGUI } from "client/constants";
+import { mainScreen } from "client/constants";
 import { calculateBagSpace, getBagSpace } from "shared/utility";
 
 import type { ReplicaController } from "../replica";
@@ -19,11 +18,10 @@ const DAMAGE_DISPLAY_LIFETIME = 1;
 
 @Controller({ loadOrder: -1 })
 export class MainUIController implements OnCharacterAdd {
-  public readonly screen = playerGUI.WaitForChild("Main");
   public readonly enabled = new Signal;
 
-  private readonly damageDisplay = this.screen.DamageDisplay;
-  private readonly stats = this.screen.Stats;
+  private readonly damageDisplay = mainScreen.DamageDisplay;
+  private readonly stats = mainScreen.Stats;
   private readonly damageTrash = new Trash;
   private hunger = 100;
 

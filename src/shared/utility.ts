@@ -6,7 +6,6 @@ import type { HashMap } from "@rbxts/serio";
 import { assets } from "./constants";
 import type { EquippedGear } from "./structs/player-data";
 
-const { huge: INF } = math;
 const { magnitude } = vector;
 
 export function stopHacking(player: Player, reason = "unspecified"): void {
@@ -61,6 +60,10 @@ export function getItemByID<T extends Model = Model>(id: number): Maybe<T> {
   return itemCache.get(id) as T;
 }
 
+export function getItemDisplayName(item: Model): string {
+  return (item.GetAttribute<string>("DisplayName") ?? item.Name).upper()
+}
+
 export function objectFromEntries<K extends string | number | symbol, V>(entries: [K, V][]): Record<K, V> {
   return new Map(entries) as never; // goat hack
 }
@@ -77,13 +80,6 @@ export function findServerCreatureByID(id: number): Maybe<CreatureServerModel> {
   return World.CreatureServerStorage
     .GetChildren()
     .find((creature): creature is CreatureServerModel => creature.GetAttribute("ID") === id);
-}
-
-export function findClientCreatureByID(id: number): Maybe<CreatureModel> {
-  return World
-    .FindFirstChild("CreatureClientStorage")!
-    .GetChildren()
-    .find((creature): creature is CreatureModel => creature.GetAttribute("ID") === id);
 }
 
 const DEFAULT_BAG_SPACE = 100;

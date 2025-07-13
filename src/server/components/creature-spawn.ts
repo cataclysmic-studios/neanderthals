@@ -27,7 +27,7 @@ export class CreatureSpawn extends CreatesDropsComponent<Attributes, BasePart> i
   private readonly name = this.instance.Name as CreatureName;
   private readonly template = assets.Creatures[this.name];
   private readonly spawnRate = this.attributes.CreatureSpawn_Rate;
-  private readonly config = require(this.template.Config) as CreatureConfig;
+  private readonly config = require<CreatureConfig>(this.template.Config);
   private readonly creatureSize: Vector3;
 
   private creature?: CreatureServerModel;
@@ -80,7 +80,7 @@ export class CreatureSpawn extends CreatesDropsComponent<Attributes, BasePart> i
 
     const id = cumulativeCreatureID++;
     const cframe = this.getSpawnCFrame();
-    creature.Name = [this.name, "-", id].join("");
+    creature.Name = this.name + "-" + id;
     creature.SetAttribute("ID", id);
     creature.PivotTo(cframe);
     creature.Parent = World.CreatureServerStorage;

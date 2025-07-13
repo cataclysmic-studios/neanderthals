@@ -1,18 +1,16 @@
 import { Controller } from "@flamework/core";
 import { getChildrenOfType } from "@rbxts/instance-utility";
-import ViewportModel from "@rbxts/viewport-model";
 
-import { playerGUI } from "client/constants";
+import { Message, messaging } from "shared/messaging";
 import { getItemByID } from "shared/utility";
+import { addViewportItem, removeViewportItem } from "client/utility";
+import { mainScreen } from "client/constants";
 
 import type { ToolController } from "../tool";
-import { Message, messaging } from "shared/messaging";
 
 @Controller()
 export class HotbarUIController {
-  public readonly screen = playerGUI.WaitForChild("Main");
-
-  private readonly hotbarButtons = getChildrenOfType<"ImageButton", HotbarButton>(this.screen.Hotbar, "ImageButton");
+  private readonly hotbarButtons = getChildrenOfType<"ImageButton", HotbarButton>(mainScreen.Hotbar, "ImageButton");
 
   public constructor(
     private readonly tool: ToolController
@@ -56,13 +54,13 @@ export class HotbarUIController {
   }
 
   private addViewportItem(hotbarButton: HotbarButton, id: number): void {
-    (ViewportModel as { GenerateViewport: Callback }).GenerateViewport(hotbarButton.Viewport, getItemByID(id)?.Clone()); // DUM DUM HACK BC THIS MODULE IS TYPED INCORRECTLY
+    addViewportItem(hotbarButton.Viewport, id);
     hotbarButton.SetAttribute("CurrentItem", id);
   }
 
   private removeViewportItem(hotbarButton: HotbarButton): void {
     hotbarButton.SetAttribute("CurrentItem", undefined);
-    (ViewportModel as { CleanViewport: Callback }).CleanViewport(hotbarButton.Viewport);
+    removeViewportItem(hotbarButton.Viewport)
   }
 
   private getNextEmptyHotbarButton(): Maybe<HotbarButton> {

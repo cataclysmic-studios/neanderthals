@@ -5,7 +5,7 @@ import { Workspace as World } from "@rbxts/services";
 import type { OnFixed } from "shared/hooks";
 import { Message, messaging } from "shared/messaging";
 import { assets } from "shared/constants";
-import { findClientCreatureByID } from "shared/utility";
+import { findClientCreatureByID } from "client/utility";
 import type { CreatureSpawnPacket, CreatureUpdatePacket } from "shared/structs/packets";
 
 import type { CreatureAnimator } from "client/components/replication/creature-animator";

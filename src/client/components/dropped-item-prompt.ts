@@ -43,7 +43,7 @@ export class DroppedItemPrompt extends DestroyableComponent<{}, BillboardGui> im
   private consume(message: Message.PickUpDrop | Message.EatDrop): void {
     if (!DroppedItemPrompt.canConsume) return;
     DroppedItemPrompt.canConsume = false;
-    task.delay(0.06, () => DroppedItemPrompt.canConsume = true);
+    task.delay(0.025, () => DroppedItemPrompt.canConsume = true);
 
     this.consumed.Fire(message);
   }

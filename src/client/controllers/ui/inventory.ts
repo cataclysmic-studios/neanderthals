@@ -1,22 +1,18 @@
 import { Controller } from "@flamework/core";
 import { Trash } from "@rbxts/trash";
-import ViewportModel from "@rbxts/viewport-model";
+import ViewportModel from "@rbxts/viewportmodel";
 
+import { Message, messaging } from "shared/messaging";
 import { assets } from "shared/constants";
-import { dropItem, getItemByID, recordDiff } from "shared/utility";
+import { getItemByID, recordDiff } from "shared/utility";
+import { mainScreen } from "client/constants";
 import { INITIAL_DATA } from "shared/structs/player-data";
 
 import type { ReplicaController } from "../replica";
 import type { CharacterController } from "../character";
 import type { MainUIController } from "./main";
-import { Message, messaging } from "shared/messaging";
-import { HotbarUIController } from "./hotbar";
-
-const { rad } = math;
-const { identity, Angles: angles } = CFrame;
-
-const VIEWPORT_CAMERA_CFRAME = angles(rad(-30), 0, 0).add(vector.create(0.1, 2.4, 4.75));
-const ITEM_ROTATION = angles(0, rad(45), rad(45));
+import type { HotbarUIController } from "./hotbar";
+import { addViewportItem } from "client/utility";
 
 interface ItemFrameInfo {
   readonly button: ItemButton;
@@ -26,6 +22,7 @@ interface ItemFrameInfo {
 @Controller()
 export class InventoryUIController {
   private readonly frame: PlayerGui["Main"]["Inventory"];
+  private readonly crafting: PlayerGui["Main"]["Crafting"];
   private readonly itemContainer: ScrollingFrame;
   private readonly buttonInfos = new Map<number, ItemFrameInfo>;
   private lastInventory = INITIAL_DATA.inventory;
@@ -36,7 +33,8 @@ export class InventoryUIController {
     private readonly mainUI: MainUIController,
     private readonly hotbar: HotbarUIController
   ) {
-    const frame = this.frame = mainUI.screen.Inventory;
+    const frame = this.frame = mainScreen.Inventory;
+    this.crafting = mainScreen.Crafting;
     this.itemContainer = frame.Content;
 
     mainUI.enabled.Connect(() => this.toggle(false));
@@ -62,6 +60,7 @@ export class InventoryUIController {
   public toggle(on = !this.frame.Visible): void {
     if (this.frame.Visible === on) return;
     this.frame.Visible = on;
+    this.crafting.Visible = on;
     this.mainUI.toggle(!on);
   }
 
@@ -94,28 +93,13 @@ export class InventoryUIController {
       return warn("Failed to create inventory item frame: no item found with ID", itemID)!;
 
     const trash = new Trash;
-    const item = itemTemplate.Clone();
     const button = assets.UI.InventoryItem.Clone();
     trash.linkToInstance(button);
+    addViewportItem(button.Viewport, itemID);
 
-    const viewport = button.Viewport;
-    const camera = new Instance("Camera");
-    camera.Focus = identity;
-    camera.CFrame = VIEWPORT_CAMERA_CFRAME;
-    camera.FieldOfView = 62;
-    camera.Parent = viewport;
-    viewport.CurrentCamera = camera;
-
-    item.PivotTo(ITEM_ROTATION);
-    item.Parent = viewport;
-
-    const viewportModel = new ViewportModel(viewport, camera);
-    viewportModel.SetModel(item);
-    viewportModel.Calibrate();
-
-    const isFood = item.GetAttribute<boolean>("Food") ?? false;
-    const isTool = item.GetAttribute("ToolTier") !== undefined;
-    button.Name = item.Name;
+    const isFood = itemTemplate.GetAttribute<boolean>("Food") ?? false;
+    const isTool = itemTemplate.GetAttribute("ToolTier") !== undefined;
+    button.Name = itemTemplate.Name;
     button.Count.Text = tostring(count);
     trash.add(button.MouseButton1Click.Connect(() => {
       if (isFood)

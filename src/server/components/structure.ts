@@ -1,12 +1,11 @@
 import type { OnStart } from "@flamework/core";
-import { BaseComponent, Component } from "@flamework/components";
+import { Component } from "@flamework/components";
 import { Trash } from "@rbxts/trash";
 import { getDescendantsOfType } from "@rbxts/instance-utility";
 import { $nameof } from "rbxts-transform-debug";
 
-import { assets } from "shared/constants";
-import { dropItem } from "shared/utility";
-import { type StructureConfig } from "shared/structs/structure-config";
+import type { StructureConfig } from "shared/structs/structure-config";
+
 import { CreatesDropsComponent } from "server/base-components/creates-drops";
 
 const DEFAULT_RESPAWN_TIME = 60;
@@ -15,7 +14,7 @@ const DEFAULT_RESPAWN_TIME = 60;
   tag: $nameof<Structure>()
 })
 export class Structure extends CreatesDropsComponent<{}, StructureModel> implements OnStart {
-  public readonly config = require(this.instance.Config) as StructureConfig;
+  public readonly config = require<StructureConfig>(this.instance.Config);
 
   private readonly aliveTrash = new Trash;
   private readonly parts = getDescendantsOfType(this.instance, "BasePart");

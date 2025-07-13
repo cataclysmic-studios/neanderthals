@@ -1,0 +1,1 @@
+declare function require<T>(module: ModuleScript): T;

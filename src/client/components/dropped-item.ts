@@ -8,7 +8,7 @@ import type { OnFixed } from "shared/hooks";
 import { Message, messaging } from "shared/messaging";
 import { player } from "client/constants";
 import { assets } from "shared/constants";
-import { distanceBetween } from "shared/utility";
+import { distanceBetween, getItemDisplayName } from "shared/utility";
 import { DEFAULT_DROPPED_ITEM_ATTRIBUTES, type DroppedItemAttributes } from "shared/structs/dropped-item-attributes";
 
 import DestroyableComponent from "shared/base-components/destroyable";
@@ -27,7 +27,7 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
   private readonly dragDetector = this.instance.WaitForChild<DragDetector>("DragDetector");
   private readonly promptUI = PROMPT_UI.Clone();
   private readonly mouse = player.GetMouse();
-  private readonly displayName = (this.attributes.DisplayName ?? this.instance.Name).upper();
+  private readonly displayName = getItemDisplayName(this.instance);
   private readonly maxDistance = this.dragDetector.MaxActivationDistance;
   private destroyed = false;
 

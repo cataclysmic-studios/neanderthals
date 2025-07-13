@@ -10,7 +10,7 @@ interface ReplicatedStorage extends Instance {
     Items: Folder & {
       Rock: ToolItem;
       GodRock: ToolItem;
-      WoodAxe: ToolItem;
+      WoodPickaxe: ToolItem;
       Leaves: Model;
       Log: Model;
       Stick: Model;
