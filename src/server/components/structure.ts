@@ -7,6 +7,8 @@ import { $nameof } from "rbxts-transform-debug";
 import type { StructureConfig } from "shared/structs/structure-config";
 
 import { CreatesDropsComponent } from "server/base-components/creates-drops";
+import { LevelsService } from "server/services/levels";
+import { Players } from "@rbxts/services";
 
 const DEFAULT_RESPAWN_TIME = 60;
 
@@ -26,6 +28,10 @@ export class Structure extends CreatesDropsComponent<{}, StructureModel> impleme
   private readonly originalPartInfo = new Map<BasePart, PartInfo>;
   private alive = false;
 
+  public constructor(
+    private readonly levels: LevelsService
+  ) { super(); }
+
   public onStart(): void {
     for (const part of this.parts)
       this.originalPartInfo.set(part, {
@@ -42,6 +48,11 @@ export class Structure extends CreatesDropsComponent<{}, StructureModel> impleme
     this.aliveTrash.purge();
     this.createDrops(this.config.drops);
     this.toggleVisibility(false);
+
+    const killerID = this.instance.Humanoid.GetAttribute<number>("AttackerID");
+    const killer = killerID !== undefined ? Players.GetPlayerByUserId(killerID) : undefined;
+    if (killer !== undefined)
+      this.levels.addXP(killer, this.config.xp);
 
     const { noRespawn = false, respawnTime = DEFAULT_RESPAWN_TIME } = this.config;
     if (noRespawn) return;

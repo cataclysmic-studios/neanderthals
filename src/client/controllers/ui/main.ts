@@ -87,7 +87,7 @@ export class MainUIController implements OnCharacterAdd {
   private updateLevelStats(): void {
     const { levelStats } = this;
     const { xp, level } = this.replica.data;
-    const xpToLevelUp = getXPToLevelUp(level) - xp;
+    const xpToLevelUp = getXPToLevelUp(level);
     const xpFrame = levelStats.XP;
     xpFrame.Bar.Size = UDim2.fromScale(xp / xpToLevelUp, 1);
     xpFrame.Amount.Text = xp + " xp";

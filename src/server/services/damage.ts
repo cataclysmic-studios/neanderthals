@@ -79,6 +79,7 @@ export class DamageService implements OnStart {
 
     const currentHealth = humanoid.Health;
     const newHealth = clamp(currentHealth - damage, 0, humanoid.MaxHealth);
+    humanoid.SetAttribute("AttackerID", player.UserId);
     if (currentHealth !== newHealth)
       humanoid.Health = newHealth;
 
