@@ -9,6 +9,7 @@ import type { StructureConfig } from "shared/structs/structure-config";
 import { CreatesDropsComponent } from "server/base-components/creates-drops";
 import { LevelsService } from "server/services/levels";
 import { Players } from "@rbxts/services";
+import { ToolKind } from "shared/structs/tool-kind";
 
 const DEFAULT_RESPAWN_TIME = 60;
 
@@ -40,6 +41,18 @@ export class Structure extends CreatesDropsComponent<{}, StructureModel> impleme
       });
 
     this.spawn(false);
+  }
+
+  public getDamage(current: number, toolTier: number, toolKind: Maybe<ToolKind>): number {
+    const { toolKind: requiredToolKind, minimumToolTier = 0 } = this.config;
+    let damage = current;
+    print(toolKind, requiredToolKind)
+    if (toolKind !== undefined && toolKind !== requiredToolKind)
+      damage /= 2;
+    if (toolTier < minimumToolTier)
+      damage = 0;
+
+    return damage;
   }
 
   private kill(): void {

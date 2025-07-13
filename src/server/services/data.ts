@@ -9,7 +9,7 @@ import { Message, messaging } from "shared/messaging";
 import { INITIAL_DATA, type PlayerData } from "shared/structs/player-data";
 
 const enum Scope {
-  Proto = "PROTO4"
+  Proto = "PROTO5"
 }
 
 @Service()
@@ -49,16 +49,13 @@ export class DataService implements OnStart, OnPlayerAdd, OnPlayerRemove {
   }
 
   public async update(player: Player, transform: (data: DeepWritable<PlayerData>) => boolean): Promise<boolean> {
-    const success = await this.store.update(player, data => {
+    return await this.store.update(player, data => {
       const success = transform(data);
       if (success)
         task.spawn(() => this.sendUpdate(player, data));
 
       return success;
     });
-
-    await this.store.save(player);
-    return success;
   }
 
   public async wipe(): Promise<void> {

@@ -8,6 +8,7 @@ import { findCreatureByID, stopHacking } from "server/utility";
 import { distanceBetween } from "shared/utility";
 
 import type { Structure } from "server/components/structure";
+import { ToolKind } from "shared/structs/tool-kind";
 
 const { clamp } = math;
 const { magnitude } = vector;
@@ -62,12 +63,10 @@ export class DamageService implements OnStart {
     const character = player.Character;
     if (!character) return;
 
+    const toolKind = tool.GetAttribute<ToolKind>("ToolKind");
     const structure = this.components.getComponent<Structure>(targetModel);
-    if (structure) {
-      const { minimumToolTier = 0 } = structure.config;
-      if (toolTier < minimumToolTier)
-        damage = 0;
-    }
+    if (structure)
+      damage = structure.getDamage(damage, toolTier, toolKind);
 
     const modelPosition = targetModel.PrimaryPart!.Position;
     const playerPosition = character.GetPivot().Position;

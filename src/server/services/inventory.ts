@@ -29,14 +29,16 @@ export class InventoryService {
 
   public async transaction(player: Player, { add, remove }: TransactionInfo): Promise<boolean> {
     return await this.data.update(player, ({ inventory }) => {
-      for (const [id, count] of add) {
+      for (let [id, count] of add) {
+        id = tonumber(id)!;
         const itemCount = inventory.get(id);
         if (itemCount !== undefined && EXCLUSIVE_IDS.has(id)) continue;
 
         inventory.set(id, itemCount !== undefined ? itemCount + count : count);
       }
 
-      for (const [id, count] of remove) {
+      for (let [id, count] of remove) {
+        id = tonumber(id)!;
         const itemCount = inventory.get(id);
         if (itemCount === undefined || EXCLUSIVE_IDS.has(id)) continue;
 
@@ -93,6 +95,7 @@ export class InventoryService {
   }
 
   public async has(player: Player, id: number, count?: number): Promise<boolean> {
+    id = tonumber(id)!;
     const { inventory } = await this.data.get(player);
 
     const hasItem = inventory.has(id);
@@ -113,6 +116,8 @@ export class InventoryService {
   }
 
   private addHotbarItem(data: DeepWritable<PlayerData>, id: number, slot?: number): boolean {
+    id = tonumber(id)!;
+
     const hotbar = data.hotbar as number[];
     data.inventory.delete(id);
     if (slot === undefined)
@@ -130,11 +135,12 @@ export class InventoryService {
 
   private removeHotbarItem(data: DeepWritable<PlayerData>, slot: number): boolean {
     type Slot = 0 | 1 | 2 | 3 | 4 | 5;
-    const id = data.hotbar[slot + 1 as Slot];
+    const index = slot + 1 as Slot;
+    const id = data.hotbar[index];
     if (id === undefined)
       return false;
 
-    data.hotbar[slot + 1 as Slot] = undefined;
+    data.hotbar[index] = undefined;
     data.inventory.set(id as number, 1);
     return true;
   }
