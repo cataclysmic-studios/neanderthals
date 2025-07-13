@@ -8,6 +8,11 @@ import type { PlayerData } from "shared/structs/player-data";
 
 import type { DataService } from "./data";
 
+interface TransactionInfo {
+  readonly add: [id: number, count: number][];
+  readonly remove: [id: number, count: number][];
+}
+
 @Service()
 export class InventoryService {
   public constructor(
@@ -20,6 +25,31 @@ export class InventoryService {
     messaging.server.on(Message.RemoveHotbarItem, (player, slot) =>
       data.update(player, data => this.removeHotbarItem(data, slot))
     );
+  }
+
+  public async transaction(player: Player, { add, remove }: TransactionInfo): Promise<boolean> {
+    return await this.data.update(player, ({ inventory }) => {
+      for (const [id, count] of add) {
+        const itemCount = inventory.get(id);
+        if (itemCount !== undefined && EXCLUSIVE_IDS.has(id)) continue;
+
+        inventory.set(id, itemCount !== undefined ? itemCount + count : count);
+      }
+
+      for (const [id, count] of remove) {
+        const itemCount = inventory.get(id);
+        if (itemCount === undefined || EXCLUSIVE_IDS.has(id)) continue;
+
+        const newCount = itemCount - count;
+        if (newCount <= 0)
+          inventory.delete(id);
+        else
+          inventory.set(id, newCount);
+      }
+
+      print(inventory)
+      return true;
+    });
   }
 
   public async addItem(player: Player, id: number, count = 1): Promise<boolean> {

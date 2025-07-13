@@ -36,7 +36,8 @@ export const enum Message {
   CreatureHealthChange,
   Eat,
   AddHotbarItem,
-  RemoveHotbarItem
+  RemoveHotbarItem,
+  Craft
 }
 
 export interface MessageData {
@@ -59,4 +60,5 @@ export interface MessageData {
   [Message.Eat]: ItemID;
   [Message.AddHotbarItem]: AddHotbarItemPacket;
   [Message.RemoveHotbarItem]: u8;
+  [Message.Craft]: u8;
 }

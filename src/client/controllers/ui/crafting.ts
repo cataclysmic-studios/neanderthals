@@ -1,21 +1,21 @@
 import { Controller } from "@flamework/core";
-import { getInstanceAtPath } from "@rbxts/flamework-meta-utils";
-import { getChildrenOfType, getDescendantsOfType } from "@rbxts/instance-utility";
+import { getChildrenOfType } from "@rbxts/instance-utility";
 
+import { Message, messaging } from "shared/messaging";
 import { assets } from "shared/constants";
 import { mainScreen } from "client/constants";
+import { RECIPES } from "shared/recipes";
 import { getItemByID, getItemDisplayName } from "shared/utility/items";
 import { addViewportItem } from "client/utility";
 import type { CraftingRecipe } from "shared/structs/crafting-recipe";
 
 import type { ReplicaController } from "../replica";
 
-const RECIPES = getDescendantsOfType(getInstanceAtPath("src/shared/crafting-recipes")!, "ModuleScript").map(require<CraftingRecipe>);
 const DEFAULT_TEXT_COLOR = new Color3(1, 1, 1);
 const NOT_ENOUGH_TEXT_COLOR = new Color3(0.7, 0, 0);
 const DEFAULT_CRAFT_BUTTON_COLOR = assets.UI.CraftingRecipeFrame.Craft.BackgroundColor3;
-
 const GRAYED_CRAFT_BUTTON_COLOR = new Color3(0.3, 0.3, 0.3);
+
 @Controller()
 export class CraftingUIController {
   private readonly frame = mainScreen.Crafting;
@@ -65,7 +65,7 @@ export class CraftingUIController {
     frame.Craft.BackgroundColor3 = color;
     frame.Craft.MouseButton1Click.Connect(() => {
       if (!this.canCraft(ingredients)) return;
-      print("attempt craft", getItemDisplayName(item));
+      messaging.server.emit(Message.Craft, RECIPES.indexOf(recipe));
     });
     frame.Parent = this.storage;
 
