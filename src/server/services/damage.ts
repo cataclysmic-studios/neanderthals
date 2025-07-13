@@ -4,7 +4,8 @@ import { Players } from "@rbxts/services";
 
 import { Message, messaging } from "shared/messaging";
 import { assets, XZ } from "shared/constants";
-import { distanceBetween, findServerCreatureByID, stopHacking } from "shared/utility";
+import { findCreatureByID, stopHacking } from "server/utility";
+import { distanceBetween } from "shared/utility";
 
 import type { Structure } from "server/components/structure";
 
@@ -25,7 +26,7 @@ export class DamageService implements OnStart {
   }
 
   private damageCreature(player: Player, id: number, toolName: ToolName): void {
-    const creature = findServerCreatureByID(id);
+    const creature = findCreatureByID(id);
     if (!creature)
       return warn(`Failed to damage creature with ID ${id}: creature not found`);
 

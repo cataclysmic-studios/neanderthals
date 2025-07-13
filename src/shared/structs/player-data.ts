@@ -1,6 +1,6 @@
 import type { u8, u16, HashMap, List } from "@rbxts/serio";
 
-import { Item } from "./item-id";
+import { Item } from "../item-id";
 import type { ItemID } from "./packets";
 
 export interface EquippedGear {

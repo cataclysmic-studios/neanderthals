@@ -1,25 +1,19 @@
 import { Service } from "@flamework/core";
 
-import { EXCLUSIVE_IDS } from "shared/structs/item-id";
+import { Message, messaging } from "shared/messaging";
+import { dropItem, stopHacking } from "server/utility";
+import { getItemByID } from "shared/utility/items";
+import { EXCLUSIVE_IDS } from "shared/item-id";
+import type { PlayerData } from "shared/structs/player-data";
 
 import type { DataService } from "./data";
-import { Message, messaging } from "shared/messaging";
-import { dropItem, getItemByID, stopHacking } from "shared/utility";
-import { PlayerData } from "shared/structs/player-data";
 
 @Service()
 export class InventoryService {
   public constructor(
     private readonly data: DataService
   ) {
-    messaging.server.on(Message.DropItem, async (player, { id, position }) => {
-      const item = getItemByID(id);
-      if (!item)
-        return stopHacking(player, "invalid item ID (no corresponding item) when dropping item");
-
-      await this.removeItem(player, id);
-      dropItem(item, new CFrame(position));
-    });
+    messaging.server.on(Message.DropItem, (player, { id, position }) => this.dropItem(player, id, position));
     messaging.server.on(Message.AddHotbarItem, (player, { id, slot }) =>
       data.update(player, data => this.addHotbarItem(data, id, slot))
     );
@@ -72,6 +66,15 @@ export class InventoryService {
   public async has(player: Player, id: number): Promise<boolean> {
     const { inventory } = await this.data.get(player)
     return inventory.has(id);
+  }
+
+  private async dropItem(player: Player, id: number, position: Vector3): Promise<void> {
+    const item = getItemByID(id);
+    if (!item)
+      return stopHacking(player, "invalid item ID (no corresponding item) when dropping item");
+
+    await this.removeItem(player, id);
+    dropItem(item, new CFrame(position));
   }
 
   private addHotbarItem(data: DeepWritable<PlayerData>, id: number, slot?: number): boolean {

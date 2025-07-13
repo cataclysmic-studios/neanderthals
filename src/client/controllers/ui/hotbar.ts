@@ -2,9 +2,9 @@ import { Controller } from "@flamework/core";
 import { getChildrenOfType } from "@rbxts/instance-utility";
 
 import { Message, messaging } from "shared/messaging";
-import { getItemByID } from "shared/utility";
-import { addViewportItem, removeViewportItem } from "client/utility";
 import { mainScreen } from "client/constants";
+import { getItemByID } from "shared/utility/items";
+import { addViewportItem, removeViewportItem } from "client/utility";
 
 import type { ToolController } from "../tool";
 

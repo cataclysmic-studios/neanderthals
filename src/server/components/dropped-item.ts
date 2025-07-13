@@ -1,10 +1,10 @@
 import type { OnStart } from "@flamework/core";
 import { Component } from "@flamework/components";
+import { getChildrenOfType } from "@rbxts/instance-utility";
 import { $nameof } from "rbxts-transform-debug";
 
 import type { OnFixed } from "shared/hooks";
 import { Message, messaging } from "shared/messaging";
-import { getPartsIncludingSelf } from "shared/utility";
 import { DEFAULT_DROPPED_ITEM_ATTRIBUTES, type DroppedItemAttributes } from "shared/structs/dropped-item-attributes";
 
 import DestroyableComponent from "shared/base-components/destroyable";
@@ -16,6 +16,18 @@ const { magnitude } = vector;
 const DRAG_DISTANCE = 24;
 const DECAY_TIME = 360;
 const MAX_SPEED = 60;
+
+function getPartsIncludingSelf(instance: Instance): BasePart[] {
+  const parts: BasePart[] = [];
+  if (instance.IsA("BasePart"))
+    parts.push(instance);
+
+  for (const child of getChildrenOfType(instance, "BasePart"))
+    for (const part of getPartsIncludingSelf(child))
+      parts.push(part);
+
+  return parts;
+}
 
 @Component({
   tag: $nameof<DroppedItem>(),

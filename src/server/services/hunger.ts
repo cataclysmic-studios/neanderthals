@@ -2,7 +2,8 @@ import { Service, type OnTick } from "@flamework/core";
 
 import type { OnPlayerAdd, OnPlayerRemove } from "server/hooks";
 import { Message, messaging } from "shared/messaging";
-import { getItemByID, stopHacking } from "shared/utility";
+import { stopHacking } from "server/utility";
+import { getItemByID } from "shared/utility/items";
 
 import type { InventoryService } from "./inventory";
 

@@ -4,7 +4,7 @@ import { getDescendantsOfType } from "@rbxts/instance-utility";
 
 import { assets } from "shared/constants";
 import { mainScreen } from "client/constants";
-import { getItemByID, getItemDisplayName } from "shared/utility";
+import { getItemByID, getItemDisplayName } from "shared/utility/items";
 import { addViewportItem } from "client/utility";
 import type { CraftingRecipe } from "shared/structs/crafting-recipe";
 

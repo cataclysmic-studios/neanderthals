@@ -1,7 +1,7 @@
 import { Controller, Modding, type OnStart } from "@flamework/core";
 import { UserInputService } from "@rbxts/services";
 
-import { getItemByID } from "shared/utility";
+import { getItemByID } from "shared/utility/items";
 
 import type { ToolController } from "./tool";
 import type { ReplicaController } from "./replica";

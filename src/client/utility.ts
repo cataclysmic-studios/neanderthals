@@ -1,13 +1,19 @@
 import { Workspace as World } from "@rbxts/services";
 import ViewportModel from "@rbxts/viewportmodel";
 
-import { getItemByID } from "shared/utility";
+import { getItemByID } from "shared/utility/items";
 
 const { rad } = math;
 const { identity, Angles: angles } = CFrame;
 
-const ITEM_ORIENTATION = angles(0, rad(45), 0);
+export function findCreatureByID(id: number): Maybe<CreatureModel> {
+  return World
+    .FindFirstChild("CreatureClientStorage")!
+    .GetChildren()
+    .find((creature): creature is CreatureModel => creature.GetAttribute("ID") === id);
+}
 
+const ITEM_ORIENTATION = angles(0, rad(45), 0);
 export function addViewportItem<T extends Model>(viewport: ViewportFrame, item: T): Maybe<T>;
 export function addViewportItem<T extends Model>(viewport: ViewportFrame, id: number): Maybe<T>;
 export function addViewportItem<T extends Model>(viewport: ViewportFrame, id: T | number): Maybe<T> {
@@ -40,11 +46,4 @@ export function addViewportItem<T extends Model>(viewport: ViewportFrame, id: T 
 
 export function removeViewportItem(viewport: ViewportFrame): void {
   viewport.FindFirstChildOfClass("Model")?.Destroy();
-}
-
-export function findClientCreatureByID(id: number): Maybe<CreatureModel> {
-  return World
-    .FindFirstChild("CreatureClientStorage")!
-    .GetChildren()
-    .find((creature): creature is CreatureModel => creature.GetAttribute("ID") === id);
 }

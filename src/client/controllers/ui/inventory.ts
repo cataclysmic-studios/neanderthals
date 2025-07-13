@@ -1,18 +1,18 @@
 import { Controller } from "@flamework/core";
 import { Trash } from "@rbxts/trash";
-import ViewportModel from "@rbxts/viewportmodel";
 
 import { Message, messaging } from "shared/messaging";
 import { assets } from "shared/constants";
-import { getItemByID, recordDiff } from "shared/utility";
 import { mainScreen } from "client/constants";
+import { recordDiff } from "shared/utility";
+import { getItemByID } from "shared/utility/items";
+import { addViewportItem } from "client/utility";
 import { INITIAL_DATA } from "shared/structs/player-data";
 
 import type { ReplicaController } from "../replica";
 import type { CharacterController } from "../character";
 import type { MainUIController } from "./main";
 import type { HotbarUIController } from "./hotbar";
-import { addViewportItem } from "client/utility";
 
 interface ItemFrameInfo {
   readonly button: ItemButton;

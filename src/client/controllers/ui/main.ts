@@ -6,7 +6,7 @@ import Signal from "@rbxts/lemon-signal";
 import type { OnCharacterAdd } from "client/hooks";
 import { Message, messaging } from "shared/messaging";
 import { mainScreen } from "client/constants";
-import { calculateBagSpace, getBagSpace } from "shared/utility";
+import { calculateBagSpace, getBagSpace } from "shared/utility/data";
 
 import type { ReplicaController } from "../replica";
 import type { CharacterController } from "../character";

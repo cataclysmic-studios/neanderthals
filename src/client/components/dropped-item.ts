@@ -8,7 +8,8 @@ import type { OnFixed } from "shared/hooks";
 import { Message, messaging } from "shared/messaging";
 import { player } from "client/constants";
 import { assets } from "shared/constants";
-import { distanceBetween, getItemDisplayName } from "shared/utility";
+import { distanceBetween } from "shared/utility";
+import { getItemDisplayName } from "shared/utility/items";
 import { DEFAULT_DROPPED_ITEM_ATTRIBUTES, type DroppedItemAttributes } from "shared/structs/dropped-item-attributes";
 
 import DestroyableComponent from "shared/base-components/destroyable";

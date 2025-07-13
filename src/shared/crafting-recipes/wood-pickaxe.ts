@@ -1,4 +1,4 @@
-import { Item } from "shared/structs/item-id";
+import { Item } from "shared/item-id";
 import type { CraftingRecipe } from "shared/structs/crafting-recipe";
 
 export = {
