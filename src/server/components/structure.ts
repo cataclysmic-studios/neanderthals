@@ -10,6 +10,11 @@ import { CreatesDropsComponent } from "server/base-components/creates-drops";
 
 const DEFAULT_RESPAWN_TIME = 60;
 
+interface PartInfo {
+  readonly collisions: boolean;
+  readonly transparency: number;
+}
+
 @Component({
   tag: $nameof<Structure>()
 })
@@ -18,12 +23,15 @@ export class Structure extends CreatesDropsComponent<{}, StructureModel> impleme
 
   private readonly aliveTrash = new Trash;
   private readonly parts = getDescendantsOfType(this.instance, "BasePart");
-  private readonly originalCollisions = new Map<BasePart, boolean>;
+  private readonly originalPartInfo = new Map<BasePart, PartInfo>;
   private alive = false;
 
   public onStart(): void {
     for (const part of this.parts)
-      this.originalCollisions.set(part, part.CanCollide);
+      this.originalPartInfo.set(part, {
+        collisions: part.CanCollide,
+        transparency: part.Transparency
+      });
 
     this.spawn(false);
   }
@@ -59,8 +67,9 @@ export class Structure extends CreatesDropsComponent<{}, StructureModel> impleme
 
   private toggleVisibility(on: boolean): void {
     for (const part of this.parts) {
-      part.Transparency = on ? 0 : 1;
-      part.CanCollide = on ? this.originalCollisions.get(part)! : false;
+      const { collisions, transparency } = this.originalPartInfo.get(part)!
+      part.Transparency = on ? transparency : 1;
+      part.CanCollide = on ? collisions : false;
       part.CanQuery = on;
       part.CanTouch = on;
     }
