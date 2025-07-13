@@ -4,6 +4,8 @@ import Signal from "@rbxts/lemon-signal";
 import { Message, messaging } from "shared/messaging";
 import { type PlayerData, INITIAL_DATA } from "shared/structs/player-data";
 
+const { freeze } = table;
+
 @Controller()
 export class ReplicaController implements OnStart {
   public readonly data = INITIAL_DATA;
@@ -15,7 +17,7 @@ export class ReplicaController implements OnStart {
   }
 
   private onDataUpdate(data: PlayerData): void {
-    (this as { data: PlayerData }).data = data;
+    (this as { data: PlayerData }).data = freeze(data);
     this.updated.Fire(data);
   }
 }
