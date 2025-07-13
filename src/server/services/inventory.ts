@@ -47,7 +47,6 @@ export class InventoryService {
           inventory.set(id, newCount);
       }
 
-      print(inventory)
       return true;
     });
   }

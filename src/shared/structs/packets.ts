@@ -2,7 +2,14 @@ import { u8, u16, f24, i24, Vector, List, Transform } from "@rbxts/serio";
 
 export type DropID = u8;
 export type ItemID = u8;
+export type StructureID = u8;
 export type CreatureID = u16;
+
+export interface PlaceStructurePacket {
+  readonly id: StructureID;
+  readonly recipeIndex: u8;
+  readonly cframe: Transform<f24>;
+}
 
 export interface AddHotbarItemPacket {
   readonly id: ItemID;

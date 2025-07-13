@@ -11,7 +11,8 @@ import type {
   DropItemPacket,
   DropID,
   ItemID,
-  AddHotbarItemPacket
+  AddHotbarItemPacket,
+  PlaceStructurePacket
 } from "./structs/packets";
 import type { PlayerData } from "./structs/player-data";
 
@@ -37,7 +38,8 @@ export const enum Message {
   Eat,
   AddHotbarItem,
   RemoveHotbarItem,
-  Craft
+  Craft,
+  PlaceStructure
 }
 
 export interface MessageData {
@@ -61,4 +63,5 @@ export interface MessageData {
   [Message.AddHotbarItem]: AddHotbarItemPacket;
   [Message.RemoveHotbarItem]: u8;
   [Message.Craft]: u8;
+  [Message.PlaceStructure]: PlaceStructurePacket;
 }

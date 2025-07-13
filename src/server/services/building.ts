@@ -1,0 +1,56 @@
+import { Service } from "@flamework/core";
+import { Workspace as World } from "@rbxts/services";
+import { getDescendantsOfType } from "@rbxts/instance-utility";
+
+import type { OnPlayerAdd, OnPlayerRemove } from "server/hooks";
+import { Message, messaging } from "shared/messaging";
+import { stopHacking } from "server/utility";
+import { getStructureByID } from "shared/utility/items";
+import { RECIPES } from "shared/recipes";
+import type { PlaceStructurePacket } from "shared/structs/packets";
+
+import type { CraftingService } from "./crafting";
+
+@Service()
+export class BuildingService implements OnPlayerAdd, OnPlayerRemove {
+  private readonly placedStructures = new Map<Player, Set<Model>>;
+
+  public constructor(
+    private readonly crafting: CraftingService
+  ) {
+    messaging.server.on(Message.PlaceStructure, (player, packet) => this.place(player, packet));
+  }
+
+  public onPlayerAdd(player: Player): void {
+    this.placedStructures.set(player, new Set);
+  }
+
+  public onPlayerRemove(player: Player): void {
+    for (const structure of this.placedStructures.get(player)!)
+      structure.Destroy(); // TODO: destroyed structure structures (lol)
+
+    this.placedStructures.delete(player);
+  }
+
+  private async place(player: Player, { id, recipeIndex, cframe }: PlaceStructurePacket): Promise<void> {
+    const recipe = RECIPES[recipeIndex];
+    if (!recipe)
+      return stopHacking(player, "recipe index does not exist");
+
+    const structureTemplate = getStructureByID(id);
+    if (!structureTemplate)
+      return stopHacking(player, "no structure with ID " + id);
+
+    const success = await this.crafting.craft(player, recipe);
+    if (!success)
+      return stopHacking(player, "failed to craft structure");
+
+    const structure = structureTemplate.Clone();
+    structure.PivotTo(cframe);
+    for (const part of getDescendantsOfType(structure, "BasePart"))
+      part.Anchored = true;
+
+    structure.Parent = World;
+    this.placedStructures.get(player)!.add(structure);
+  }
+}

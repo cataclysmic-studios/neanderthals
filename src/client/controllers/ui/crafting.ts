@@ -10,6 +10,7 @@ import { addViewportItem } from "client/utility";
 import { RecipeKind, type CraftingRecipe } from "shared/structs/crafting-recipe";
 
 import type { ReplicaController } from "../replica";
+import type { BuildingController } from "../building";
 
 const DEFAULT_TEXT_COLOR = new Color3(1, 1, 1);
 const NOT_ENOUGH_TEXT_COLOR = new Color3(0.7, 0, 0);
@@ -23,7 +24,8 @@ export class CraftingUIController {
   private readonly frames = new Map<CraftingRecipe, RecipeFrame>;
 
   public constructor(
-    private readonly replica: ReplicaController
+    private readonly replica: ReplicaController,
+    private readonly building: BuildingController
   ) {
     replica.updated.Connect(() => {
       for (const [{ ingredients }, frame] of this.frames) {
@@ -50,19 +52,19 @@ export class CraftingUIController {
   private createRecipeFrame(recipe: CraftingRecipe): Maybe<RecipeFrame> {
     const { kind, yield: yieldItem, ingredients, requiredLevel } = recipe;
     const yieldID = typeIs(yieldItem, "number") ? yieldItem : yieldItem[0];
-    const item = recipe.kind === RecipeKind.Structure
+    const model = recipe.kind === RecipeKind.Structure
       ? getStructureByID(yieldID)
       : getItemByID(yieldID);
 
-    if (!item) return;
+    if (!model) return;
 
     // TODO: required level UI
     const frame = assets.UI.CraftingRecipeFrame.Clone();
     for (const ingredient of ingredients)
       this.createIngredientFrame(frame.Ingredients, ingredient);
 
-    addViewportItem(frame.Viewport, item);
-    frame.Title.Text = getDisplayName(item);
+    addViewportItem(frame.Viewport, model);
+    frame.Title.Text = getDisplayName(model);
 
     const color = this.getCraftButtonColor(ingredients);
     frame.Craft.BackgroundColor3 = color;
@@ -70,9 +72,8 @@ export class CraftingUIController {
       if (!this.canCraft(ingredients)) return;
       if (kind === RecipeKind.Tool)
         messaging.server.emit(Message.Craft, RECIPES.indexOf(recipe));
-      else if (kind === RecipeKind.Structure) {
-        // TODO: enter build mode
-      }
+      else if (kind === RecipeKind.Structure)
+        this.building.enterBuildMode(model);
     });
     frame.Parent = this.storage;
 
