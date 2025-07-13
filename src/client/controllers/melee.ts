@@ -67,8 +67,9 @@ export class MeleeController implements OnFixed {
     const hitboxSize = this.tool.getHitboxSize();
     const rootCFrame = root.CFrame;
     const distance = hitboxSize.Z;
-    const direction = rootCFrame.LookVector.mul(distance / 2);
-    const origin = rootCFrame;
+    const look = rootCFrame.LookVector;
+    const direction = look.mul(distance);
+    const origin = rootCFrame.sub(look.mul(distance / 4));
     if (VISUALIZE_HITBOX)
       visualizeHitbox(origin, direction, hitboxSize);
 
