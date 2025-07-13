@@ -17,12 +17,15 @@ export class ToolController {
     character.died.Connect(() => this.unequip());
   }
 
-  public toggleEquipped(tool: ToolItem): void {
-    if (this.hasEquipped(tool))
-      return this.unequip();
+  public toggleEquipped(tool: ToolItem): boolean {
+    if (this.hasEquipped(tool)) {
+      this.unequip();
+      return false;
+    }
 
     this.unequip();
     this.equip(tool);
+    return true;
   }
 
   public equip(tool: ToolItem): void {

@@ -1,20 +1,16 @@
 import { Controller, Modding, type OnStart } from "@flamework/core";
 import { UserInputService } from "@rbxts/services";
 
-import { getItemByID } from "shared/utility/items";
-
-import type { ToolController } from "./tool";
-import type { ReplicaController } from "./replica";
 import type { InventoryUIController } from "./ui/inventory";
+import type { HotbarUIController } from "./ui/hotbar";
 
 const hotbarKeys = Modding.inspect<HotbarKeys>();
 
 @Controller()
 export class InputController implements OnStart {
   public constructor(
-    private readonly tool: ToolController,
-    private readonly replica: ReplicaController,
-    private readonly inventoryUI: InventoryUIController
+    private readonly inventoryUI: InventoryUIController,
+    private readonly hotbarUI: HotbarUIController
   ) { }
 
   public onStart(): void {
@@ -38,10 +34,6 @@ export class InputController implements OnStart {
 
   private onHotbarKeyPress(hotbarKey: HotbarKey): void {
     const hotbarIndex = hotbarKeys.indexOf(hotbarKey.Name);
-    const itemID = this.replica.data.hotbar[hotbarIndex];
-    const tool = getItemByID<ToolItem>(itemID);
-    if (!tool) return;
-
-    this.tool.toggleEquipped(tool);
+    this.hotbarUI.selectButton(hotbarIndex);
   }
 }
