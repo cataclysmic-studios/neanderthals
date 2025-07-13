@@ -63,11 +63,14 @@ export class InventoryService {
     return inventory.get(id) ?? 0;
   }
 
-  public async has(player: Player, id: number): Promise<boolean> {
-    const { inventory } = await this.data.get(player)
-    return inventory.has(id);
-  }
+  public async has(player: Player, id: number, count?: number): Promise<boolean> {
+    const { inventory } = await this.data.get(player);
 
+    const hasItem = inventory.has(id);
+    return count !== undefined
+      ? hasItem && inventory.get(id)! >= count
+      : hasItem;
+  }
   private async dropItem(player: Player, id: number, position: Vector3): Promise<void> {
     const item = getItemByID(id);
     if (!item)
