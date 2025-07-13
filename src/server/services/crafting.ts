@@ -11,15 +11,16 @@ export class CraftingService {
   ) { }
 
   public async craft(player: Player, { yield: yieldItem, ingredients }: CraftingRecipe): Promise<boolean> {
-    const canCraft = ingredients.every(([id, count]) => this.inventory.has(player, id, count).await()[0]);
+    const { inventory } = this;
+    const canCraft = ingredients.every(([id, count]) => inventory.has(player, id, count).await()[0]);
     if (canCraft)
       return false;
 
     const yieldID = typeIs(yieldItem, "number") ? yieldItem : yieldItem[0];
     const yieldCount = typeIs(yieldItem, "number") ? 1 : yieldItem[1];
-    let success = this.inventory.addItem(player, yieldID, yieldCount);
+    let success = inventory.addItem(player, yieldID, yieldCount);
     for (const [id, count] of ingredients)
-      success &&= this.inventory.removeItem(player, id, count);
+      success &&= inventory.removeItem(player, id, count);
 
     return success;
   }
