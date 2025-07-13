@@ -72,6 +72,8 @@ export class InventoryService {
     const item = getItemByID(id);
     if (!item)
       return stopHacking(player, "invalid item ID (no corresponding item) when dropping item");
+    if (EXCLUSIVE_IDS.has(id))
+      return stopHacking(player, "the client checks for undroppable items before sending this message you dummy");
 
     await this.removeItem(player, id);
     dropItem(item, new CFrame(position));

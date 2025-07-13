@@ -13,6 +13,7 @@ import type { ReplicaController } from "../replica";
 import type { CharacterController } from "../character";
 import type { MainUIController } from "./main";
 import type { HotbarUIController } from "./hotbar";
+import { EXCLUSIVE_IDS } from "shared/item-id";
 
 interface ItemFrameInfo {
   readonly button: ItemButton;
@@ -99,6 +100,7 @@ export class InventoryUIController {
 
     const isFood = itemTemplate.GetAttribute<boolean>("Food") ?? false;
     const isTool = itemTemplate.GetAttribute("ToolTier") !== undefined;
+    const canDrop = !EXCLUSIVE_IDS.has(itemID);
     button.Name = itemTemplate.Name;
     button.Count.Text = tostring(count);
     trash.add(button.MouseButton1Click.Connect(() => {
@@ -108,6 +110,8 @@ export class InventoryUIController {
         this.hotbar.addItem(itemID);
     }));
     trash.add(button.MouseButton2Click.Connect(() => {
+      if (!canDrop) return;
+
       const characterPivot = this.character.getPivot();
       if (!characterPivot) return;
 
