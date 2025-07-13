@@ -65,7 +65,7 @@ export class InventoryUIController {
     this.mainUI.toggle(!on);
   }
 
-  private update(changes: Record<number, number>, deletions: Set<number>): void {
+  private update(changes: Record<number, Maybe<number>>, deletions: Set<number>): void {
     for (const [id, diff] of pairs(changes)) {
       const info = this.buttonInfos.get(id);
       if (info) {

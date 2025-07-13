@@ -8,6 +8,7 @@ import { addViewportItem, removeViewportItem } from "client/utility";
 
 import type { CharacterController } from "../character";
 import type { ToolController } from "../tool";
+import { PlayerData } from "shared/structs/player-data";
 
 const WHITE = new Color3(1, 1, 1);
 const DEFAULT_VIEWPORT_COLOR = Color3.fromRGB(30, 30, 30);
@@ -42,26 +43,23 @@ export class HotbarUIController {
     if (!button) return;
     if (this.hasViewportItem(button)) return;
 
-    // update data
     messaging.server.emit(Message.AddHotbarItem, { id, slot });
     this.addViewportItem(button, id);
   }
 
   public removeItem(hotbarButton: HotbarButton): void {
-    // update data
     this.removeViewportItem(hotbarButton);
     messaging.server.emit(Message.RemoveHotbarItem, hotbarButton.LayoutOrder);
   }
 
-  public update(items: number[]): void {
-    const buttons = this.buttons;
-    let i = 0;
-
-    for (const id of items) {
-      const button = buttons[i++];
+  public update(items: PlayerData["hotbar"]): void {
+    const { buttons } = this;
+    for (const [i, id] of pairs(items)) {
+      const button = buttons[i - 1];
       if (this.hasViewportItem(button))
         this.removeViewportItem(button);
 
+      if (id === undefined) continue;
       this.addViewportItem(button, id);
     }
   }

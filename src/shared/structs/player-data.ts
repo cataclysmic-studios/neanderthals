@@ -12,15 +12,15 @@ export interface EquippedGear {
 }
 
 export interface PlayerData {
-  readonly hotbar: List<ItemID, u8>;
-  readonly inventory: HashMap<ItemID, u16, u16>;
+  readonly hotbar: { [P in 0 | 1 | 2 | 3 | 4 | 5]?: ItemID };
+  readonly inventory: HashMap<ItemID, Maybe<u16>, u16>;
   readonly equippedGear: EquippedGear;
   readonly level: number;
   readonly xp: number;
 }
 
 export const INITIAL_DATA: PlayerData = {
-  hotbar: [Item.GodRock],
+  hotbar: [Item.GodRock] as never,
   inventory: new Map,
   equippedGear: {},
   xp: 0,

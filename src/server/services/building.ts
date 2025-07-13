@@ -9,14 +9,14 @@ import { getStructureByID } from "shared/utility/items";
 import { RECIPES } from "shared/recipes";
 import type { PlaceStructurePacket } from "shared/structs/packets";
 
-import type { CraftingService } from "./crafting";
+import type { InventoryService } from "./inventory";
 
 @Service()
 export class BuildingService implements OnPlayerAdd, OnPlayerRemove {
   private readonly placedStructures = new Map<Player, Set<Model>>;
 
   public constructor(
-    private readonly crafting: CraftingService
+    private readonly inventory: InventoryService
   ) {
     messaging.server.on(Message.PlaceStructure, (player, packet) => this.place(player, packet));
   }
@@ -41,7 +41,10 @@ export class BuildingService implements OnPlayerAdd, OnPlayerRemove {
     if (!structureTemplate)
       return stopHacking(player, "no structure with ID " + id);
 
-    const success = await this.crafting.craft(player, recipe);
+    const success = await this.inventory.transaction(player, {
+      add: [],
+      remove: recipe.ingredients
+    });
     if (!success)
       return stopHacking(player, "failed to craft structure");
 

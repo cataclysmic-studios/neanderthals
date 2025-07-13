@@ -112,26 +112,28 @@ export class InventoryService {
   }
 
   private addHotbarItem(data: DeepWritable<PlayerData>, id: number, slot?: number): boolean {
+    const hotbar = data.hotbar as number[];
     data.inventory.delete(id);
     if (slot === undefined)
-      data.hotbar.push(id);
+      hotbar.push(id);
     else {
       const success = this.removeHotbarItem(data, slot);
       if (!success)
         return false;
 
-      data.hotbar.insert(slot, id);
+      hotbar.insert(slot, id);
     }
 
     return true;
   }
 
   private removeHotbarItem(data: DeepWritable<PlayerData>, slot: number): boolean {
-    const id = data.hotbar[slot];
+    type Slot = 0 | 1 | 2 | 3 | 4 | 5;
+    const id = data.hotbar[slot + 1 as Slot];
     if (id === undefined)
       return false;
 
-    data.hotbar[slot] = undefined!;
+    data.hotbar[slot + 1 as Slot] = undefined;
     data.inventory.set(id as number, 1);
     return true;
   }

@@ -1,5 +1,5 @@
 import { getItemByID } from "./items";
-import type { EquippedGear } from "shared/structs/player-data";
+import type { EquippedGear, PlayerData } from "shared/structs/player-data";
 
 const DEFAULT_BAG_SPACE = 100;
 export function getBagSpace(equippedGear: EquippedGear): number {
@@ -23,8 +23,8 @@ export function getBagSpace(equippedGear: EquippedGear): number {
   return bagSpace;
 }
 
-export function calculateBagSpace(hotbar: number[], inventory: Map<number, number>): number {
-  const items = [...hotbar.map<[number, number]>(id => [id, 1]), ...inventory];
+export function calculateBagSpace(hotbar: PlayerData["hotbar"], inventory: PlayerData["inventory"]): number {
+  const items = [...(hotbar as number[]).filterUndefined().map<[number, number]>(id => [id, 1]), ...inventory];
   return items.reduce((sum, [id, count]) => {
     const item = getItemByID(id);
     if (!item) {
@@ -39,6 +39,6 @@ export function calculateBagSpace(hotbar: number[], inventory: Map<number, numbe
       return sum;
     }
 
-    return sum + bagSpaceUsed * count;
+    return sum + bagSpaceUsed * count!;
   }, 0);
 }
