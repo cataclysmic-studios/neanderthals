@@ -1,6 +1,18 @@
 import { getItemByID } from "./items";
 import type { EquippedGear, PlayerData } from "shared/structs/player-data";
 
+export function stringifyNumberMap(map: { [id: number]: number }): { [key: string]: number } {
+  const out: { [key: string]: number } = {};
+  for (const [k, v] of pairs(map)) out[tostring(k)] = v;
+  return out;
+}
+
+export function parseNumberMap(map: { [key: string]: number }): { [id: number]: number } {
+  const out: { [id: number]: number } = {};
+  for (const [k, v] of pairs(map)) out[tonumber(k) as number] = v;
+  return out;
+}
+
 const DEFAULT_BAG_SPACE = 100;
 export function getBagSpace(equippedGear: EquippedGear): number {
   if (!equippedGear.bag)
