@@ -1,5 +1,6 @@
 import { getInstanceAtPath } from "@rbxts/flamework-meta-utils";
 import { getDescendantsOfType } from "@rbxts/instance-utility";
+
 import type { CraftingRecipe } from "./structs/crafting-recipe";
 
 // dumb new file bc this in constants.ts creates a recursive import

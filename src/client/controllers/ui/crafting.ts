@@ -5,9 +5,9 @@ import { Message, messaging } from "shared/messaging";
 import { assets } from "shared/constants";
 import { mainScreen } from "client/constants";
 import { RECIPES } from "shared/recipes";
-import { getItemByID, getItemDisplayName } from "shared/utility/items";
+import { getItemByID, getDisplayName, getStructureByID } from "shared/utility/items";
 import { addViewportItem } from "client/utility";
-import type { CraftingRecipe } from "shared/structs/crafting-recipe";
+import { RecipeKind, type CraftingRecipe } from "shared/structs/crafting-recipe";
 
 import type { ReplicaController } from "../replica";
 
@@ -48,9 +48,12 @@ export class CraftingUIController {
   }
 
   private createRecipeFrame(recipe: CraftingRecipe): Maybe<RecipeFrame> {
-    const { yield: yieldItem, ingredients, requiredLevel } = recipe;
+    const { kind, yield: yieldItem, ingredients, requiredLevel } = recipe;
     const yieldID = typeIs(yieldItem, "number") ? yieldItem : yieldItem[0];
-    const item = getItemByID(yieldID);
+    const item = recipe.kind === RecipeKind.Structure
+      ? getStructureByID(yieldID)
+      : getItemByID(yieldID);
+
     if (!item) return;
 
     // TODO: required level UI
@@ -59,13 +62,17 @@ export class CraftingUIController {
       this.createIngredientFrame(frame.Ingredients, ingredient);
 
     addViewportItem(frame.Viewport, item);
-    frame.Title.Text = getItemDisplayName(item);
+    frame.Title.Text = getDisplayName(item);
 
     const color = this.getCraftButtonColor(ingredients);
     frame.Craft.BackgroundColor3 = color;
     frame.Craft.MouseButton1Click.Connect(() => {
       if (!this.canCraft(ingredients)) return;
-      messaging.server.emit(Message.Craft, RECIPES.indexOf(recipe));
+      if (kind === RecipeKind.Tool)
+        messaging.server.emit(Message.Craft, RECIPES.indexOf(recipe));
+      else if (kind === RecipeKind.Structure) {
+        // TODO: enter build mode
+      }
     });
     frame.Parent = this.storage;
 
