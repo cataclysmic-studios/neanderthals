@@ -29,6 +29,10 @@ interface ItemButton extends ImageButton {
   Count: TextLabel;
 }
 
+interface ProgressBarFrame extends Frame {
+  Bar: Frame;
+}
+
 type StructureName = ExtractKeys<ReplicatedStorage["Assets"]["Structures"], Model>;
 type ItemName = ExtractKeys<ReplicatedStorage["Assets"]["Items"], Model>;
 type CreatureName = ExtractKeys<ReplicatedStorage["Assets"]["Creatures"], CreatureModel>;

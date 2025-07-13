@@ -15,10 +15,14 @@ export interface PlayerData {
   readonly hotbar: List<ItemID, u8>;
   readonly inventory: HashMap<ItemID, u16, u16>;
   readonly equippedGear: EquippedGear;
+  readonly level: number;
+  readonly xp: number;
 }
 
 export const INITIAL_DATA: PlayerData = {
   hotbar: [Item.GodRock],
   inventory: new Map,
-  equippedGear: {}
+  equippedGear: {},
+  xp: 0,
+  level: 1
 };

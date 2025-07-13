@@ -2,8 +2,7 @@ interface PlayerGui extends BasePlayerGui {
   Main: ScreenGui & {
     DamageDisplay: Frame & {
       Title: TextLabel;
-      Health: Frame & {
-        Bar: Frame;
+      Health: ProgressBarFrame & {
         Amount: TextLabel;
       };
     };
@@ -16,16 +15,16 @@ interface PlayerGui extends BasePlayerGui {
       Content: ScrollingFrame;
       Separator: Frame;
     };
+    LevelStats: Frame & {
+      Level: TextLabel;
+      XP: ProgressBarFrame & {
+        Amount: TextLabel;
+      };
+    };
     Stats: Frame & {
-      BagSpace: Frame & {
-        Bar: Frame;
-      };
-      Hunger: Frame & {
-        Bar: Frame;
-      };
-      Health: Frame & {
-        Bar: Frame;
-      };
+      BagSpace: ProgressBarFrame;
+      Hunger: ProgressBarFrame;
+      Health: ProgressBarFrame;
     };
   };
 }

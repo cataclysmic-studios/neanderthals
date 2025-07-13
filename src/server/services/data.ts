@@ -9,7 +9,7 @@ import { Message, messaging } from "shared/messaging";
 import { INITIAL_DATA, type PlayerData } from "shared/structs/player-data";
 
 const enum Scope {
-  Proto = "PROTO"
+  Proto = "PROTO4"
 }
 
 @Service()
@@ -18,7 +18,7 @@ export class DataService implements OnStart, OnPlayerAdd, OnPlayerRemove {
   public readonly updated = new Signal<(player: Player, data: PlayerData) => void>;
 
   private readonly store = createPlayerStore({
-    name: $nameof<PlayerData>() + "_" + Scope.Proto + 3,
+    name: $nameof<PlayerData>() + "_" + Scope.Proto,
     template: INITIAL_DATA,
     schema: Flamework.createGuard<Writable<PlayerData>>(),
   });

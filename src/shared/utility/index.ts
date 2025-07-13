@@ -1,7 +1,12 @@
 import type { Trash } from "@rbxts/trash";
 import type { HashMap } from "@rbxts/serio";
 
+const { floor } = math;
 const { magnitude } = vector;
+
+export function getXPToLevelUp(level: number): number {
+  return floor(25 + level ** 1.5) - 1;
+}
 
 export function weldTool(toolTemplate: ToolItem, character: CharacterModel, trash: Trash): ToolItem {
   const tool = trash.add(toolTemplate.Clone());

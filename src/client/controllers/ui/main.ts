@@ -11,6 +11,7 @@ import { calculateBagSpace, getBagSpace } from "shared/utility/data";
 import type { ReplicaController } from "../replica";
 import type { CharacterController } from "../character";
 import type { HotbarUIController } from "./hotbar";
+import { getXPToLevelUp } from "shared/utility";
 
 const { delay } = task;
 
@@ -22,6 +23,7 @@ export class MainUIController implements OnCharacterAdd {
 
   private readonly damageDisplay = mainScreen.DamageDisplay;
   private readonly stats = mainScreen.Stats;
+  private readonly levelStats = mainScreen.LevelStats;
   private readonly damageTrash = new Trash;
   private hunger = 100;
 
@@ -36,6 +38,7 @@ export class MainUIController implements OnCharacterAdd {
     replica.updated.Connect(data => {
       hotbar.update(data.hotbar);
       this.updateStats();
+      this.updateLevelStats();
     });
   }
 
@@ -79,6 +82,16 @@ export class MainUIController implements OnCharacterAdd {
     const isAlive = health! > 0;
     const lifetime = DAMAGE_DISPLAY_LIFETIME * (isAlive ? 1 : 0.5);
     damageTrash.add(delay(lifetime, () => this.damageDisplay.Visible = false));
+  }
+
+  private updateLevelStats(): void {
+    const { levelStats } = this;
+    const { xp, level } = this.replica.data;
+    const xpToLevelUp = getXPToLevelUp(level) - xp;
+    const xpFrame = levelStats.XP;
+    xpFrame.Bar.Size = UDim2.fromScale(xp / xpToLevelUp, 1);
+    xpFrame.Amount.Text = xp + " xp";
+    levelStats.Level.Text = tostring(level);
   }
 
   private updateStats(hunger = this.hunger): void {
