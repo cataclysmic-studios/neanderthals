@@ -14,7 +14,7 @@ export function parseNumberMap(map: { [key: string]: number }): { [id: number]: 
 }
 
 const DEFAULT_BAG_SPACE = 100;
-export function getBagSpace(equippedGear: EquippedGear): number {
+export function getMaxBagSpace(equippedGear: EquippedGear): number {
   if (!equippedGear.bag)
     return DEFAULT_BAG_SPACE;
 

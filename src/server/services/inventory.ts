@@ -7,6 +7,7 @@ import { EXCLUSIVE_IDS } from "shared/item-id";
 import type { PlayerData } from "shared/structs/player-data";
 
 import type { DataService } from "./data";
+import { calculateBagSpace, getMaxBagSpace } from "shared/utility/data";
 
 interface TransactionInfo {
   readonly add: [id: number, count: number][];
@@ -28,11 +29,14 @@ export class InventoryService {
   }
 
   public async transaction(player: Player, { add, remove }: TransactionInfo): Promise<boolean> {
-    return await this.data.update(player, ({ inventory }) => {
+    return await this.data.update(player, data => {
+      const { inventory } = data;
       for (let [id, count] of add) {
         id = tonumber(id)!;
         const itemCount = inventory.get(id);
         if (itemCount !== undefined && EXCLUSIVE_IDS.has(id)) continue;
+        if (!this.hasSpace(data, count))
+          return false;
 
         inventory.set(id, itemCount !== undefined ? itemCount + count : count);
       }
@@ -60,6 +64,9 @@ export class InventoryService {
 
     return await this.data.update(player, data => {
       const itemCount = data.inventory.get(id);
+      if (!this.hasSpace(data, count))
+        return false;
+
       data.inventory.set(id, itemCount !== undefined ? itemCount + count : count);
       return true;
     });
@@ -143,5 +150,11 @@ export class InventoryService {
     data.hotbar[index] = undefined;
     data.inventory.set(id as number, 1);
     return true;
+  }
+
+  private hasSpace({ hotbar, inventory, equippedGear }: DeepWritable<PlayerData>, minimumSpace = 1): boolean {
+    const maxBagSpace = getMaxBagSpace(equippedGear as never);
+    const bagSpace = calculateBagSpace(hotbar as never, inventory as never);
+    return bagSpace + minimumSpace <= maxBagSpace;
   }
 }

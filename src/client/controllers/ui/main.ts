@@ -6,7 +6,7 @@ import Signal from "@rbxts/lemon-signal";
 import type { OnCharacterAdd } from "client/hooks";
 import { Message, messaging } from "shared/messaging";
 import { mainScreen } from "client/constants";
-import { calculateBagSpace, getBagSpace } from "shared/utility/data";
+import { calculateBagSpace, getMaxBagSpace } from "shared/utility/data";
 
 import type { ReplicaController } from "../replica";
 import type { CharacterController } from "../character";
@@ -99,7 +99,7 @@ export class MainUIController implements OnCharacterAdd {
     if (!humanoid) return;
 
     const { replica: { data }, stats } = this;
-    const maxBagSpace = getBagSpace(data.equippedGear);
+    const maxBagSpace = getMaxBagSpace(data.equippedGear);
     const bagSpace = calculateBagSpace(data.hotbar, data.inventory);
     stats.BagSpace.Bar.Size = UDim2.fromScale(bagSpace / maxBagSpace, 1);
     stats.Hunger.Bar.Size = UDim2.fromScale(hunger / 100, 1);
