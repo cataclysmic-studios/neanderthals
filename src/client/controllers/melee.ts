@@ -9,25 +9,21 @@ import type { AnimationController } from "./animation";
 import type { ToolController } from "./tool";
 import type { DamageController } from "./damage";
 
-const { normalize, magnitude } = vector;
-
 const SWING_COOLDOWN = 0.45;
 const SWING_ANIMATION = assets.Animations.Swing;
 const VISUALIZE_HITBOX = false;
 
 function visualizeHitbox(origin: CFrame, direction: Vector3, hitboxSize: Vector3): void {
-  const distance = magnitude(direction);
-  const castOffset = normalize(direction).mul(distance / 2);
-  const castCenterCFrame = origin.mul(new CFrame(castOffset));
+  const castCenterCFrame = origin.add(direction);
   const hitboxPart = new Instance("Part");
-  hitboxPart.Size = hitboxSize.add(new Vector3(0, 0, distance));
+  hitboxPart.Size = hitboxSize;
   hitboxPart.CFrame = castCenterCFrame;
   hitboxPart.Anchored = true;
   hitboxPart.CanCollide = false;
   hitboxPart.Transparency = 0.5;
   hitboxPart.Color = Color3.fromRGB(255, 0, 0);
   hitboxPart.Material = Enum.Material.Neon;
-  hitboxPart.Name = "HitboxCastPath";
+  hitboxPart.Name = "HitboxCast";
   hitboxPart.Parent = game.Workspace;
 
   task.delay(0.15, () => hitboxPart.Destroy());
@@ -66,12 +62,13 @@ export class MeleeController implements OnFixed {
     const root = character.HumanoidRootPart;
     const raycastParams = new RaycastParams;
     raycastParams.AddToFilter(character);
+    raycastParams.FilterType = Enum.RaycastFilterType.Exclude;
 
     const hitboxSize = this.tool.getHitboxSize();
     const rootCFrame = root.CFrame;
-    const direction = rootCFrame.LookVector;
-    const distance = magnitude(direction);
-    const origin = rootCFrame.add(direction.mul(distance / 2));
+    const distance = hitboxSize.Z;
+    const direction = rootCFrame.LookVector.mul(distance / 2);
+    const origin = rootCFrame;
     if (VISUALIZE_HITBOX)
       visualizeHitbox(origin, direction, hitboxSize);
 

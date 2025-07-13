@@ -46,7 +46,6 @@ export class Structure extends CreatesDropsComponent<{}, StructureModel> impleme
   public getDamage(current: number, toolTier: number, toolKind: Maybe<ToolKind>): number {
     const { toolKind: requiredToolKind, minimumToolTier = 0 } = this.config;
     let damage = current;
-    print(toolKind, requiredToolKind)
     if (toolKind !== undefined && toolKind !== requiredToolKind)
       damage /= 2;
     if (toolTier < minimumToolTier)
