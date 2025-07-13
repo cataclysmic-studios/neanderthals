@@ -4,7 +4,7 @@ import { getChildrenOfType } from "@rbxts/instance-utility";
 import { Message, messaging } from "shared/messaging";
 import { assets } from "shared/constants";
 import { mainScreen } from "client/constants";
-import { RECIPES } from "shared/recipes";
+import { getRecipeIndex, RECIPES } from "shared/recipes";
 import { getItemByID, getDisplayName, getStructureByID } from "shared/utility/items";
 import { addViewportItem } from "client/utility";
 import { RecipeKind, type CraftingRecipe } from "shared/structs/crafting-recipe";
@@ -71,7 +71,7 @@ export class CraftingUIController {
     frame.Craft.MouseButton1Click.Connect(() => {
       if (!this.canCraft(ingredients)) return;
       if (kind === RecipeKind.Tool)
-        messaging.server.emit(Message.Craft, RECIPES.indexOf(recipe));
+        messaging.server.emit(Message.Craft, getRecipeIndex(recipe));
       else if (kind === RecipeKind.Structure)
         this.building.enterBuildMode(model);
     });

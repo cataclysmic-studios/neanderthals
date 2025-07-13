@@ -4,7 +4,7 @@ import { getDescendantsOfType } from "@rbxts/instance-utility";
 
 import { Message, messaging } from "shared/messaging";
 import { player } from "client/constants";
-import { getStructureRecipe, RECIPES } from "shared/recipes";
+import { getRecipeIndex, getStructureRecipe } from "shared/recipes";
 
 const PASTEL_BLUE = new BrickColor("Pastel Blue");
 const DEGREES_PER_SECOND = 160;
@@ -85,7 +85,7 @@ export class BuildingController implements OnTick {
       return warn("Failed to place structure: current structure model has no corresponding recipe");
 
     const cframe = this.hologram!.GetPivot();
-    const recipeIndex = RECIPES.indexOf(recipe);
+    const recipeIndex = getRecipeIndex(recipe);
     this.leaveBuildMode();
     messaging.server.emit(Message.PlaceStructure, { id, recipeIndex, cframe });
   }

@@ -100,6 +100,7 @@ export class InventoryService {
       ? hasItem && inventory.get(id)! >= count
       : hasItem;
   }
+
   private async dropItem(player: Player, id: number, position: Vector3): Promise<void> {
     const item = getItemByID(id);
     if (!item)
