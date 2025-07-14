@@ -6,6 +6,8 @@ import { weldTool } from "shared/utility";
 
 import type { CharacterController } from "./character";
 
+const DEFAULT_HITBOX_SIZE = vector.create(2.6, 3, 2.6);
+
 @Controller()
 export class ToolController {
   private readonly trash = new Trash;
@@ -44,7 +46,7 @@ export class ToolController {
   }
 
   public getHitboxSize(): Vector3 {
-    return this.equipped!.GetAttribute<Vector3>("HitboxSize") ?? vector.one;
+    return this.equipped!.GetAttribute<Vector3>("HitboxSize") ?? DEFAULT_HITBOX_SIZE;
   }
 
   public getName(): ToolName {
