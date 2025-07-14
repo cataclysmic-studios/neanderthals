@@ -29,6 +29,7 @@ export function dropItem(itemTemplate: PVInstance, pivot: CFrame, count = 1): vo
   }
 }
 
+// TODO: fix this shit
 const checkInterval = 5;
 let elapsed = 0;
 RunService.Heartbeat.Connect(dt => {
@@ -36,5 +37,7 @@ RunService.Heartbeat.Connect(dt => {
   if (elapsed < checkInterval) return;
   elapsed -= checkInterval;
 
+  cumulativeDropID = World.DroppedItems.GetChildren().size();
+  task.wait(0.1);
   cumulativeDropID = World.DroppedItems.GetChildren().size();
 });

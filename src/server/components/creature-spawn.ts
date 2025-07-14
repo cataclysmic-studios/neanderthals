@@ -1,6 +1,6 @@
 import type { OnStart } from "@flamework/core";
 import { Component } from "@flamework/components";
-import { Workspace as World } from "@rbxts/services";
+import { Players, Workspace as World } from "@rbxts/services";
 import { $nameof } from "rbxts-transform-debug";
 
 import type { OnPlayerAdd } from "server/hooks";
@@ -10,6 +10,7 @@ import type { CreatureConfig } from "shared/structs/creature-config";
 
 import { CreatesDropsComponent } from "server/base-components/creates-drops";
 import type { CreaturePathfindingService } from "server/services/creature";
+import type { LevelsService } from "server/services/levels";
 
 interface Attributes {
   readonly CreatureSpawn_Rate: number;
@@ -33,7 +34,8 @@ export class CreatureSpawn extends CreatesDropsComponent<Attributes, BasePart> i
   private creature?: CreatureServerModel;
 
   public constructor(
-    private readonly pathfinding: CreaturePathfindingService
+    private readonly pathfinding: CreaturePathfindingService,
+    private readonly levels: LevelsService
   ) {
     super();
 
@@ -55,7 +57,7 @@ export class CreatureSpawn extends CreatesDropsComponent<Attributes, BasePart> i
 
   private hydrate(player: Player): void {
     const creature = this.creature!;
-    task.wait(0.5);
+    task.wait(0.5); // POOOOOOP
     messaging.client.emit(player, Message.SpawnCreature, {
       name: this.name,
       id: creature.GetAttribute<number>("ID")!,
@@ -75,7 +77,14 @@ export class CreatureSpawn extends CreatesDropsComponent<Attributes, BasePart> i
     humanoid.Health = maxHealth;
     humanoid.GetPropertyChangedSignal("Health").Connect(() => {
       if (humanoid.Health > 0) return;
-      this.despawn();
+
+      const attackerID = humanoid.GetAttribute<number>("AttackerID");
+      if (attackerID === undefined) return;
+
+      const attacker = Players.GetPlayerByUserId(attackerID);
+      if (!attacker) return;
+
+      this.despawn(attacker);
     });
 
     const id = cumulativeCreatureID++;
@@ -96,12 +105,13 @@ export class CreatureSpawn extends CreatesDropsComponent<Attributes, BasePart> i
     this.pathfinding.registerCreature(creature, speed, this.creatureSize);
   }
 
-  private despawn(): void {
+  private despawn(killer: Player): void {
     task.delay(this.spawnRate, () => this.spawn());
 
-    const { creature } = this;
+    const { creature, config } = this;
     if (creature) {
-      this.createDrops(this.config.drops, creature.PrimaryPart!.CFrame);
+      this.levels.addXP(killer, config.xp);
+      this.createDrops(config.drops, creature.PrimaryPart!.CFrame);
       creature.Destroy();
       this.creature = undefined;
     }
