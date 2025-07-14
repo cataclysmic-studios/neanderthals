@@ -29,7 +29,7 @@ export function addViewportItem<T extends Model>(viewport: ViewportFrame, id: T 
   if (viewport.CurrentCamera !== camera)
     viewport.CurrentCamera = camera;
 
-  item.PrimaryPart!.CFrame = ITEM_ORIENTATION.mul(displayOffset);
+  item.PivotTo(ITEM_ORIENTATION.mul(displayOffset));
   item.Parent = viewport;
 
   const viewportModel = new ViewportModel(viewport, camera);

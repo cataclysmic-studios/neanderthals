@@ -91,7 +91,9 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
 
   // speed cap
   public onFixed(): void {
-    const root = this.instance.PrimaryPart!;
+    const root = this.instance.PrimaryPart;
+    if (!root) return;
+
     const velocity = root.AssemblyLinearVelocity;
     if (magnitude(velocity) <= MAX_SPEED) return;
 
