@@ -21,6 +21,9 @@ interface ReplicatedStorage extends Instance {
       Campfire: Model;
     };
     UI: Folder & {
+      CookProgressUI: BillboardGui & {
+        Progress: ProgressBarFrame;
+      };
       DroppedItemUI: BillboardGui & {
         ItemName: TextLabel;
         PickUp: TextLabel;

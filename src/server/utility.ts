@@ -10,16 +10,14 @@ export function findCreatureByID(id: number): Maybe<CreatureServerModel> {
     .find((creature): creature is CreatureServerModel => creature.GetAttribute("ID") === id);
 }
 
-let cumulativeDropID = 0;
 // TODO: collision shit
 export function dropItem(itemTemplate: PVInstance, pivot: CFrame, count = 1): void {
   for (const _ of $range(1, count)) {
-    const id = cumulativeDropID++;
+    const id = World.DroppedItems.GetChildren().size();
     const drop = itemTemplate.Clone();
     drop.SetAttribute("DropID", id);
     drop.PivotTo(pivot);
-    drop.Destroying.Once(() => cumulativeDropID--);
-    drop.Parent = World;
+    drop.Parent = World.DroppedItems;
     drop.AddTag("DroppedItem");
   }
 }

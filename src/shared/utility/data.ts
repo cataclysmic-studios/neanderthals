@@ -13,6 +13,12 @@ export function parseNumberMap(map: { [key: string]: number }): { [id: number]: 
   return out;
 }
 
+export function inventoryHasSpace({ equippedGear, hotbar, inventory }: PlayerData | DeepWritable<PlayerData>) {
+  const maxBagSpace = getMaxBagSpace(equippedGear as never);
+  const bagSpace = calculateBagSpace(hotbar as never, inventory as never);
+  return bagSpace + 1 <= maxBagSpace;
+}
+
 const DEFAULT_BAG_SPACE = 100;
 export function getMaxBagSpace(equippedGear: EquippedGear): number {
   if (!equippedGear.bag)

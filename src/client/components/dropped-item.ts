@@ -8,10 +8,12 @@ import { Message, messaging } from "shared/messaging";
 import { assets } from "shared/constants";
 import { distanceBetween } from "shared/utility";
 import { getDisplayName } from "shared/utility/items";
+import { inventoryHasSpace } from "shared/utility/data";
 import { DEFAULT_DROPPED_ITEM_ATTRIBUTES, type DroppedItemAttributes } from "shared/structs/dropped-item-attributes";
 
 import DestroyableComponent from "shared/base-components/destroyable";
 import type { DroppedItemPrompt } from "./dropped-item-prompt";
+import type { ReplicaController } from "client/controllers/replica";
 import type { InputController } from "client/controllers/input";
 import type { CharacterController } from "client/controllers/character";
 
@@ -32,6 +34,7 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
 
   public constructor(
     private readonly components: Components,
+    private readonly replica: ReplicaController,
     private readonly input: InputController,
     private readonly character: CharacterController
   ) { super(); }
@@ -55,8 +58,9 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
 
     const dropID = this.attributes.DropID;
     const prompt = trash.add(this.components.addComponent<DroppedItemPrompt>(promptUI));
-    trash.add(prompt.consumed.Once(message => {
+    trash.add(prompt.consumed.Connect(message => {
       if (message === Message.EatDrop && !this.attributes.Food) return;
+      if (message === Message.PickUpDrop && !inventoryHasSpace(this.replica.data)) return;
       messaging.server.emit(message, dropID);
       this.destroy();
     }));

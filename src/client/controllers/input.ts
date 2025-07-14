@@ -35,12 +35,12 @@ export class InputController implements OnStart {
     });
   }
 
-  public getMouseWorldPosition(distance = 1000): Maybe<Vector3> {
-    return this.createMouseRaycast(distance)?.Position;
+  public getMouseWorldPosition(extraFilter: Instance[] = [], distance = 1000): Maybe<Vector3> {
+    return this.createMouseRaycast(extraFilter, distance)?.Position;
   }
 
-  public getMouseTarget(distance = 1000): Maybe<BasePart> {
-    return this.createMouseRaycast(distance)?.Instance;
+  public getMouseTarget(extraFilter: Instance[] = [], distance = 1000): Maybe<BasePart> {
+    return this.createMouseRaycast(extraFilter, distance)?.Instance;
   }
 
   private onHotbarKeyPress(hotbarKey: HotbarKey): void {
@@ -48,13 +48,17 @@ export class InputController implements OnStart {
     this.hotbarUI.selectButton(hotbarIndex);
   }
 
-  private createMouseRaycast(distance = 1000): Maybe<RaycastResult> {
+  private createMouseRaycast(extraFilter: Instance[] = [], distance = 1000): Maybe<RaycastResult> {
     const camera = World.CurrentCamera!;
     const { X, Y } = UserInputService.GetMouseLocation();
     const { Origin, Direction } = camera.ViewportPointToRay(X, Y);
     const raycastParams = new RaycastParams;
-    raycastParams.AddToFilter([this.character.get()!, World.PlacedStructures, World.StructureHolograms, creatureStorage]);
     raycastParams.FilterType = Enum.RaycastFilterType.Exclude;
+    raycastParams.AddToFilter([
+      this.character.get()!,
+      creatureStorage,
+      ...extraFilter
+    ]);
 
     return World.Raycast(Origin, Direction.mul(distance), raycastParams);
   }

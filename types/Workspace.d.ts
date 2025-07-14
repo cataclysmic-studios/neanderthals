@@ -3,4 +3,5 @@ interface Workspace extends WorldModel {
   CreatureServerStorage: Folder;
   PlacedStructures: Folder;
   StructureHolograms: Folder;
+  DroppedItems: Folder;
 }

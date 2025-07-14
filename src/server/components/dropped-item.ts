@@ -89,6 +89,7 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
     this.destroy();
   }
 
+  // speed cap
   public onFixed(): void {
     const root = this.instance.PrimaryPart!;
     const velocity = root.AssemblyLinearVelocity;
@@ -97,8 +98,10 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
     root.AssemblyLinearVelocity = velocity.div(2);
   }
 
-  private pickUp(player: Player): void {
-    this.inventory.addItem(player, this.itemID);
+  private async pickUp(player: Player): Promise<void> {
+    const success = await this.inventory.addItem(player, this.itemID);
+    if (!success) return;
+
     this.destroy();
   }
 
