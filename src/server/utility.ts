@@ -1,4 +1,4 @@
-import { Workspace as World } from "@rbxts/services";
+import { RunService, Workspace as World } from "@rbxts/services";
 
 export function stopHacking(player: Player, reason = "unspecified"): void {
   return player.Kick("nice try dum dum\nreason: " + reason);
@@ -10,10 +10,11 @@ export function findCreatureByID(id: number): Maybe<CreatureServerModel> {
     .find((creature): creature is CreatureServerModel => creature.GetAttribute("ID") === id);
 }
 
+let cumulativeDropID = 0;
 // TODO: collision shit
 export function dropItem(itemTemplate: PVInstance, pivot: CFrame, count = 1): void {
   for (const _ of $range(1, count)) {
-    const id = World.DroppedItems.GetChildren().size();
+    const id = cumulativeDropID++;
     const drop = itemTemplate.Clone();
     drop.SetAttribute("DropID", id);
     drop.PivotTo(pivot);
@@ -21,3 +22,13 @@ export function dropItem(itemTemplate: PVInstance, pivot: CFrame, count = 1): vo
     drop.AddTag("DroppedItem");
   }
 }
+
+const checkInterval = 5;
+let elapsed = 0;
+RunService.Heartbeat.Connect(dt => {
+  elapsed += dt;
+  if (elapsed < checkInterval) return;
+  elapsed -= checkInterval;
+
+  cumulativeDropID = World.DroppedItems.GetChildren().size();
+});
