@@ -11,8 +11,11 @@ interface ReplicatedStorage extends Instance {
       Rock: ToolItem;
       GodRock: ToolItem;
       WoodPickaxe: ToolItem;
+      WoodAxe: ToolItem;
       StonePickaxe: ToolItem;
+      StoneAxe: ToolItem;
       IronPickaxe: ToolItem;
+      IronAxe: ToolItem;
       Leaves: Model;
       Log: Model;
       Stick: Model;
