@@ -12,9 +12,9 @@ import type { CreatureAnimator } from "client/components/replication/creature-an
 import type { CreatureSync } from "client/components/replication/creature-sync";
 import type { MainUIController } from "../ui/main";
 
-const storage = new Instance("Folder");
-storage.Name = "CreatureClientStorage";
-storage.Parent = World;
+export const creatureStorage = new Instance("Folder");
+creatureStorage.Name = "CreatureClientStorage";
+creatureStorage.Parent = World;
 
 function spawn({ name, id, position, health }: CreatureSpawnPacket): void {
   const creature = assets.Creatures[name].Clone();
@@ -23,7 +23,7 @@ function spawn({ name, id, position, health }: CreatureSpawnPacket): void {
   creature.PivotTo(new CFrame(position));
   humanoid.Health = health;
   humanoid.MaxHealth = health;
-  creature.Parent = storage;
+  creature.Parent = creatureStorage;
   creature.AddTag("CreatureAnimator");
   creature.AddTag("CreatureSync");
 }

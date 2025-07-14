@@ -53,7 +53,7 @@ export class BuildingService implements OnPlayerAdd, OnPlayerRemove {
     for (const part of getDescendantsOfType(structure, "BasePart"))
       part.Anchored = true;
 
-    structure.Parent = World;
+    structure.Parent = World.PlacedStructures;
     this.placedStructures.get(player)!.add(structure);
   }
 }

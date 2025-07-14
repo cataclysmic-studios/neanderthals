@@ -5,12 +5,14 @@ import { getDescendantsOfType } from "@rbxts/instance-utility";
 import { Message, messaging } from "shared/messaging";
 import { player } from "client/constants";
 import { getRecipeIndex, getStructureRecipe } from "shared/recipes";
-
-const PASTEL_BLUE = new BrickColor("Pastel Blue");
-const DEGREES_PER_SECOND = 160;
+import { InputController } from "./input";
 
 const { rad } = math;
 const { Angles: angles } = CFrame;
+
+const PASTEL_BLUE = new BrickColor("Pastel Blue");
+const ROTATION_DEGREES_PER_SECOND = 160;
+const OUT_OUT_BOUNDS_CFRAME = new CFrame(0, 1e8, 0);
 
 @Controller()
 export class BuildingController implements OnTick {
@@ -18,10 +20,11 @@ export class BuildingController implements OnTick {
   private currentStructure?: Model;
   private currentStructureSize?: Vector3;
   private hologram?: Model;
-  private previousTargetFilter?: Instance;
   private rotation = 0;
 
-  public constructor() {
+  public constructor(
+    private readonly input: InputController
+  ) {
     this.mouse.Button1Down.Connect(() => this.tryPlace());
   }
 
@@ -30,12 +33,18 @@ export class BuildingController implements OnTick {
     if (!hologram || !this.currentStructure || !currentStructureSize) return;
 
     if (UserInputService.IsKeyDown("R"))
-      this.rotation += dt * DEGREES_PER_SECOND;
+      this.rotation += dt * ROTATION_DEGREES_PER_SECOND;
     if (UserInputService.IsKeyDown("Q"))
-      this.rotation -= dt * DEGREES_PER_SECOND;
+      this.rotation -= dt * ROTATION_DEGREES_PER_SECOND;
 
     const root = hologram.PrimaryPart!;
-    const mouseCFrame = new CFrame(this.mouse.Hit.Position.add(vector.create(0, currentStructureSize.Y / 2, 0)));
+    const mousePosition = this.input.getMouseWorldPosition();
+    if (!mousePosition) {
+      root.CFrame = OUT_OUT_BOUNDS_CFRAME;
+      return;
+    }
+
+    const mouseCFrame = new CFrame(mousePosition.add(vector.create(0, currentStructureSize.Y / 2, 0)));
     root.CFrame = mouseCFrame.mul(angles(0, rad(this.rotation), 0));
   }
 
@@ -58,9 +67,7 @@ export class BuildingController implements OnTick {
     this.hologram = hologram;
     this.currentStructure = structure;
     this.currentStructureSize = size;
-    this.previousTargetFilter = this.mouse.TargetFilter;
-    this.mouse.TargetFilter = hologram; // TODO: ignore creatures and such too
-    hologram.Parent = World;
+    hologram.Parent = World.PlacedStructures;
   }
 
   public leaveBuildMode(): void {
@@ -69,8 +76,6 @@ export class BuildingController implements OnTick {
     this.hologram = undefined;
     this.currentStructure = undefined;
     this.currentStructureSize = undefined;
-    this.mouse.TargetFilter = this.previousTargetFilter;
-    this.previousTargetFilter = undefined;
   }
 
   private tryPlace(): void {

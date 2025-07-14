@@ -3,10 +3,8 @@ import { Component, type Components } from "@flamework/components";
 import { Workspace as World } from "@rbxts/services";
 import { $nameof } from "rbxts-transform-debug";
 
-import type { OnCharacterAdd } from "client/hooks";
 import type { OnFixed } from "shared/hooks";
 import { Message, messaging } from "shared/messaging";
-import { player } from "client/constants";
 import { assets } from "shared/constants";
 import { distanceBetween } from "shared/utility";
 import { getDisplayName } from "shared/utility/items";
@@ -14,6 +12,7 @@ import { DEFAULT_DROPPED_ITEM_ATTRIBUTES, type DroppedItemAttributes } from "sha
 
 import DestroyableComponent from "shared/base-components/destroyable";
 import type { DroppedItemPrompt } from "./dropped-item-prompt";
+import type { InputController } from "client/controllers/input";
 import type { CharacterController } from "client/controllers/character";
 
 const PROMPT_UI = assets.UI.DroppedItemUI;
@@ -23,17 +22,17 @@ const PROMPT_UI = assets.UI.DroppedItemUI;
   ancestorWhitelist: [World],
   defaults: DEFAULT_DROPPED_ITEM_ATTRIBUTES
 })
-export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Model> implements OnStart, OnFixed, OnCharacterAdd {
+export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Model> implements OnStart, OnFixed {
   private readonly highlight = this.trash.add(new Instance("Highlight"));
   private readonly dragDetector = this.instance.WaitForChild<DragDetector>("DragDetector");
   private readonly promptUI = PROMPT_UI.Clone();
-  private readonly mouse = player.GetMouse();
   private readonly displayName = getDisplayName(this.instance);
   private readonly maxDistance = this.dragDetector.MaxActivationDistance;
   private destroyed = false;
 
   public constructor(
     private readonly components: Components,
+    private readonly input: InputController,
     private readonly character: CharacterController
   ) { super(); }
 
@@ -66,7 +65,7 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
   public onFixed(): void {
     if (this.destroyed) return;
 
-    const target = this.mouse.Target;
+    const target = this.input.getMouseTarget();
     if (!target)
       return this.toggleHover(false);
 
@@ -85,10 +84,6 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
       return this.toggleHover(false);
 
     this.toggleHover(true);
-  }
-
-  public onCharacterAdd(character: CharacterModel): void {
-    this.mouse.TargetFilter = character;
   }
 
   private toggleHover(on: boolean): void {

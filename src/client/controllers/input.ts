@@ -1,6 +1,8 @@
 import { Controller, Modding, type OnStart } from "@flamework/core";
-import { UserInputService } from "@rbxts/services";
+import { UserInputService, Workspace as World } from "@rbxts/services";
 
+import { creatureStorage } from "./replication/creature";
+import type { CharacterController } from "./character";
 import type { InventoryUIController } from "./ui/inventory";
 import type { HotbarUIController } from "./ui/hotbar";
 
@@ -9,6 +11,7 @@ const hotbarKeys = Modding.inspect<HotbarKeys>();
 @Controller()
 export class InputController implements OnStart {
   public constructor(
+    private readonly character: CharacterController,
     private readonly inventoryUI: InventoryUIController,
     private readonly hotbarUI: HotbarUIController
   ) { }
@@ -32,8 +35,27 @@ export class InputController implements OnStart {
     });
   }
 
+  public getMouseWorldPosition(distance = 1000): Maybe<Vector3> {
+    return this.createMouseRaycast(distance)?.Position;
+  }
+
+  public getMouseTarget(distance = 1000): Maybe<BasePart> {
+    return this.createMouseRaycast(distance)?.Instance;
+  }
+
   private onHotbarKeyPress(hotbarKey: HotbarKey): void {
     const hotbarIndex = hotbarKeys.indexOf(hotbarKey.Name);
     this.hotbarUI.selectButton(hotbarIndex);
+  }
+
+  private createMouseRaycast(distance = 1000): Maybe<RaycastResult> {
+    const camera = World.CurrentCamera!;
+    const { X, Y } = UserInputService.GetMouseLocation();
+    const { Origin, Direction } = camera.ViewportPointToRay(X, Y);
+    const raycastParams = new RaycastParams;
+    raycastParams.AddToFilter([this.character.get()!, World.PlacedStructures, creatureStorage]);
+    raycastParams.FilterType = Enum.RaycastFilterType.Exclude;
+
+    return World.Raycast(Origin, Direction.mul(distance), raycastParams);
   }
 }
