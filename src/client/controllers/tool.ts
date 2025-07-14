@@ -48,13 +48,13 @@ export class ToolController {
     return this.equipped!.GetAttribute<Vector3>("HitboxSize") ?? DEFAULT_HITBOX_SIZE;
   }
 
-  public getName(): ToolName {
-    return this.equipped!.Name as never;
+  public getID(): number {
+    return this.equipped!.GetAttribute<number>("ID")!;
   }
 
   public hasEquipped(tool?: ToolItem): boolean {
     return tool
-      ? this.equipped !== undefined && this.equipped.GetAttribute("ID") === tool.GetAttribute("ID")
+      ? this.equipped !== undefined && this.getID() === tool.GetAttribute("ID")
       : this.equipped !== undefined;
   }
 }

@@ -15,10 +15,10 @@ export class DamageController {
     if (!humanoid) return;
 
     const isCreature = model.HasTag("CreatureSync");
-    const toolName = this.tool.getName();
+    const toolID = this.tool.getID();
     if (isCreature)
-      messaging.server.emit(Message.DamageCreature, { id: model.GetAttribute<number>("ID")!, toolName });
+      messaging.server.emit(Message.DamageCreature, { id: model.GetAttribute<number>("ID")!, toolID });
     else
-      messaging.server.emit(Message.Damage, { humanoid, toolName });
+      messaging.server.emit(Message.Damage, { humanoid, toolID });
   }
 }

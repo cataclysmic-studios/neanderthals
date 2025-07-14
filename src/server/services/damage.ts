@@ -3,12 +3,13 @@ import type { Components } from "@flamework/components";
 import { Players } from "@rbxts/services";
 
 import { Message, messaging } from "shared/messaging";
-import { assets, DEFAULT_HITBOX_SIZE, XZ } from "shared/constants";
+import { DEFAULT_HITBOX_SIZE, XZ } from "shared/constants";
 import { findCreatureByID, stopHacking } from "server/utility";
 import { distanceBetween } from "shared/utility";
 
 import type { Structure } from "server/components/structure";
 import { ToolKind } from "shared/structs/tool-kind";
+import { getItemByID } from "shared/utility/items";
 
 const { clamp } = math;
 const { magnitude } = vector;
@@ -22,17 +23,17 @@ export class DamageService implements OnStart {
   ) { }
 
   public onStart(): void {
-    messaging.server.on(Message.Damage, (player, { humanoid, toolName }) => this.damage(player, humanoid, toolName));
-    messaging.server.on(Message.DamageCreature, (player, { id, toolName }) => this.damageCreature(player, id, toolName));
+    messaging.server.on(Message.Damage, (player, { humanoid, toolID }) => this.damage(player, humanoid, toolID));
+    messaging.server.on(Message.DamageCreature, (player, { id, toolID }) => this.damageCreature(player, id, toolID));
   }
 
-  private damageCreature(player: Player, id: number, toolName: ToolName): void {
+  private damageCreature(player: Player, id: number, toolID: number): void {
     const creature = findCreatureByID(id);
     if (!creature)
       return warn(`Failed to damage creature with ID ${id}: creature not found`);
 
     const humanoid = creature.Humanoid;
-    this.damage(player, humanoid, toolName, true);
+    this.damage(player, humanoid, toolID, true);
     messaging.client.emitAll(Message.CreatureHealthChange, {
       id,
       health: humanoid.Health,
@@ -40,7 +41,7 @@ export class DamageService implements OnStart {
     });
   }
 
-  private damage(player: Player, humanoid: Humanoid, toolName: ToolName, isCreature = false): void {
+  private damage(player: Player, humanoid: Humanoid, toolID: number, isCreature = false): void {
     const targetModel = humanoid.Parent;
     if (!targetModel || !targetModel.IsA("Model")) return;
 
@@ -48,7 +49,7 @@ export class DamageService implements OnStart {
     const damageType = targetPlayer || isCreature ? "Entity" : humanoid.GetAttribute<DamageType>("DamageType");
     if (damageType === undefined) return;
 
-    const tool = assets.Items[toolName];
+    const tool = getItemByID<ToolItem>(toolID);
     if (!tool)
       return stopHacking(player);
 

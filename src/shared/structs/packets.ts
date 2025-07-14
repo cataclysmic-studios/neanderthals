@@ -22,7 +22,7 @@ export interface DropItemPacket {
 }
 
 interface BaseDamagePacket {
-  readonly toolName: ToolName;
+  readonly toolID: ItemID;
 }
 
 export interface DamagePacket extends BaseDamagePacket {
