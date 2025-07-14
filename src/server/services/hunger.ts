@@ -60,9 +60,10 @@ export class HungerService implements OnTick, OnPlayerAdd, OnPlayerRemove {
     if (hungerWhenEaten === undefined)
       return warn("Item has no hunger value");
 
-    const damageWhenEaten = attributes.get("DamageWhenEaten") as number;
-    if (damageWhenEaten !== undefined)
-      character.Humanoid.TakeDamage(damageWhenEaten);
+    const healthWhenEaten = attributes.get("HealthWhenEaten") as number;
+    const humanoid = character.Humanoid;
+    if (healthWhenEaten !== undefined)
+      humanoid.Health = clamp(humanoid.Health + healthWhenEaten, 0, humanoid.MaxHealth);
 
     const hunger = this.playerHunger.get(player)!;
     const newHunger = clamp(hunger + hungerWhenEaten, 0, 100);

@@ -26,8 +26,8 @@ export class Structure extends CreatesDropsComponent<{}, StructureModel> impleme
   public readonly config = require<StructureConfig>(this.instance.Config);
 
   private readonly aliveTrash = new Trash;
-  private readonly parts = getDescendantsOfType(this.instance, "BasePart");
-  private readonly originalPartInfo = new Map<BasePart, PartInfo>;
+  private parts = getDescendantsOfType(this.instance, "BasePart");
+  private originalPartInfo = new Map<BasePart, PartInfo>;
   private alive = false;
 
   public constructor(
@@ -69,7 +69,12 @@ export class Structure extends CreatesDropsComponent<{}, StructureModel> impleme
     if (killer !== undefined && xp !== undefined)
       this.levels.addXP(killer, xp);
 
-    if (noRespawn) return;
+    if (noRespawn) {
+      this.parts = [];
+      this.originalPartInfo = new Map;
+      this.instance.Destroy();
+      return this.destroy();
+    }
 
     task.delay(respawnTime, () => this.spawn());
   }
