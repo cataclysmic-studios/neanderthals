@@ -18,6 +18,11 @@ export function getStructureByID<T extends Model = Model>(id: number): Maybe<T> 
   return structureCache.get(id) as T;
 }
 
-export function getDisplayName(item: Model): string {
-  return (item.GetAttribute<string>("DisplayName") ?? item.Name).upper()
+interface DisplayNameOptions {
+  readonly uppercase?: boolean;
+}
+
+export function getDisplayName(item: Model, { uppercase = true }: DisplayNameOptions = {}): string {
+  const name = item.GetAttribute<string>("DisplayName") ?? item.Name;
+  return uppercase ? name.upper() : name;
 }

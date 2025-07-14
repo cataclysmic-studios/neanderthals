@@ -85,7 +85,7 @@ export class CraftingUIController {
     if (!item) return;
 
     const frame = assets.UI.IngredientFrame.Clone();
-    frame.Title.Text = count + " " + item.Name;
+    frame.Title.Text = count + " " + getDisplayName(item, { uppercase: false });
     frame.Title.TextColor3 = this.getTextColor(id, count);
     addViewportItem(frame.Viewport, id);
 
