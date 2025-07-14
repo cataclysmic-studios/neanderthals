@@ -55,6 +55,7 @@ export class BuildingController implements OnTick {
     const parts = getDescendantsOfType(hologram, "BasePart");
     for (const part of parts) {
       part.CanCollide = false;
+      part.CastShadow = false;
 
       if (part.Transparency >= 1) continue;
       part.BrickColor = PASTEL_BLUE;
