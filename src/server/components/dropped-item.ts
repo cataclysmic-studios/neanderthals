@@ -9,7 +9,9 @@ import { DEFAULT_DROPPED_ITEM_ATTRIBUTES, type DroppedItemAttributes } from "sha
 
 import DestroyableComponent from "shared/base-components/destroyable";
 import type { InventoryService } from "server/services/inventory";
+import type { LevelsService } from "server/services/levels";
 import type { HungerService } from "server/services/hunger";
+import { Item } from "shared/item-id";
 
 const { magnitude } = vector;
 
@@ -41,6 +43,7 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
 
   public constructor(
     private readonly inventory: InventoryService,
+    private readonly levels: LevelsService,
     private readonly hunger: HungerService
   ) { super(); }
 
@@ -101,8 +104,13 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
   }
 
   private async pickUp(player: Player): Promise<void> {
-    const success = await this.inventory.addItem(player, this.itemID);
-    if (!success) return;
+    if (this.itemID === Item.Flux) {
+      const xpGain = this.instance.GetAttribute<number>("XP") ?? 6;
+      this.levels.addXP(player, xpGain);
+    } else {
+      const success = await this.inventory.addItem(player, this.itemID);
+      if (!success) return;
+    }
 
     this.destroy();
   }

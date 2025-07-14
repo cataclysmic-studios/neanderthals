@@ -21,6 +21,7 @@ interface ReplicatedStorage extends Instance {
       CookedMeat: Model;
       RawIron: Model;
       IronBar: Model;
+      Flux: Model;
     };
     Structures: Folder & {
       WoodWall: Model;

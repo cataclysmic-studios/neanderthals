@@ -10,7 +10,7 @@ import { parseNumberMap, stringifyNumberMap } from "shared/utility/data";
 import { INITIAL_DATA, type PlayerData } from "shared/structs/player-data";
 
 const enum Scope {
-  Proto = "PROTO7"
+  Proto = "PROTO8"
 }
 
 @Service()
