@@ -117,6 +117,7 @@ export class Campfire extends BaseComponent<{}, CampfireModel> implements OnFixe
 
   private toggleFX(on: boolean): void {
     if (this.fx[0].Enabled === on) return;
+    this.fuelBillboard.Enabled = on;
     for (const fx of this.fx)
       fx.Enabled = on;
   }
