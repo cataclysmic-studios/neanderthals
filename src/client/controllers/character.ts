@@ -16,7 +16,7 @@ async function promisifyEvent<Args extends unknown[]>(event: RBXScriptSignal<(..
 }
 
 @Controller({ loadOrder: 0 })
-@FixedUpdateRate(48)
+@FixedUpdateRate(52)
 export class CharacterController implements OnFixed, OnCharacterAdd {
   public readonly spawned = new Signal<(model: CharacterModel) => void>;
   public readonly died = new Signal;
@@ -31,7 +31,7 @@ export class CharacterController implements OnFixed, OnCharacterAdd {
     const lookVector = camera.CFrame.LookVector;
     const direction = normalize(lookVector.mul(XZ));
     const adjustedPivot = lookAlong(position, direction);
-    root.CFrame = currentPivot.Lerp(adjustedPivot, 3 * min(dt, 1));
+    root.CFrame = currentPivot.Lerp(adjustedPivot, 4.5 * min(dt, 1));
   }
 
   public async onCharacterAdd(character: CharacterModel): Promise<void> {
