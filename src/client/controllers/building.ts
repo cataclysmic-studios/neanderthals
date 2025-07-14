@@ -68,7 +68,7 @@ export class BuildingController implements OnTick {
     this.hologram = hologram;
     this.currentStructure = structure;
     this.currentStructureSize = size;
-    hologram.Parent = World.PlacedStructures;
+    hologram.Parent = World.StructureHolograms;
   }
 
   public leaveBuildMode(): void {

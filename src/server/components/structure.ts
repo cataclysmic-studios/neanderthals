@@ -72,8 +72,12 @@ export class Structure extends CreatesDropsComponent<{}, StructureModel> impleme
     if (noRespawn) {
       this.parts = [];
       this.originalPartInfo = new Map;
-      this.instance.Destroy();
-      return this.destroy();
+      task.delay(1, () => {
+        this.destroy();
+
+        if (!this.instance) return;
+        this.instance.Destroy();
+      });
     }
 
     task.delay(respawnTime, () => this.spawn());

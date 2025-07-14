@@ -53,7 +53,7 @@ export class InputController implements OnStart {
     const { X, Y } = UserInputService.GetMouseLocation();
     const { Origin, Direction } = camera.ViewportPointToRay(X, Y);
     const raycastParams = new RaycastParams;
-    raycastParams.AddToFilter([this.character.get()!, World.PlacedStructures, creatureStorage]);
+    raycastParams.AddToFilter([this.character.get()!, World.PlacedStructures, World.StructureHolograms, creatureStorage]);
     raycastParams.FilterType = Enum.RaycastFilterType.Exclude;
 
     return World.Raycast(Origin, Direction.mul(distance), raycastParams);
