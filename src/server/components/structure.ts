@@ -1,15 +1,15 @@
 import type { OnStart } from "@flamework/core";
 import { Component } from "@flamework/components";
+import { Players, Workspace as World } from "@rbxts/services";
 import { Trash } from "@rbxts/trash";
 import { getDescendantsOfType } from "@rbxts/instance-utility";
 import { $nameof } from "rbxts-transform-debug";
 
+import { ToolKind } from "shared/structs/tool-kind";
 import type { StructureConfig } from "shared/structs/structure-config";
 
 import { CreatesDropsComponent } from "server/base-components/creates-drops";
-import { LevelsService } from "server/services/levels";
-import { Players } from "@rbxts/services";
-import { ToolKind } from "shared/structs/tool-kind";
+import type { LevelsService } from "server/services/levels";
 
 const DEFAULT_RESPAWN_TIME = 60;
 
@@ -19,7 +19,8 @@ interface PartInfo {
 }
 
 @Component({
-  tag: $nameof<Structure>()
+  tag: $nameof<Structure>(),
+  ancestorWhitelist: [World]
 })
 export class Structure extends CreatesDropsComponent<{}, StructureModel> implements OnStart {
   public readonly config = require<StructureConfig>(this.instance.Config);
@@ -58,15 +59,16 @@ export class Structure extends CreatesDropsComponent<{}, StructureModel> impleme
     if (!this.alive) return;
     this.alive = false;
     this.aliveTrash.purge();
-    this.createDrops(this.config.drops);
+
+    const { drops, xp, noRespawn = false, respawnTime = DEFAULT_RESPAWN_TIME } = this.config;
+    this.createDrops(drops);
     this.toggleVisibility(false);
 
     const killerID = this.instance.Humanoid.GetAttribute<number>("AttackerID");
     const killer = killerID !== undefined ? Players.GetPlayerByUserId(killerID) : undefined;
-    if (killer !== undefined)
-      this.levels.addXP(killer, this.config.xp);
+    if (killer !== undefined && xp !== undefined)
+      this.levels.addXP(killer, xp);
 
-    const { noRespawn = false, respawnTime = DEFAULT_RESPAWN_TIME } = this.config;
     if (noRespawn) return;
 
     task.delay(respawnTime, () => this.spawn());
