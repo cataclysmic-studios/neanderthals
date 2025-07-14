@@ -4,8 +4,9 @@ import { RecipeKind, type CraftingRecipe } from "shared/structs/crafting-recipe"
 
 export = {
   kind: RecipeKind.Structure,
-  yield: Structure.WoodWall,
+  yield: Structure.Campfire,
   ingredients: [
-    [Item.Log, 3]
+    [Item.Log, 2],
+    [Item.Stick, 2]
   ]
 } satisfies CraftingRecipe;

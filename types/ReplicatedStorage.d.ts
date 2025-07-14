@@ -18,6 +18,7 @@ interface ReplicatedStorage extends Instance {
     };
     Structures: Folder & {
       WoodWall: Model;
+      Campfire: Model;
     };
     UI: Folder & {
       DroppedItemUI: BillboardGui & {
