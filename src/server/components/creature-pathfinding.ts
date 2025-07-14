@@ -79,7 +79,7 @@ export class CreaturePathfinding extends DestroyableComponent<Attributes, Creatu
         if (!point) return;
 
         this.isIdlePathing = true;
-        this.moveTo(point).await();
+        this.moveTo(point).catch(warn).await();
         this.trash.add(task.delay(random(6, 9), () => this.isIdlePathing = false));
         task.wait(0.1); // important
         this.moveToNextWaypoint();
@@ -104,13 +104,13 @@ export class CreaturePathfinding extends DestroyableComponent<Attributes, Creatu
   }
 
   public async moveTo(position: Vector3): Promise<void> {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       const { path } = this;
       const startPosition = this.root.Position;
       path.ComputeAsync(startPosition, position);
 
       if (path.Status !== Enum.PathStatus.Success)
-        return warn(path.Status);
+        return reject("Pathfinding failed: " + path.Status.Name);
 
       this.waypoints = path.GetWaypoints();
       this.currentWaypointIndex = 0;
