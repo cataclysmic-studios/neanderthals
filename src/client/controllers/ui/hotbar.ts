@@ -48,7 +48,9 @@ export class HotbarUIController {
   }
 
   public removeItem(hotbarButton: HotbarButton): void {
-    this.selectButton(hotbarButton);
+    if (this.selectedButton === hotbarButton)
+      this.selectButton(hotbarButton);
+
     this.removeViewportItem(hotbarButton);
     messaging.server.emit(Message.RemoveHotbarItem, hotbarButton.LayoutOrder);
   }
