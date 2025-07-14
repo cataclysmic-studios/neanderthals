@@ -3,7 +3,7 @@ import type { Components } from "@flamework/components";
 import { Players } from "@rbxts/services";
 
 import { Message, messaging } from "shared/messaging";
-import { assets, XZ } from "shared/constants";
+import { assets, DEFAULT_HITBOX_SIZE, XZ } from "shared/constants";
 import { findCreatureByID, stopHacking } from "server/utility";
 import { distanceBetween } from "shared/utility";
 
@@ -70,7 +70,8 @@ export class DamageService implements OnStart {
 
     const modelPosition = targetModel.PrimaryPart!.Position;
     const playerPosition = character.GetPivot().Position;
-    const hitboxSize = tool.GetAttribute<Vector3>("HitboxSize")!;
+    const hitboxSize = tool.GetAttribute<Vector3>("HitboxSize") ?? DEFAULT_HITBOX_SIZE;
+    ;
     const [_, targetSize] = targetModel.GetBoundingBox();
     const maxRange = (magnitude(hitboxSize) * 2 + magnitude(targetSize.mul(XZ)));
     if (distanceBetween(modelPosition, playerPosition) > maxRange)

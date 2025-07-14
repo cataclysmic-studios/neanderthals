@@ -2,11 +2,10 @@ import { Controller } from "@flamework/core";
 import { Trash } from "@rbxts/trash";
 
 import { Message, messaging } from "shared/messaging";
+import { DEFAULT_HITBOX_SIZE } from "shared/constants";
 import { weldTool } from "shared/utility";
 
 import type { CharacterController } from "./character";
-
-const DEFAULT_HITBOX_SIZE = vector.create(2.6, 3, 2.6);
 
 @Controller()
 export class ToolController {
