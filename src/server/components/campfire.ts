@@ -106,7 +106,7 @@ export class Campfire extends BaseComponent<{}, CampfireModel> implements OnFixe
     }
 
     for (const { cookedID, cframe } of info)
-      dropItem(getItemByID(cookedID)!, cframe);
+      dropItem(getItemByID(cookedID), cframe);
 
     this.cookedItems = new Set;
   }

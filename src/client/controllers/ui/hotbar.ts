@@ -100,7 +100,9 @@ export class HotbarUIController {
 
   private getViewportItem(hotbarButton: HotbarButton): Maybe<ToolItem> {
     const itemID = hotbarButton.GetAttribute<number>("CurrentItem");
-    return itemID !== undefined ? getItemByID(itemID) : undefined;
+    return itemID !== undefined
+      ? getItemByID<ToolItem>(itemID)
+      : undefined;
   }
 
   private onButtonClick(hotbarButton: HotbarButton): void {

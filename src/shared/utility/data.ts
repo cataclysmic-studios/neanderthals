@@ -26,11 +26,6 @@ export function getMaxBagSpace(equippedGear: EquippedGear): number {
 
   const bagID = equippedGear.bag;
   const bagItem = getItemByID(bagID);
-  if (!bagItem) {
-    warn("Failed to get bag space: no item found with ID", bagID);
-    return DEFAULT_BAG_SPACE;
-  }
-
   const attributeName = "BagSpaceGiven";
   const bagSpace = bagItem.GetAttribute<number>(attributeName);
   if (bagSpace === undefined) {
@@ -45,11 +40,6 @@ export function calculateBagSpace(hotbar: PlayerData["hotbar"], inventory: Playe
   const items = [...(hotbar as number[]).filterUndefined().map<[number, number]>(id => [id, 1]), ...inventory];
   return items.reduce((sum, [id, count]) => {
     const item = getItemByID(id);
-    if (!item) {
-      warn("Failed to calculate bag space: no item found with ID", id);
-      return sum;
-    }
-
     const attributeName = "BagSpace";
     const bagSpaceUsed = item.GetAttribute<number>("BagSpace");
     if (bagSpaceUsed === undefined) {

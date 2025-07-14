@@ -56,8 +56,6 @@ export class CraftingUIController {
       ? getStructureByID(yieldID)
       : getItemByID(yieldID);
 
-    if (!model) return;
-
     // TODO: required level UI
     const frame = assets.UI.CraftingRecipeFrame.Clone();
     for (const ingredient of ingredients)

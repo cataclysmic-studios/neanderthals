@@ -14,12 +14,10 @@ export function findCreatureByID(id: number): Maybe<CreatureModel> {
 }
 
 const ITEM_ORIENTATION = angles(0, rad(45), 0);
-export function addViewportItem<T extends Model>(viewport: ViewportFrame, item: T): Maybe<T>;
-export function addViewportItem<T extends Model>(viewport: ViewportFrame, id: number): Maybe<T>;
-export function addViewportItem<T extends Model>(viewport: ViewportFrame, id: T | number): Maybe<T> {
+export function addViewportItem<T extends Model>(viewport: ViewportFrame, item: T): void;
+export function addViewportItem<T extends Model>(viewport: ViewportFrame, id: number): void;
+export function addViewportItem<T extends Model>(viewport: ViewportFrame, id: T | number): void {
   const itemTemplate = typeIs(id, "number") ? getItemByID<T>(id) : id;
-  if (!itemTemplate) return;
-
   const displayOffset = itemTemplate.GetAttribute<CFrame>("DisplayOffset") ?? CFrame.identity;
   const item = itemTemplate.Clone();
   let camera = viewport.FindFirstChildOfClass("Camera");

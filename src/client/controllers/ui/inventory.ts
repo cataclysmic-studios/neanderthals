@@ -90,9 +90,6 @@ export class InventoryUIController {
 
   private createItemButton(itemID: number, count: number): ItemButton {
     const itemTemplate = getItemByID(itemID);
-    if (!itemTemplate)
-      return warn("Failed to create inventory item frame: no item found with ID", itemID)!;
-
     const trash = new Trash;
     const button = assets.UI.InventoryItem.Clone();
     trash.linkToInstance(button);

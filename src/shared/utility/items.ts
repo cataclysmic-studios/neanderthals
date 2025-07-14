@@ -5,7 +5,7 @@ const itemCache = new Map<number, Model>;
 for (const item of items)
   itemCache.set(item.GetAttribute<number>("ID")!, item);
 
-export function getItemByID<T extends Model = Model>(id: number): Maybe<T> {
+export function getItemByID<T extends Model = Model>(id: number): T {
   return itemCache.get(id) as T;
 }
 
@@ -14,7 +14,7 @@ const structureCache = new Map<number, Model>;
 for (const structure of structures)
   structureCache.set(structure.GetAttribute<number>("ID")!, structure);
 
-export function getStructureByID<T extends Model = Model>(id: number): Maybe<T> {
+export function getStructureByID<T extends Model = Model>(id: number): T {
   return structureCache.get(id) as T;
 }
 

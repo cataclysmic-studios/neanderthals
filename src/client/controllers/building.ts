@@ -83,10 +83,7 @@ export class BuildingController implements OnTick {
   private tryPlace(): void {
     if (!this.isInBuildMode()) return;
 
-    const id = this.currentStructure!.GetAttribute<number>("ID");
-    if (id === undefined)
-      return warn("Failed to place structure: current structure model has no ID");
-
+    const id = this.currentStructure!.GetAttribute<number>("ID")!;
     const recipe = getStructureRecipe(id);
     if (!recipe)
       return warn("Failed to place structure: current structure model has no corresponding recipe");

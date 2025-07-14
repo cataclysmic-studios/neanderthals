@@ -56,9 +56,10 @@ export class HungerService implements OnTick, OnPlayerAdd, OnPlayerRemove {
     if (!character) return;
 
     const attributes = item.GetAttributes();
-    const hungerWhenEaten = attributes.get("HungerWhenEaten") as number;
+    const attributeName = "HungerWhenEaten";
+    const hungerWhenEaten = attributes.get(attributeName) as number;
     if (hungerWhenEaten === undefined)
-      return warn("Item has no hunger value");
+      return warn(`Failed to eat '${item}': food item has no '${attributeName}' attribute`);
 
     const healthWhenEaten = attributes.get("HealthWhenEaten") as number;
     const humanoid = character.Humanoid;
