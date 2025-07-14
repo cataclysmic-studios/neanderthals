@@ -34,7 +34,7 @@ export class HungerService implements OnTick, OnPlayerAdd, OnPlayerRemove {
     const elapsed = this.elapsed += dt;
     if (elapsed >= HUNGER_TICK_INTERVAL) {
       for (const [player, hunger] of this.playerHunger) {
-        const newHunger = clamp(hunger - 0.5, 0, 100);
+        const newHunger = clamp(hunger - 0.25, 0, 100);
         this.playerHunger.set(player, newHunger);
         messaging.client.emit(player, Message.UpdateHunger, newHunger);
       }

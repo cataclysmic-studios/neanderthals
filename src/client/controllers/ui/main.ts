@@ -6,13 +6,14 @@ import Signal from "@rbxts/lemon-signal";
 import type { OnCharacterAdd } from "client/hooks";
 import { Message, messaging } from "shared/messaging";
 import { mainScreen } from "client/constants";
+import { getXPToLevelUp } from "shared/utility";
 import { calculateBagSpace, getMaxBagSpace } from "shared/utility/data";
 
 import type { ReplicaController } from "../replica";
 import type { CharacterController } from "../character";
 import type { HotbarUIController } from "./hotbar";
-import { getXPToLevelUp } from "shared/utility";
 
+const { floor } = math;
 const { delay } = task;
 
 const DAMAGE_DISPLAY_LIFETIME = 1;
@@ -72,14 +73,16 @@ export class MainUIController implements OnCharacterAdd {
       maxHealth = humanoid.MaxHealth;
     }
 
-    healthBar.Amount.Text = tostring(health); // TODO: comma format
-    healthBar.Bar.Size = UDim2.fromScale(health! / maxHealth!, 1);
+    health = health!;
+    maxHealth = maxHealth!;
+    healthBar.Amount.Text = tostring(floor(health)); // TODO: comma format
+    healthBar.Bar.Size = UDim2.fromScale(health / maxHealth, 1);
 
     const name = typeIs(humanoid, "string") ? humanoid : humanoid.Parent!.Name.upper();
     damageDisplay.Title.Text = name;
     damageDisplay.Visible = true;
 
-    const isAlive = health! > 0;
+    const isAlive = health > 0;
     const lifetime = DAMAGE_DISPLAY_LIFETIME * (isAlive ? 1 : 0.5);
     damageTrash.add(delay(lifetime, () => this.damageDisplay.Visible = false));
   }
