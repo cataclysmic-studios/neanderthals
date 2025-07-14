@@ -14,7 +14,7 @@ import type { LevelsService } from "server/services/levels";
 
 const DEFAULT_RESPAWN_TIME = 60;
 const SHAKE_TWEEN_INFO = new TweenInfo(0.04, Enum.EasingStyle.Sine, Enum.EasingDirection.In, 0, true);
-const SHAKE_MAGNITUDE = 0.25;
+const SHAKE_MAGNITUDE = 0.2;
 const SHAKE_LEFT_OFFSET = new Vector3(-SHAKE_MAGNITUDE, 0, -SHAKE_MAGNITUDE);
 const SHAKE_RIGHT_OFFSET = new Vector3(SHAKE_MAGNITUDE, 0, SHAKE_MAGNITUDE);
 
@@ -141,6 +141,9 @@ export class Structure extends CreatesDropsComponent<{}, StructureModel> impleme
       part.CanCollide = on ? collisions : false;
       part.CanQuery = on;
       part.CanTouch = on;
+
+      for (const fx of getDescendantsOfType(part, "ParticleEmitter", "Light"))
+        fx.Enabled = on;
     }
   }
 }
