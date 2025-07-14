@@ -1,4 +1,5 @@
 import { RunService, Workspace as World } from "@rbxts/services";
+import { getDescendantsOfType } from "@rbxts/instance-utility";
 
 export function stopHacking(player: Player, reason = "unspecified"): void {
   return player.Kick("nice try dum dum\nreason: " + reason);
@@ -20,6 +21,11 @@ export function dropItem(itemTemplate: PVInstance, pivot: CFrame, count = 1): vo
     drop.PivotTo(pivot);
     drop.Parent = World.DroppedItems;
     drop.AddTag("DroppedItem");
+
+    for (const part of getDescendantsOfType(drop, "BasePart")) {
+      if (part.GetAttribute("UseDefaultDroppedCollisions") === true) continue;
+      part.CanCollide = true;
+    }
   }
 }
 
