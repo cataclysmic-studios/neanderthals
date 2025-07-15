@@ -1,5 +1,7 @@
-import { RunService, Workspace as World } from "@rbxts/services";
+import { Workspace as World } from "@rbxts/services";
 import { getDescendantsOfType } from "@rbxts/instance-utility";
+
+const { random } = math;
 
 export function stopHacking(player: Player, reason = "unspecified"): void {
   return player.Kick("nice try dum dum\nreason: " + reason);
@@ -12,12 +14,29 @@ export function findCreatureByID(id: number): Maybe<CreatureServerModel> {
 }
 
 let cumulativeDropID = 0;
-export function dropItem(itemTemplate: PVInstance, pivot: CFrame, count = 1): void {
-  for (const _ of $range(1, count)) {
+
+/**
+ * Creates a dropped item of the given item, origin, radius, and amount.
+ * @param itemTemplate The item template to clone and drop.
+ * @param origin The CFrame where the item should be dropped.
+ * @param radius An optional Vector3 which specifies the range from the origin where the item could be spawned.
+ * If not specified, the item will be spawned at the origin.
+ * @param amount The number of items to spawn. If not specified, only one item will be spawned.
+ */
+export function dropItem(itemTemplate: PVInstance, origin: CFrame, radius: Vector3 = vector.zero, amount = 1): void {
+  for (const _ of $range(1, amount)) {
     const id = cumulativeDropID++;
     const drop = itemTemplate.Clone();
+    const x = radius.X / 2;
+    const z = radius.Z / 2;
+    const offset = vector.create(
+      random(-x, x),
+      0,
+      random(-z, z)
+    );
+
     drop.SetAttribute("DropID", id);
-    drop.PivotTo(pivot);
+    drop.PivotTo(origin.add(offset));
     drop.Destroying.Once(() => cumulativeDropID = id - 1);
     drop.Parent = World.DroppedItems;
     drop.AddTag("DroppedItem");
