@@ -15,6 +15,7 @@ import type {
   PlaceStructurePacket
 } from "./structs/packets";
 import type { PlayerData } from "./structs/player-data";
+import { TribeColorName } from "./constants";
 
 export const messaging = MessageEmitter.create<MessageData>();
 
@@ -39,7 +40,8 @@ export const enum Message {
   AddHotbarItem,
   RemoveHotbarItem,
   Craft,
-  PlaceStructure
+  PlaceStructure,
+  CreateTribe
 }
 
 export interface MessageData {
@@ -64,4 +66,5 @@ export interface MessageData {
   [Message.RemoveHotbarItem]: HotbarKey["Name"];
   [Message.Craft]: u8;
   [Message.PlaceStructure]: PlaceStructurePacket;
+  [Message.CreateTribe]: TribeColorName;
 }

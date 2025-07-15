@@ -1,11 +1,14 @@
 import { Controller } from "@flamework/core";
+import { Teams } from "@rbxts/services";
 import { Trash } from "@rbxts/trash";
 import { atom, subscribe } from "@rbxts/charm";
 import Signal from "@rbxts/lemon-signal";
 
-import { mainScreen, player } from "client/constants";
+import { Message, messaging } from "shared/messaging";
 import { assets, TRIBE_COLORS } from "shared/constants";
-import { Teams } from "@rbxts/services";
+import { mainScreen, player } from "client/constants";
+
+import type { CharacterController } from "../character";
 
 const GRAYED_BUTTON_COLOR = new Color3(0.3, 0.3, 0.3);
 
@@ -16,13 +19,15 @@ export class TribesUIController {
   private readonly frame = mainScreen.Tribes;
   private readonly visibleTrash = new Trash;
 
-  public constructor() {
+  public constructor(character: CharacterController) {
     this.frame.GetPropertyChangedSignal("Visible").Connect(() => {
       if (this.frame.Visible) return;
-      this.visibleTrash.destroy();
+      this.visibleTrash.purge();
+      this.update();
     });
 
     this.update();
+    character.died.Connect(() => this.update());
   }
 
   private update(): void {
@@ -41,19 +46,21 @@ export class TribesUIController {
 
     const selectedColor = atom<Maybe<BrickColor>>(undefined);
     noTribe.Create.BackgroundColor3 = GRAYED_BUTTON_COLOR;
-    subscribe(selectedColor, color =>
+    this.visibleTrash.add(subscribe(selectedColor, color =>
       noTribe.Create.BackgroundColor3 = color !== undefined ? defaultButtonColor : GRAYED_BUTTON_COLOR
-    );
+    ));
 
     this.visibleTrash.add(noTribe.Create.MouseButton1Click.Connect(() => {
       const color = selectedColor();
       if (!color) return;
-      print("selected", color);
-      // send create tribe message
+
+      messaging.server.emit(Message.CreateTribe, color.Name as never);
+      noTribe.Visible = false;
     }));
 
     for (const color of TRIBE_COLORS) {
-      const button = assets.UI.ColorButton.Clone();
+      const button = this.visibleTrash.add(assets.UI.ColorButton.Clone());
+      button.Name = color.Name;
       button.BackgroundColor3 = color.Color;
       button.Parent = noTribe.Colors;
       this.visibleTrash.add(button.MouseButton1Click.Connect(() => selectedColor(color)));
