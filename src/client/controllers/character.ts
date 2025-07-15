@@ -31,7 +31,7 @@ export class CharacterController implements OnFixed, OnCharacterAdd {
     const lookVector = camera.CFrame.LookVector;
     const direction = normalize(lookVector.mul(XZ));
     const adjustedPivot = lookAlong(position, direction);
-    root.CFrame = currentPivot.Lerp(adjustedPivot, 4.5 * min(dt, 1));
+    root.CFrame = currentPivot.Lerp(adjustedPivot, 6 * min(dt, 1));
   }
 
   public async onCharacterAdd(character: CharacterModel): Promise<void> {
