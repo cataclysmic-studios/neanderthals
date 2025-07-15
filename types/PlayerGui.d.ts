@@ -1,5 +1,9 @@
 interface PlayerGui extends BasePlayerGui {
   Main: ScreenGui & {
+    ActionButtons: Frame & {
+      Inventory: ImageButton;
+      Tribes: ImageButton;
+    };
     DamageDisplay: Frame & {
       Title: TextLabel;
       Health: ProgressBarFrame & {

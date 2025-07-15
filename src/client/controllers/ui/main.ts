@@ -12,6 +12,7 @@ import { calculateBagSpace, getMaxBagSpace } from "shared/utility/data";
 import type { ReplicaController } from "../replica";
 import type { CharacterController } from "../character";
 import type { HotbarUIController } from "./hotbar";
+import { ActionButtonsUIController } from "./action-buttons";
 
 const { floor } = math;
 const { delay } = task;
@@ -31,6 +32,7 @@ export class MainUIController implements OnCharacterAdd {
   public constructor(
     private readonly replica: ReplicaController,
     private readonly character: CharacterController,
+    private readonly actionButtonsUI: ActionButtonsUIController,
     hotbar: HotbarUIController
   ) {
     messaging.client.on(Message.UpdateHunger, hunger => this.updateStats(this.hunger = hunger));
@@ -57,6 +59,8 @@ export class MainUIController implements OnCharacterAdd {
   }
 
   public toggle(on: boolean): void {
+    this.actionButtonsUI.toggle(on);
+
     if (!on) return;
     this.enabled.Fire();
   }
