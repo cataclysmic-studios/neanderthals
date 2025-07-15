@@ -3,13 +3,13 @@ import { Component } from "@flamework/components";
 import { Players, Workspace as World } from "@rbxts/services";
 import { $nameof } from "rbxts-transform-debug";
 
-import type { OnPlayerAdd } from "server/hooks";
 import { Message, messaging } from "shared/messaging";
 import { assets } from "shared/constants";
 import type { CreatureConfig } from "shared/structs/creature-config";
 
 import { CreatesDropsComponent } from "server/base-components/creates-drops";
 import type { CreaturePathfindingService } from "server/services/creature";
+import type { CharacterService } from "server/services/character";
 import type { LevelsService } from "server/services/levels";
 
 interface Attributes {
@@ -24,7 +24,7 @@ let cumulativeCreatureID = 0;
     CreatureSpawn_Rate: 60
   }
 })
-export class CreatureSpawn extends CreatesDropsComponent<Attributes, BasePart> implements OnStart, OnPlayerAdd {
+export class CreatureSpawn extends CreatesDropsComponent<Attributes, BasePart> implements OnStart {
   private readonly name = this.instance.Name as CreatureName;
   private readonly template = assets.Creatures[this.name];
   private readonly spawnRate = this.attributes.CreatureSpawn_Rate;
@@ -35,6 +35,7 @@ export class CreatureSpawn extends CreatesDropsComponent<Attributes, BasePart> i
 
   public constructor(
     private readonly pathfinding: CreaturePathfindingService,
+    private readonly character: CharacterService,
     private readonly levels: LevelsService
   ) {
     super();
@@ -44,19 +45,18 @@ export class CreatureSpawn extends CreatesDropsComponent<Attributes, BasePart> i
   }
 
   public onStart(): void {
+    this.character.added.Connect(player => this.onCharacterAdd(player));
     this.spawn();
   }
 
-  public onPlayerAdd(player: Player): void {
-    if (!this.creature) return;
-    if (!player.Character)
-      player.CharacterAdded.Wait();
-
+  private onCharacterAdd(player: Player): void {
     this.hydrate(player);
   }
 
   private hydrate(player: Player): void {
-    const creature = this.creature!;
+    const { creature } = this;
+    if (!creature) return;
+
     task.wait(0.5); // POOOOOOP
     messaging.client.emit(player, Message.SpawnCreature, {
       name: this.name,

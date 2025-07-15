@@ -12,7 +12,6 @@ export function findCreatureByID(id: number): Maybe<CreatureServerModel> {
 }
 
 let cumulativeDropID = 0;
-// TODO: collision shit
 export function dropItem(itemTemplate: PVInstance, pivot: CFrame, count = 1): void {
   for (const _ of $range(1, count)) {
     const id = cumulativeDropID++;
@@ -25,6 +24,7 @@ export function dropItem(itemTemplate: PVInstance, pivot: CFrame, count = 1): vo
     for (const part of getDescendantsOfType(drop, "BasePart")) {
       if (part.GetAttribute("UseDefaultDroppedCollisions") === true) continue;
       part.CanCollide = true;
+      part.CollisionGroup = "DroppedItems";
     }
   }
 }

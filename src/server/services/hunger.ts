@@ -1,10 +1,11 @@
 import { Service, type OnTick } from "@flamework/core";
 
-import type { OnPlayerAdd, OnPlayerRemove } from "server/hooks";
+import type { OnPlayerRemove } from "server/hooks";
 import { Message, messaging } from "shared/messaging";
 import { stopHacking } from "server/utility";
 import { getItemByID } from "shared/utility/items";
 
+import type { CharacterService } from "./character";
 import type { InventoryService } from "./inventory";
 
 const { clamp } = math;
@@ -12,11 +13,11 @@ const { clamp } = math;
 const HUNGER_TICK_INTERVAL = 4;
 
 @Service()
-export class HungerService implements OnTick, OnPlayerAdd, OnPlayerRemove {
+export class HungerService implements OnTick, OnPlayerRemove {
   private readonly playerHunger = new Map<Player, number>;
   private elapsed = 0;
 
-  public constructor(inventory: InventoryService) {
+  public constructor(character: CharacterService, inventory: InventoryService) {
     messaging.server.on(Message.Eat, async (player, id) => {
       const item = getItemByID(id);
       if (!item)
@@ -28,6 +29,8 @@ export class HungerService implements OnTick, OnPlayerAdd, OnPlayerRemove {
       inventory.removeItem(player, id);
       this.eat(player, item);
     });
+
+    character.added.Connect(player => this.onCharacterAdd(player));
   }
 
   public onTick(dt: number): void {
@@ -41,10 +44,6 @@ export class HungerService implements OnTick, OnPlayerAdd, OnPlayerRemove {
 
       this.elapsed -= HUNGER_TICK_INTERVAL;
     }
-  }
-
-  public onPlayerAdd(player: Player): void {
-    player.CharacterAdded.Connect(() => this.playerHunger.set(player, 100));
   }
 
   public onPlayerRemove(player: Player): void {
@@ -70,5 +69,9 @@ export class HungerService implements OnTick, OnPlayerAdd, OnPlayerRemove {
     const newHunger = clamp(hunger + hungerWhenEaten, 0, 100);
     this.playerHunger.set(player, newHunger);
     messaging.client.emit(player, Message.UpdateHunger, newHunger);
+  }
+
+  private onCharacterAdd(player: Player): void {
+    this.playerHunger.set(player, 100);
   }
 }
