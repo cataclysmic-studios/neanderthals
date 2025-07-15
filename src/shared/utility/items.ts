@@ -26,3 +26,10 @@ export function getDisplayName(item: Model, { uppercase = true }: DisplayNameOpt
   const name = item.GetAttribute<string>("DisplayName") ?? item.Name;
   return uppercase ? name.upper() : name;
 }
+
+export function isItemStackable(itemID: number): boolean;
+export function isItemStackable(item: Model): boolean;
+export function isItemStackable(item: Model | number): boolean {
+  item = typeIs(item, "number") ? getItemByID(item) : item;
+  return item.GetAttribute("ToolTier") === undefined;
+}

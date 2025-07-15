@@ -5,7 +5,7 @@ import { Message, messaging } from "shared/messaging";
 import { assets } from "shared/constants";
 import { mainScreen } from "client/constants";
 import { recordDiff } from "shared/utility";
-import { getItemByID } from "shared/utility/items";
+import { getItemByID, isItemStackable } from "shared/utility/items";
 import { addViewportItem } from "client/utility";
 import { INITIAL_DATA } from "shared/structs/player-data";
 
@@ -68,7 +68,7 @@ export class InventoryUIController {
   private update(changes: Record<number, Maybe<number>>, deletions: Set<number>): void {
     for (const [id, diff] of pairs(changes)) {
       const info = this.buttonInfos.get(id);
-      if (info) {
+      if (info && isItemStackable(id)) {
         const currentCount = this.lastInventory.get(id) ?? 0;
         info.button.Count.Text = tostring(currentCount + diff);
         continue;
