@@ -96,9 +96,13 @@ export class HotbarUIController {
       hotbarButton = this.buttons[hotbarButton];
 
     const tool = this.getViewportItem(hotbarButton);
+    const currentlyEquippedButNotThisSlot = this.selectedButton !== hotbarButton && this.tool.hasEquipped(tool); // lol
     if (!tool) return;
 
-    const equipped = this.tool.toggleEquipped(tool);
+    const equipped = currentlyEquippedButNotThisSlot
+      ? this.tool.equip(tool) as undefined || true
+      : this.tool.toggleEquipped(tool);
+
     this.selectedButton = equipped ? hotbarButton : undefined;
     this.updateSelectionColors();
     if (equipped)
