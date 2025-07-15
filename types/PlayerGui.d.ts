@@ -13,7 +13,13 @@ interface PlayerGui extends BasePlayerGui {
         Amount: TextLabel;
       };
     };
-    Hotbar: Frame & Record<HotbarKey["Name"], HotbarButton>;
+    Hotbar: Frame & {
+      Unlisted: Folder & {
+        ItemName: TextLabel & {
+          UIStroke: UIStroke;
+        };
+      };
+    } & Record<HotbarKey["Name"], HotbarButton>;
     Inventory: Frame & {
       Content: ScrollingFrame;
       Separator: Frame;

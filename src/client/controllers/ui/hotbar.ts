@@ -1,24 +1,33 @@
 import { Controller } from "@flamework/core";
 import { getChildrenOfType } from "@rbxts/instance-utility";
+import { TweenBuilder, type TweenBuilderBase } from "@rbxts/twin";
+import { Trash } from "@rbxts/trash";
 
 import { Message, messaging } from "shared/messaging";
 import { mainScreen } from "client/constants";
-import { getItemByID } from "shared/utility/items";
+import { getDisplayName, getItemByID } from "shared/utility/items";
 import { addViewportItem, removeViewportItem } from "client/utility";
+import type { PlayerData } from "shared/structs/player-data";
 
 import type { CharacterController } from "../character";
 import type { ToolController } from "../tool";
-import { PlayerData } from "shared/structs/player-data";
 
 const WHITE = new Color3(1, 1, 1);
 const DEFAULT_VIEWPORT_COLOR = Color3.fromRGB(30, 30, 30);
 const SELECTED_VIEWPORT_COLOR = DEFAULT_VIEWPORT_COLOR.Lerp(WHITE, 0.25);
+const FADE_OUT_TWEEN_INFO = new TweenInfo(1);
 
 @Controller()
 export class HotbarUIController {
-  private readonly buttons: readonly HotbarButton[] = getChildrenOfType<"ImageButton", HotbarButton>(mainScreen.Hotbar, "ImageButton");
+  private readonly frame = mainScreen.Hotbar;
+  private readonly buttons = getChildrenOfType<"ImageButton", HotbarButton>(this.frame, "ImageButton");
   private readonly defaultButtonColor = this.buttons.first()!.ImageColor3;
   private readonly selectedButtonColor = this.defaultButtonColor.Lerp(WHITE, 0.25);
+  private readonly itemNameLabel = this.frame.Unlisted.ItemName;
+  private readonly defaultStrokeTransparency = this.itemNameLabel.UIStroke.Transparency;
+  private readonly itemLabelTrash = new Trash;
+  private readonly itemLabelFadeOut: TweenBuilderBase<TextLabel>;
+  private readonly itemLabelStrokeFadeOut: TweenBuilderBase<UIStroke>;
   private selectedButton?: HotbarButton;
 
   public constructor(
@@ -29,6 +38,19 @@ export class HotbarUIController {
       if (!this.selectedButton) return;
       this.onButtonClick(this.selectedButton);
     });
+
+    const { itemNameLabel } = this;
+    itemNameLabel.TextTransparency = 1;
+    itemNameLabel.UIStroke.Transparency = 1;
+    itemNameLabel.Visible = true;
+
+    this.itemLabelFadeOut = TweenBuilder.for(itemNameLabel)
+      .info(FADE_OUT_TWEEN_INFO)
+      .property("TextTransparency", 1);
+    this.itemLabelStrokeFadeOut = TweenBuilder.for(itemNameLabel.UIStroke)
+      .info(FADE_OUT_TWEEN_INFO)
+      .property("Transparency", 1);
+
     for (const button of this.buttons) {
       button.MouseButton1Click.Connect(() => this.onButtonClick(button));
       button.MouseButton2Click.Connect(() => this.onButtonRightClick(button));
@@ -76,8 +98,26 @@ export class HotbarUIController {
     const tool = this.getViewportItem(hotbarButton);
     if (!tool) return;
 
-    this.selectedButton = this.tool.toggleEquipped(tool) ? hotbarButton : undefined;
+    const equipped = this.tool.toggleEquipped(tool);
+    this.selectedButton = equipped ? hotbarButton : undefined;
     this.updateSelectionColors();
+    if (equipped)
+      this.showItemLabel(tool);
+  }
+
+  private showItemLabel(item: Model): void {
+    const { itemNameLabel, itemLabelTrash } = this;
+    itemLabelTrash.purge();
+
+    const displayName = getDisplayName(item);
+    itemNameLabel.Text = displayName;
+    itemNameLabel.UIStroke.Transparency = this.defaultStrokeTransparency;
+    itemNameLabel.TextTransparency = 0;
+
+    itemLabelTrash.add(task.delay(1.5, () => {
+      itemLabelTrash.add(this.itemLabelFadeOut.build()).Play()
+      itemLabelTrash.add(this.itemLabelStrokeFadeOut.build()).Play()
+    }));
   }
 
   private addViewportItem(hotbarButton: HotbarButton, id: number): void {
