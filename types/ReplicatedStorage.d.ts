@@ -50,6 +50,7 @@ interface ReplicatedStorage extends Instance {
         PickUp: TextLabel;
         Eat: TextLabel;
       };
+      ColorButton: ImageButton;
       InventoryItem: ItemButton;
       CraftingRecipeFrame: RecipeFrame;
       IngredientFrame: IngredientFrame;
