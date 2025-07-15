@@ -13,7 +13,7 @@ export interface PlaceStructurePacket {
 
 export interface AddHotbarItemPacket {
   readonly id: ItemID;
-  readonly slot?: u8;
+  readonly slot: HotbarKey["Name"];
 }
 
 export interface DropItemPacket {

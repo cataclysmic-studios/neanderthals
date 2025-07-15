@@ -61,7 +61,7 @@ export interface MessageData {
   [Message.UpdateCreatures]: CreatureUpdatePacket;
   [Message.Eat]: ItemID;
   [Message.AddHotbarItem]: AddHotbarItemPacket;
-  [Message.RemoveHotbarItem]: u8;
+  [Message.RemoveHotbarItem]: HotbarKey["Name"];
   [Message.Craft]: u8;
   [Message.PlaceStructure]: PlaceStructurePacket;
 }

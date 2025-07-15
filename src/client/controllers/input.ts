@@ -1,12 +1,10 @@
-import { Controller, Modding, type OnStart } from "@flamework/core";
+import { Controller, type OnStart } from "@flamework/core";
 import { UserInputService, Workspace as World } from "@rbxts/services";
 
 import { creatureStorage } from "./replication/creature";
 import type { CharacterController } from "./character";
 import type { InventoryUIController } from "./ui/inventory";
 import type { HotbarUIController } from "./ui/hotbar";
-
-const hotbarKeys = Modding.inspect<HotbarKeys>();
 
 @Controller()
 export class InputController implements OnStart {
@@ -25,7 +23,7 @@ export class InputController implements OnStart {
         case Enum.KeyCode.Four:
         case Enum.KeyCode.Five:
         case Enum.KeyCode.Six:
-          this.onHotbarKeyPress(input.KeyCode);
+          this.hotbarUI.selectButton(input.KeyCode.Name);
           break;
 
         case Enum.KeyCode.B:
@@ -41,11 +39,6 @@ export class InputController implements OnStart {
 
   public getMouseTarget(extraFilter: Instance[] = [], distance = 1000): Maybe<BasePart> {
     return this.createMouseRaycast(extraFilter, distance)?.Instance;
-  }
-
-  private onHotbarKeyPress(hotbarKey: HotbarKey): void {
-    const hotbarIndex = hotbarKeys.indexOf(hotbarKey.Name);
-    this.hotbarUI.selectButton(hotbarIndex);
   }
 
   private createMouseRaycast(extraFilter: Instance[] = [], distance = 1000): Maybe<RaycastResult> {

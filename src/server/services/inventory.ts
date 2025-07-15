@@ -3,11 +3,11 @@ import { Service } from "@flamework/core";
 import { Message, messaging } from "shared/messaging";
 import { dropItem, stopHacking } from "server/utility";
 import { getItemByID } from "shared/utility/items";
+import { inventoryHasSpace } from "shared/utility/data";
 import { EXCLUSIVE_IDS } from "shared/item-id";
-import type { EquippedGear, PlayerData } from "shared/structs/player-data";
+import type { PlayerData } from "shared/structs/player-data";
 
 import type { DataService } from "./data";
-import { calculateBagSpace, getMaxBagSpace, inventoryHasSpace } from "shared/utility/data";
 
 interface TransactionInfo {
   readonly add: [id: number, count: number][];
@@ -123,32 +123,27 @@ export class InventoryService {
     dropItem(item, new CFrame(position));
   }
 
-  private addHotbarItem(data: DeepWritable<PlayerData>, id: number, slot?: number): boolean {
+  private addHotbarItem(data: DeepWritable<PlayerData>, id: number, slot: HotbarKey["Name"]): boolean {
     id = tonumber(id)!;
 
-    const hotbar = data.hotbar as number[];
+    const { hotbar } = data;
     data.inventory.delete(id);
-    if (slot === undefined)
-      hotbar.push(id);
-    else {
-      const success = this.removeHotbarItem(data, slot);
-      if (!success)
-        return false;
 
-      hotbar.insert(slot, id);
+    if (data.hotbar.has(slot)) {
+      const success = this.removeHotbarItem(data, slot);
+      if (!success) return true;
     }
 
+    hotbar.set(slot, id);
     return true;
   }
 
-  private removeHotbarItem(data: DeepWritable<PlayerData>, slot: number): boolean {
-    type Slot = 0 | 1 | 2 | 3 | 4 | 5;
-    const index = slot + 1 as Slot;
-    const id = data.hotbar[index];
+  private removeHotbarItem(data: DeepWritable<PlayerData>, slot: HotbarKey["Name"]): boolean {
+    const id = data.hotbar.get(slot);
     if (id === undefined)
       return false;
 
-    data.hotbar[index] = undefined;
+    data.hotbar.delete(slot);
     data.inventory.set(id as number, 1);
     return true;
   }

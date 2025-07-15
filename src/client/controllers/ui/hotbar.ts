@@ -21,7 +21,7 @@ const FADE_OUT_TWEEN_INFO = new TweenInfo(1);
 export class HotbarUIController {
   private readonly frame = mainScreen.Hotbar;
   private readonly buttons = getChildrenOfType<"ImageButton", HotbarButton>(this.frame, "ImageButton");
-  private readonly defaultButtonColor = this.buttons.first()!.ImageColor3;
+  private readonly defaultButtonColor = this.frame.One.ImageColor3;
   private readonly selectedButtonColor = this.defaultButtonColor.Lerp(WHITE, 0.25);
   private readonly itemNameLabel = this.frame.Unlisted.ItemName;
   private readonly defaultStrokeTransparency = this.itemNameLabel.UIStroke.Transparency;
@@ -57,14 +57,15 @@ export class HotbarUIController {
     }
   }
 
-  public addItem(id: number, slot?: number): void {
+  public addItem(id: number, slot?: HotbarKey["Name"]): void {
     const button = slot !== undefined
-      ? this.buttons[slot]
+      ? this.frame[slot]
       : this.getNextEmptyHotbarButton();
 
     if (!button) return;
     if (this.hasViewportItem(button)) return;
 
+    slot ??= button.Name as never;
     messaging.server.emit(Message.AddHotbarItem, { id, slot });
     this.addViewportItem(button, id);
   }
@@ -74,13 +75,13 @@ export class HotbarUIController {
       this.selectButton(hotbarButton);
 
     this.removeViewportItem(hotbarButton);
-    messaging.server.emit(Message.RemoveHotbarItem, hotbarButton.LayoutOrder);
+    messaging.server.emit(Message.RemoveHotbarItem, hotbarButton.Name as never);
   }
 
   public update(items: PlayerData["hotbar"]): void {
-    const { buttons } = this;
-    for (const [i, id] of pairs(items)) {
-      const button = buttons[i - 1];
+    const { frame } = this;
+    for (const [slot, id] of pairs(items)) {
+      const button = frame[slot];
       if (this.hasViewportItem(button))
         this.removeViewportItem(button);
 
@@ -90,10 +91,10 @@ export class HotbarUIController {
   }
 
   public selectButton(hotbarButton: HotbarButton): void
-  public selectButton(hotbarSlot: number): void
-  public selectButton(hotbarButton: HotbarButton | number): void {
-    if (typeIs(hotbarButton, "number"))
-      hotbarButton = this.buttons[hotbarButton];
+  public selectButton(hotbarSlot: HotbarKey["Name"]): void
+  public selectButton(hotbarButton: HotbarButton | HotbarKey["Name"]): void {
+    if (typeIs(hotbarButton, "string"))
+      hotbarButton = this.frame[hotbarButton];
 
     const tool = this.getViewportItem(hotbarButton);
     const currentlyEquippedButNotThisSlot = this.selectedButton !== hotbarButton && this.tool.hasEquipped(tool); // lol
