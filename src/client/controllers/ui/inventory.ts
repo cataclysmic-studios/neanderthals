@@ -1,5 +1,6 @@
 import { Controller } from "@flamework/core";
 import { Trash } from "@rbxts/trash";
+import Signal from "@rbxts/lemon-signal";
 
 import { Message, messaging } from "shared/messaging";
 import { assets } from "shared/constants";
@@ -8,12 +9,11 @@ import { recordDiff } from "shared/utility";
 import { getItemByID, isItemStackable } from "shared/utility/items";
 import { addViewportItem } from "client/utility";
 import { INITIAL_DATA } from "shared/structs/player-data";
+import { EXCLUSIVE_IDS } from "shared/item-id";
 
 import type { ReplicaController } from "../replica";
 import type { CharacterController } from "../character";
-import type { MainUIController } from "./main";
 import type { HotbarUIController } from "./hotbar";
-import { EXCLUSIVE_IDS } from "shared/item-id";
 
 interface ItemFrameInfo {
   readonly button: ItemButton;
@@ -22,8 +22,9 @@ interface ItemFrameInfo {
 
 @Controller()
 export class InventoryUIController {
+  public readonly toggled = new Signal<(on: boolean) => void>;
+
   private readonly frame: PlayerGui["Main"]["Inventory"];
-  private readonly crafting: PlayerGui["Main"]["Crafting"];
   private readonly itemContainer: ScrollingFrame;
   private readonly buttonInfos = new Map<number, ItemFrameInfo>;
   private lastInventory = INITIAL_DATA.inventory;
@@ -31,14 +32,11 @@ export class InventoryUIController {
   public constructor(
     replica: ReplicaController,
     private readonly character: CharacterController,
-    private readonly mainUI: MainUIController,
     private readonly hotbar: HotbarUIController
   ) {
     const frame = this.frame = mainScreen.Inventory;
-    this.crafting = mainScreen.Crafting;
     this.itemContainer = frame.Content;
 
-    mainUI.enabled.Connect(() => this.toggle(false));
     replica.updated.Connect(data => {
       const last = this.lastInventory;
       let changes = recordDiff(data.inventory, last);
@@ -61,8 +59,7 @@ export class InventoryUIController {
   public toggle(on = !this.frame.Visible): void {
     if (this.frame.Visible === on) return;
     this.frame.Visible = on;
-    this.crafting.Visible = on;
-    this.mainUI.toggle(!on);
+    this.toggled.Fire(on);
   }
 
   private update(changes: Record<number, Maybe<number>>, deletions: Set<number>): void {

@@ -13,6 +13,7 @@ import type { ReplicaController } from "../replica";
 import type { CharacterController } from "../character";
 import type { HotbarUIController } from "./hotbar";
 import { ActionButtonsUIController } from "./action-buttons";
+import { InventoryUIController } from "./inventory";
 
 const { floor } = math;
 const { delay } = task;
@@ -21,8 +22,6 @@ const DAMAGE_DISPLAY_LIFETIME = 1;
 
 @Controller({ loadOrder: -1 })
 export class MainUIController implements OnCharacterAdd {
-  public readonly enabled = new Signal;
-
   private readonly damageDisplay = mainScreen.DamageDisplay;
   private readonly stats = mainScreen.Stats;
   private readonly levelStats = mainScreen.LevelStats;
@@ -33,11 +32,13 @@ export class MainUIController implements OnCharacterAdd {
     private readonly replica: ReplicaController,
     private readonly character: CharacterController,
     private readonly actionButtonsUI: ActionButtonsUIController,
+    inventoryUI: InventoryUIController,
     hotbar: HotbarUIController
   ) {
     messaging.client.on(Message.UpdateHunger, hunger => this.updateStats(this.hunger = hunger));
     messaging.client.on(Message.ShowDamageDisplay, humanoid => this.showDamageDisplay(humanoid));
 
+    inventoryUI.toggled.Connect(on => this.toggle(!on));
     replica.updated.Connect(data => {
       hotbar.update(data.hotbar);
       this.updateStats();
@@ -60,9 +61,6 @@ export class MainUIController implements OnCharacterAdd {
 
   public toggle(on: boolean): void {
     this.actionButtonsUI.toggle(on);
-
-    if (!on) return;
-    this.enabled.Fire();
   }
 
   public showDamageDisplay(humanoid: Humanoid): void;
