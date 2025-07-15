@@ -1,10 +1,9 @@
-import { Controller } from "@flamework/core";
+import { Controller, type OnRender } from "@flamework/core";
+import { Workspace as World } from "@rbxts/services";
 import Signal from "@rbxts/lemon-signal";
 
 import type { OnCharacterAdd } from "../hooks";
-import { FixedUpdateRate, type OnFixed } from "shared/hooks";
 import { player } from "client/constants";
-import { Workspace as World } from "@rbxts/services";
 import { XZ } from "shared/constants";
 
 const { min } = math;
@@ -16,12 +15,11 @@ async function promisifyEvent<Args extends unknown[]>(event: RBXScriptSignal<(..
 }
 
 @Controller({ loadOrder: 0 })
-@FixedUpdateRate(52)
-export class CharacterController implements OnFixed, OnCharacterAdd {
+export class CharacterController implements OnRender, OnCharacterAdd {
   public readonly spawned = new Signal<(model: CharacterModel) => void>;
   public readonly died = new Signal;
 
-  public onFixed(dt: number): void {
+  public onRender(dt: number): void {
     const root = this.getRoot();
     if (!root) return;
 
