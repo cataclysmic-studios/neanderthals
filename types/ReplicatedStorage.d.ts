@@ -28,9 +28,18 @@ interface ReplicatedStorage extends Instance {
       IronBar: Model;
       Flux: Model;
     };
+    NaturalStructures: Folder & {
+      Tree: StructureModel;
+      Bush: StructureModel
+      Rock: StructureModel;
+      ["Big Rock"]: StructureModel;
+      ["Iron Node"]: StructureModel;
+      ["Gold Node"]: StructureModel;
+      ["Flux Cluster"]: StructureModel;
+    }
     Structures: Folder & {
-      WoodWall: Model;
-      Campfire: Model;
+      WoodWall: StructureModel;
+      Campfire: StructureModel;
     };
     UI: Folder & {
       CookProgressUI: BillboardGui & {

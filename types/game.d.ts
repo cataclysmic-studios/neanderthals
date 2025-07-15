@@ -34,6 +34,7 @@ interface ProgressBarFrame extends Frame {
 }
 
 type StructureName = ExtractKeys<ReplicatedStorage["Assets"]["Structures"], Model>;
+type NaturalStructureName = ExtractKeys<ReplicatedStorage["Assets"]["NaturalStructures"], Model>;
 type ItemName = ExtractKeys<ReplicatedStorage["Assets"]["Items"], Model>;
 type CreatureName = ExtractKeys<ReplicatedStorage["Assets"]["Creatures"], CreatureModel>;
 

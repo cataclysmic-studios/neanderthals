@@ -13,7 +13,13 @@ const { Angles: angles } = CFrame;
 const PASTEL_BLUE = new BrickColor("Pastel Blue");
 const ROTATION_DEGREES_PER_SECOND = 160;
 const OUT_OUT_BOUNDS_CFRAME = new CFrame(0, 1e8, 0);
-const MOUSE_IGNORE = [World.DroppedItems, World.PlacedStructures, World.StructureHolograms];
+const MOUSE_IGNORE = [
+  World.DroppedItems,
+  World.PlacedStructures,
+  World.NaturalStructures,
+  World.StructureSpawns,
+  World.StructureHolograms
+];
 
 @Controller()
 export class BuildingController implements OnTick {

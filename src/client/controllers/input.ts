@@ -55,6 +55,7 @@ export class InputController implements OnStart {
     raycastParams.AddToFilter([
       this.character.get()!,
       creatureStorage,
+      World.CreatureSpawns,
       ...extraFilter
     ]);
 
