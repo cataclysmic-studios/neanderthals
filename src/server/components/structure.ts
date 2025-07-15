@@ -54,9 +54,7 @@ export class Structure extends CreatesDropsComponent<{}, StructureModel> impleme
   public getDamage(current: number, toolTier: number, toolKind: Maybe<ToolKind>): number {
     const { toolKind: requiredToolKind, minimumToolTier = 0 } = this.config;
     let damage = current;
-    if (toolKind !== undefined && toolKind !== requiredToolKind)
-      damage /= 2;
-    if (toolTier < minimumToolTier) {
+    if (toolTier < minimumToolTier || (toolKind !== undefined && toolKind !== requiredToolKind)) {
       damage = 0;
       this.shake(); // dumbest hack lol
     }
