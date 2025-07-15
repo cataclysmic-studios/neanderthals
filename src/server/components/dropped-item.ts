@@ -104,6 +104,8 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
   }
 
   private async pickUp(player: Player): Promise<void> {
+    assert(this.itemID >= 0, "Item ID for dropped item @" + this.instance.GetFullName() + "is < 0");
+
     if (this.itemID === Item.Flux) {
       const xpGain = this.instance.GetAttribute<number>("XP") ?? 6;
       this.levels.addXP(player, xpGain);
