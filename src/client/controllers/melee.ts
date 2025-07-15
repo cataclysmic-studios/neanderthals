@@ -32,17 +32,30 @@ function visualizeHitbox(origin: CFrame, direction: Vector3, hitboxSize: Vector3
 @Controller()
 export class MeleeController implements OnFixed {
   private isSwinging = false;
+  private isClickHeld = false;
 
   public constructor(
     private readonly character: CharacterController,
     private readonly animation: AnimationController,
     private readonly tool: ToolController,
     private readonly damage: DamageController
-  ) { }
+  ) {
+    UserInputService.InputBegan.Connect((input, gameProcessed) => {
+      if (gameProcessed) return;
+      if (input.UserInputType !== Enum.UserInputType.MouseButton1) return;
+      if (!this.tool.hasEquipped()) return;
+      this.isClickHeld = true;
+    });
+    UserInputService.InputEnded.Connect((input, gameProcessed) => {
+      if (gameProcessed) return;
+      if (input.UserInputType !== Enum.UserInputType.MouseButton1) return;
+      this.isClickHeld = false;
+    });
+  }
 
   public onFixed(): void {
+    if (!this.isClickHeld) return;
     if (!this.tool.hasEquipped()) return;
-    if (!this.isClickHeld()) return;
     this.swing();
   }
 
@@ -80,9 +93,5 @@ export class MeleeController implements OnFixed {
     if (!hitModel) return;
 
     this.damage.deal(hitModel);
-  }
-
-  private isClickHeld(): boolean {
-    return UserInputService.IsMouseButtonPressed(Enum.UserInputType.MouseButton1);
   }
 }
