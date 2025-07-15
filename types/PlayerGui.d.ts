@@ -1,5 +1,8 @@
 interface PlayerGui extends BasePlayerGui {
   Main: ScreenGui & {
+    Tribes: Frame & {
+
+    };
     ActionButtons: Frame & {
       Inventory: ImageButton;
       Tribes: ImageButton;
