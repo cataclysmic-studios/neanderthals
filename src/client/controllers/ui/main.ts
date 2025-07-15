@@ -14,6 +14,7 @@ import type { CharacterController } from "../character";
 import type { HotbarUIController } from "./hotbar";
 import { ActionButtonsUIController } from "./action-buttons";
 import { InventoryUIController } from "./inventory";
+import { TribesUIController } from "./tribes";
 
 const { floor } = math;
 const { delay } = task;
@@ -32,15 +33,35 @@ export class MainUIController implements OnCharacterAdd {
     private readonly replica: ReplicaController,
     private readonly character: CharacterController,
     private readonly actionButtonsUI: ActionButtonsUIController,
+    hotbarUI: HotbarUIController,
     inventoryUI: InventoryUIController,
-    hotbar: HotbarUIController
+    tribesUI: TribesUIController
   ) {
     messaging.client.on(Message.UpdateHunger, hunger => this.updateStats(this.hunger = hunger));
     messaging.client.on(Message.ShowDamageDisplay, humanoid => this.showDamageDisplay(humanoid));
 
-    inventoryUI.toggled.Connect(on => this.toggle(!on));
+    const hideMainUIs = [inventoryUI, tribesUI];
+    const tryEnableMain = () => {
+      if (!hideMainUIs.every(ui => !ui.isEnabled())) return;
+      this.toggle(true);
+    };
+
+    inventoryUI.toggled.Connect(on => {
+      if (!on)
+        return tryEnableMain();
+
+      this.toggle(false);
+      tribesUI.toggle(false);
+    });
+    tribesUI.toggled.Connect(on => {
+      if (!on)
+        return tryEnableMain();
+
+      this.toggle(false)
+      inventoryUI.toggle(false);
+    });
     replica.updated.Connect(data => {
-      hotbar.update(data.hotbar);
+      hotbarUI.update(data.hotbar);
       this.updateStats();
       this.updateLevelStats();
     });

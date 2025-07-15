@@ -5,12 +5,14 @@ import { creatureStorage } from "./replication/creature";
 import type { CharacterController } from "./character";
 import type { InventoryUIController } from "./ui/inventory";
 import type { HotbarUIController } from "./ui/hotbar";
+import { TribesUIController } from "./ui/tribes";
 
 @Controller()
 export class InputController implements OnStart {
   public constructor(
     private readonly character: CharacterController,
     private readonly inventoryUI: InventoryUIController,
+    private readonly tribesUI: TribesUIController,
     private readonly hotbarUI: HotbarUIController
   ) { }
 
@@ -28,6 +30,9 @@ export class InputController implements OnStart {
 
         case Enum.KeyCode.B:
           this.inventoryUI.toggle();
+          break;
+        case Enum.KeyCode.T:
+          this.tribesUI.toggle();
           break;
       }
     });

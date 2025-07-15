@@ -18,4 +18,8 @@ export class TribesUIController {
     this.frame.Visible = on;
     this.toggled.Fire(on);
   }
+
+  public isEnabled(): boolean {
+    return this.frame.Visible;
+  }
 }

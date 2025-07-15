@@ -14,6 +14,7 @@ import { EXCLUSIVE_IDS } from "shared/item-id";
 import type { ReplicaController } from "../replica";
 import type { CharacterController } from "../character";
 import type { HotbarUIController } from "./hotbar";
+import type { TribesUIController } from "./tribes";
 
 interface ItemFrameInfo {
   readonly button: ItemButton;
@@ -32,7 +33,8 @@ export class InventoryUIController {
   public constructor(
     replica: ReplicaController,
     private readonly character: CharacterController,
-    private readonly hotbar: HotbarUIController
+    private readonly hotbar: HotbarUIController,
+    tribesUI: TribesUIController
   ) {
     const frame = this.frame = mainScreen.Inventory;
     this.itemContainer = frame.Content;
@@ -60,6 +62,10 @@ export class InventoryUIController {
     if (this.frame.Visible === on) return;
     this.frame.Visible = on;
     this.toggled.Fire(on);
+  }
+
+  public isEnabled(): boolean {
+    return this.frame.Visible;
   }
 
   private update(changes: Record<number, Maybe<number>>, deletions: Set<number>): void {
