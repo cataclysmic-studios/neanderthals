@@ -1,4 +1,4 @@
-import { u8, u16, f24, i24, Vector, List, Transform } from "@rbxts/serio";
+import { u8, u16, i16, f24, Vector, List, Transform } from "@rbxts/serio";
 
 export type DropID = u8;
 export type ItemID = u8;
@@ -18,7 +18,7 @@ export interface AddHotbarItemPacket {
 
 export interface DropItemPacket {
   readonly id: ItemID;
-  readonly position: Vector<i24>;
+  readonly position: Vector<i16>;
 }
 
 interface BaseDamagePacket {
@@ -47,7 +47,7 @@ export interface ToolEquipReplicationPacket {
 export interface CreatureSpawnPacket {
   readonly name: CreatureName;
   readonly id: CreatureID;
-  readonly position: Vector<i24>;
+  readonly position: Vector<i16>;
   readonly health: u16;
 }
 
