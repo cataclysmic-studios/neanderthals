@@ -1,7 +1,7 @@
 import { Workspace as World } from "@rbxts/services";
 import { getDescendantsOfType } from "@rbxts/instance-utility";
 
-const { random } = math;
+const { min, random } = math;
 
 export function stopHacking(player: Player, reason = "unspecified"): void {
   return player.Kick("nice try dum dum\nreason: " + reason);
@@ -28,12 +28,9 @@ export function dropItem(itemTemplate: PVInstance, origin: CFrame, radius: Vecto
     const id = cumulativeDropID++;
     const drop = itemTemplate.Clone();
     const x = radius.X / 2;
+    const y = min(radius.Y / 2, 5);
     const z = radius.Z / 2;
-    const offset = vector.create(
-      random(-x, x),
-      0,
-      random(-z, z)
-    );
+    const offset = vector.create(random(-x, x), random(-y, y), random(-z, z));
 
     drop.SetAttribute("DropID", id);
     drop.PivotTo(origin.add(offset));
