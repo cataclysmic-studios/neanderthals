@@ -5,18 +5,18 @@ import { $nameof } from "rbxts-transform-debug";
 
 import type { OnFixed } from "shared/hooks";
 import { Message, messaging } from "shared/messaging";
+import { Item } from "shared/item-id";
 import { DEFAULT_DROPPED_ITEM_ATTRIBUTES, type DroppedItemAttributes } from "shared/structs/dropped-item-attributes";
 
 import DestroyableComponent from "shared/base-components/destroyable";
 import type { InventoryService } from "server/services/inventory";
 import type { LevelsService } from "server/services/levels";
 import type { HungerService } from "server/services/hunger";
-import { Item } from "shared/item-id";
 
 const { magnitude } = vector;
 
 const DRAG_DISTANCE = 24;
-const DECAY_TIME = 360;
+const DECAY_TIME = 600; // 10 mins
 const MAX_SPEED = 60;
 
 function getPartsIncludingSelf(instance: Instance): BasePart[] {
