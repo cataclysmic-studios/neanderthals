@@ -9,6 +9,9 @@ import SmoothValue from "shared/classes/smooth-value";
 
 import DestroyableComponent from "shared/base-components/destroyable";
 import { CreatureAnimator } from "./creature-animator";
+import { distanceBetween } from "shared/utility";
+import { CharacterController } from "client/controllers/character";
+import { CREATURE_DRAW_DISTANCE } from "shared/constants";
 
 const { clamp } = math;
 
@@ -33,7 +36,10 @@ export class CreatureSync extends DestroyableComponent<{ ID: number }, CreatureM
   private latestCFrame = this.cframe;
   private timeNow = 0;
 
-  public constructor(components: Components) {
+  public constructor(
+    components: Components,
+    private readonly character: CharacterController
+  ) {
     super();
     this.animator = components.getComponent(this.instance)!;
     for (const part of getDescendantsOfType(this.instance, "BasePart"))
@@ -49,12 +55,19 @@ export class CreatureSync extends DestroyableComponent<{ ID: number }, CreatureM
   public onTick(dt: number): void {
     this.updateTimeNow(dt);
 
-    const { animator } = this;
+    const { root, animator } = this;
     const cframe = this.getLerpedCFrame(World.GetServerTimeNow() - INTERPOLATION_DELAY);
     const lastCFrame = this.cframe;
     this.cframe = cframe; // update cframe asap
-    this.root.AssemblyLinearVelocity = vector.zero;
-    this.root.AssemblyAngularVelocity = vector.zero;
+
+    const distance = distanceBetween(cframe.Position, this.character.getPositionOrDefault());
+    if (distance > CREATURE_DRAW_DISTANCE) {
+      this.cframe = new CFrame(0, 1e8, 0);
+      return;
+    }
+
+    root.AssemblyLinearVelocity = vector.zero;
+    root.AssemblyAngularVelocity = vector.zero;
 
     const moving = !lastCFrame.FuzzyEq(cframe);
     const isWalkAnimationPlaying = animator.isWalking();
