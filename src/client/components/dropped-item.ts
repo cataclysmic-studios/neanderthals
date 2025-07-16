@@ -1,6 +1,8 @@
 import type { OnStart } from "@flamework/core";
 import { Component, type Components } from "@flamework/components";
 import { Workspace as World } from "@rbxts/services";
+import { TweenBuilder } from "@rbxts/twin";
+import { getDescendantsOfType } from "@rbxts/instance-utility";
 import { $nameof } from "rbxts-transform-debug";
 
 import type { OnFixed } from "shared/hooks";
@@ -18,6 +20,7 @@ import type { InputController } from "client/controllers/input";
 import type { CharacterController } from "client/controllers/character";
 
 const PROMPT_UI = assets.UI.DroppedItemUI;
+const PICK_UP_TWEEN_INFO = new TweenInfo(1, Enum.EasingStyle.Sine);
 
 @Component({
   tag: $nameof<DroppedItem>(),
@@ -30,6 +33,7 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
   private readonly promptUI = PROMPT_UI.Clone();
   private readonly displayName = getDisplayName(this.instance);
   private readonly maxDistance = this.dragDetector.MaxActivationDistance;
+  private prompt!: DroppedItemPrompt;
   private destroyed = false;
 
   public constructor(
@@ -57,12 +61,12 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
     promptUI.Parent = instance;
 
     const dropID = this.attributes.DropID;
-    const prompt = trash.add(this.components.addComponent<DroppedItemPrompt>(promptUI));
+    const prompt = this.prompt = this.components.addComponent<DroppedItemPrompt>(promptUI);
     trash.add(prompt.consumed.Connect(message => {
       if (message === Message.EatDrop && !this.attributes.Food) return;
       if (message === Message.PickUpDrop && !inventoryHasSpace(this.replica.data)) return;
+      this.pickUpAnimation();
       messaging.server.emit(message, dropID);
-      this.destroy();
     }));
   }
 
@@ -88,6 +92,29 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
       return this.toggleHover(false);
 
     this.toggleHover(true);
+  }
+
+  private pickUpAnimation(): void {
+    const characterPivot = this.character.getPivot();
+    if (!characterPivot) return;
+
+    const { instance } = this;
+    this.prompt.destroy();
+
+    for (const part of getDescendantsOfType(instance, "BasePart")) {
+      part.CanCollide = false;
+      part.CastShadow = false;
+      TweenBuilder.for(part)
+        .info(PICK_UP_TWEEN_INFO)
+        .property("Transparency", 1)
+        .play();
+    }
+
+    TweenBuilder.forModel(instance)
+      .info(PICK_UP_TWEEN_INFO)
+      .property("Value", characterPivot)
+      .onCompleted(() => this.destroy())
+      .play();
   }
 
   private toggleHover(on: boolean): void {
