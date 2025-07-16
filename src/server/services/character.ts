@@ -1,4 +1,5 @@
 import { Service } from "@flamework/core";
+import { Workspace as World } from "@rbxts/services";
 import { getDescendantsOfType } from "@rbxts/instance-utility";
 import Signal from "@rbxts/lemon-signal";
 
@@ -13,6 +14,8 @@ export class CharacterService implements OnPlayerAdd {
   }
 
   private onCharacterAdd(player: Player, character: Model): void {
+    character.Parent = World.PlayerCharacterStorage;
+
     this.added.Fire(player, character);
     for (const part of getDescendantsOfType(character, "BasePart"))
       part.CollisionGroup = "Players";

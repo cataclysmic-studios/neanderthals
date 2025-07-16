@@ -7,12 +7,13 @@ import { FixedUpdateRate, type OnFixed } from "shared/hooks";
 import { distanceBetween, sanitizeVector } from "shared/utility";
 import { CREATURE_UPDATE_RATE, XZ } from "shared/constants";
 
-const { random, clamp } = math;
+const { random, clamp, max, deg, acos } = math;
 const { normalize } = vector;
 
+const MAX_SLOPE_ANGLE = 50;
 const WALK_RADIUS = 24;
 const UP50: Vector3 = vector.create(0, 50, 0);
-const DOWN100: Vector3 = vector.create(0, -100, 0);
+const DOWN500: Vector3 = vector.create(0, -500, 0);
 
 interface Attributes {
   readonly ID: number;
@@ -34,10 +35,49 @@ function getRandomPoint(origin: Vector3, creature: CreatureServerModel): Maybe<V
   params.FilterDescendantsInstances = [creature];
   params.FilterType = Enum.RaycastFilterType.Exclude;
 
-  const result = World.Raycast(rayOrigin, DOWN100, params);
+  const result = World.Raycast(rayOrigin, DOWN500, params);
   return result?.Position
     .mul(XZ)
     .add(vector.create(0, target.Y, 0));
+}
+
+function getGroundYAndNormal(origin: Vector3, rootHeight: number, agentRadius: number): LuaTuple<[number, Vector3?]> {
+  const raycastParams = new RaycastParams;
+  raycastParams.AddToFilter([World.PlayerCharacterStorage, World.CreatureServerStorage, World.CreatureSpawns]);
+  raycastParams.CollisionGroup = "CreatureRaycast";
+  raycastParams.FilterType = Enum.RaycastFilterType.Exclude;
+  raycastParams.RespectCanCollide = true;
+
+  const heightOffset = max(rootHeight, 3);
+  const originWithHeight = origin.add(Vector3.yAxis.mul(heightOffset));
+
+  const halfRadius = agentRadius / 2;
+  const offsets: Vector3[] = [
+    vector.create(-halfRadius, 0, -halfRadius), // back-left
+    vector.create(halfRadius, 0, -halfRadius), // back-right
+    vector.create(-halfRadius, 0, halfRadius), // front-left
+    vector.create(halfRadius, 0, halfRadius), // front-right
+    vector.zero // center
+  ];
+
+  const results: RaycastResult[] = [];
+  for (const offset of offsets) {
+    const castOrigin = originWithHeight.add(offset);
+    const result = World.Raycast(castOrigin, DOWN500, raycastParams);
+    if (result !== undefined)
+      results.push(result);
+  }
+
+  if (results.size() === 0)
+    return $tuple(origin.Y); // NOTHING TO STAND ON
+
+  let highestResult = results.first()!;
+  for (let i = 1; i < results.size(); i++) {
+    if (results[i].Position.Y <= highestResult.Position.Y) continue;
+    highestResult = results[i];
+  }
+
+  return $tuple(highestResult.Position.Y + rootHeight, highestResult.Normal);
 }
 
 @Component({ tag: $nameof<CreaturePathfinding>() })
@@ -50,13 +90,14 @@ export class CreaturePathfinding extends DestroyableComponent<Attributes, Creatu
   private readonly origin = this.root.Position;
   private readonly size = this.attributes.CreaturePathfinding_Size;
   private readonly speed = this.attributes.CreaturePathfinding_Speed;
-  private readonly path = this.trash.add(PathfindingService.CreatePath({
+  private readonly agentParams: AgentParameters = {
     AgentCanClimb: false,
     AgentCanJump: false,
     AgentHeight: this.size.Y,
     AgentRadius: (this.size.X + this.size.Z) / 2,
     WaypointSpacing: 6
-  }));
+  };
+  private readonly path = this.trash.add(PathfindingService.CreatePath(this.agentParams));
 
   private waypoints: PathWaypoint[] = [];
   private currentWaypointIndex = 0;
@@ -66,6 +107,7 @@ export class CreaturePathfinding extends DestroyableComponent<Attributes, Creatu
   private endPosition?: Vector3;
   private moveStartTime = 0;
   private moveDuration = 0;
+  private y = this.root.Position.Y;
 
   public constructor() {
     super();
@@ -82,7 +124,8 @@ export class CreaturePathfinding extends DestroyableComponent<Attributes, Creatu
     const elapsed = os.clock() - this.moveStartTime;
     const alpha = clamp(elapsed / this.moveDuration, 0, 1);
     const newPosition = startPosition.Lerp(endPosition, alpha);
-    this.setCFrame(newPosition);
+    this.alignToGround();
+    this.setPosition(newPosition);
 
     if (alpha < 1) return;
     if (++this.currentWaypointIndex <= this.waypoints.size())
@@ -106,6 +149,18 @@ export class CreaturePathfinding extends DestroyableComponent<Attributes, Creatu
       this.isMoving = true;
       resolve();
     });
+  }
+
+  private alignToGround(): void {
+    const { root } = this;
+    const rootPosition = root.Position;
+    const [y, normal] = getGroundYAndNormal(rootPosition, this.size.Y / 2, this.agentParams.AgentRadius!);
+    if (normal !== undefined) {
+      const angle = deg(acos(clamp(normal.Y, -1, 1)));
+      if (angle > MAX_SLOPE_ANGLE) return;
+    }
+
+    this.y = y;
   }
 
   private tryIdle(): void {
@@ -135,12 +190,12 @@ export class CreaturePathfinding extends DestroyableComponent<Attributes, Creatu
     const distance = distanceBetween(startPosition, endPosition);
     this.moveDuration = distance / this.speed;
     this.moveStartTime = os.clock();
-    this.setCFrame(rootPosition);
+    this.setPosition(rootPosition);
   }
 
-  private setCFrame(newPosition: Vector3): void {
+  private setPosition(newPosition: Vector3): void {
     const direction = this.getMoveDirection();
-    const heightAdjustedPosition = newPosition.mul(XZ).add(vector.create(0, this.size.Y / 2, 0));
+    const heightAdjustedPosition = newPosition.mul(XZ).add(vector.create(0, this.y, 0));
     const lookAt = sanitizeVector(heightAdjustedPosition.add(direction));
     this.cframe = this.root.CFrame = new CFrame(heightAdjustedPosition, lookAt);
   }
