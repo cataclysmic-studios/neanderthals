@@ -1,7 +1,7 @@
 import { Workspace as World } from "@rbxts/services";
 import { getDescendantsOfType } from "@rbxts/instance-utility";
 
-const { min, random } = math;
+const { min, clamp, random } = math;
 
 export function stopHacking(player: Player, reason = "unspecified"): void {
   return player.Kick("nice try dum dum\nreason: " + reason);
@@ -34,7 +34,7 @@ export function dropItem(itemTemplate: PVInstance, origin: CFrame, radius: Vecto
 
     drop.SetAttribute("DropID", id);
     drop.PivotTo(origin.add(offset));
-    drop.Destroying.Once(() => cumulativeDropID = id - 1);
+    drop.Destroying.Once(() => cumulativeDropID = clamp(id - 1, 0, 255));
     drop.Parent = World.DroppedItems;
     drop.AddTag("DroppedItem");
 
