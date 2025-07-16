@@ -1,6 +1,21 @@
 interface PlayerGui extends BasePlayerGui {
   Main: ScreenGui & {
     Tribes: Frame & {
+      Tribe: Frame & {
+        TribeName: TextLabel;
+        Members: ScrollingFrame;
+        ChiefAvatar: ImageLabel;
+        ChiefName: TextLabel;
+        Chief: Frame & {
+          Ally: TextButton;
+          Announce: TextButton;
+          PlaceTotem: TextButton;
+          Leave: TextButton;
+        };
+        Member: Frame & {
+          Leave: TextButton;
+        };
+      };
       NoTribe: Frame & {
         Create: TextButton;
         Colors: Frame;

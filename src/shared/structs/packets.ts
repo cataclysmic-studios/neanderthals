@@ -1,4 +1,5 @@
 import { u8, u16, i16, f24, Vector, List, Transform } from "@rbxts/serio";
+import { TribeColorName } from "shared/constants";
 
 export type DropID = u8;
 export type ItemID = u8;

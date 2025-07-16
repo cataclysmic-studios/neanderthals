@@ -50,6 +50,11 @@ interface ReplicatedStorage extends Instance {
         PickUp: TextLabel;
         Eat: TextLabel;
       };
+      TribeMember: Frame & {
+        Avatar: ImageLabel;
+        PlayerName: TextLabel;
+        Kick: TextButton;
+      };
       ColorButton: ImageButton;
       InventoryItem: ItemButton;
       CraftingRecipeFrame: RecipeFrame;

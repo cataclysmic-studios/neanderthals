@@ -15,7 +15,7 @@ import type {
   PlaceStructurePacket
 } from "./structs/packets";
 import type { PlayerData } from "./structs/player-data";
-import { TribeColorName } from "./constants";
+import type { TribeColorName } from "./constants";
 
 export const messaging = MessageEmitter.create<MessageData>();
 
@@ -41,16 +41,22 @@ export const enum Message {
   RemoveHotbarItem,
   Craft,
   PlaceStructure,
-  CreateTribe
+  CreateTribe,
+  TribeCreated,
+  KickTribeMember,
+  JoinTribe,
+  LeaveTribe,
+  GetTribeChief,
+  ReturnTribeChief,
 }
 
 export interface MessageData {
   [Message.Damage]: DamagePacket;
   [Message.DamageCreature]: CreatureDamagePacket;
   [Message.ShowDamageDisplay]: Humanoid;
-  [Message.EquipTool]: ToolItem; // just the slot number when inventory/hotbar is implemented
+  [Message.EquipTool]: ToolItem; // TODO: just the slot number
   [Message.UnequipTool]: undefined;
-  [Message.ReplicateEquipTool]: ToolEquipReplicationPacket; // just the slot number when inventory/hotbar is implemented
+  [Message.ReplicateEquipTool]: ToolEquipReplicationPacket; // TODO: just the slot number
   [Message.ReplicateUnequipTool]: Player;
   [Message.UpdateHunger]: u8;
   [Message.InitializeData]: undefined;
@@ -67,4 +73,10 @@ export interface MessageData {
   [Message.Craft]: u8;
   [Message.PlaceStructure]: PlaceStructurePacket;
   [Message.CreateTribe]: TribeColorName;
+  [Message.TribeCreated]: Player;
+  [Message.KickTribeMember]: Player;
+  [Message.JoinTribe]: Player; // chief
+  [Message.LeaveTribe]: undefined;
+  [Message.GetTribeChief]: undefined;
+  [Message.ReturnTribeChief]: Maybe<Player>;
 }
