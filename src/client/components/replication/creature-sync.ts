@@ -53,6 +53,8 @@ export class CreatureSync extends DestroyableComponent<{ ID: number }, CreatureM
     const cframe = this.getLerpedCFrame(World.GetServerTimeNow() - INTERPOLATION_DELAY);
     const lastCFrame = this.cframe;
     this.cframe = cframe; // update cframe asap
+    this.root.AssemblyLinearVelocity = vector.zero;
+    this.root.AssemblyAngularVelocity = vector.zero;
 
     const moving = !lastCFrame.FuzzyEq(cframe);
     const isWalkAnimationPlaying = animator.isWalking();
