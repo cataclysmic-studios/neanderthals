@@ -21,14 +21,13 @@ interface Attributes {
 }
 
 /** Get a random reachable point */
-function getRandomPoint(creature: CreatureServerModel): Maybe<Vector3> {
+function getRandomPoint(origin: Vector3, creature: CreatureServerModel): Maybe<Vector3> {
   const offset = vector.create(
     random(-WALK_RADIUS, WALK_RADIUS),
     0,
     random(-WALK_RADIUS, WALK_RADIUS)
   );
 
-  const origin = creature.Root.Position;
   const target = origin.add(offset);
   const rayOrigin = target.add(UP50);
   const params = new RaycastParams;
@@ -48,6 +47,7 @@ export class CreaturePathfinding extends DestroyableComponent<Attributes, Creatu
   public readonly root = this.instance.Root;
   public cframe = CFrame.identity;
 
+  private readonly origin = this.root.Position;
   private readonly size = this.attributes.CreaturePathfinding_Size;
   private readonly speed = this.attributes.CreaturePathfinding_Speed;
   private readonly path = this.trash.add(PathfindingService.CreatePath({
@@ -73,19 +73,8 @@ export class CreaturePathfinding extends DestroyableComponent<Attributes, Creatu
   }
 
   public onFixed(): void {
-    if (!this.isMoving) {
-      if (!this.isIdlePathing) {
-        const point = getRandomPoint(this.instance);
-        if (!point) return;
-
-        this.isIdlePathing = true;
-        this.moveTo(point).catch(warn).await();
-        this.trash.add(task.delay(random(6, 9), () => this.isIdlePathing = false));
-        task.wait(0.1); // important
-        this.moveToNextWaypoint();
-      }
-      return;
-    }
+    if (!this.isMoving)
+      return this.tryIdle();
 
     const { startPosition, endPosition } = this;
     if (!startPosition || !endPosition) return;
@@ -117,6 +106,19 @@ export class CreaturePathfinding extends DestroyableComponent<Attributes, Creatu
       this.isMoving = true;
       resolve();
     });
+  }
+
+  private tryIdle(): void {
+    if (this.isIdlePathing) return;
+
+    const point = getRandomPoint(this.origin, this.instance);
+    if (!point) return;
+
+    this.isIdlePathing = true;
+    this.moveTo(point).catch(warn).await();
+    this.trash.add(task.delay(random(6, 9), () => this.isIdlePathing = false));
+    task.wait(0.1); // important
+    this.moveToNextWaypoint();
   }
 
   private moveToNextWaypoint(): void {
