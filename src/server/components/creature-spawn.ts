@@ -45,19 +45,14 @@ export class CreatureSpawn extends CreatesDropsComponent<Attributes, BasePart> i
   }
 
   public onStart(): void {
-    this.character.added.Connect(player => this.onCharacterAdd(player));
+    messaging.server.on(Message.InitializeData, player => this.hydrate(player));
     this.spawn();
-  }
-
-  private onCharacterAdd(player: Player): void {
-    this.hydrate(player);
   }
 
   private hydrate(player: Player): void {
     const { creature } = this;
     if (!creature) return;
 
-    task.wait(0.5); // POOOOOOP
     messaging.client.emit(player, Message.SpawnCreature, {
       name: this.name,
       id: creature.GetAttribute<number>("ID")!,
