@@ -4,13 +4,17 @@ import { getDescendantsOfType } from "@rbxts/instance-utility";
 
 import { Message, messaging } from "shared/messaging";
 import { player } from "client/constants";
+import { isValidStructureDistance } from "shared/utility";
 import { getRecipeIndex, getStructureRecipe } from "shared/recipes";
-import { InputController } from "./input";
+
+import type { InputController } from "./input";
+import { STRUCTURE_OVERLAP_PARAMS } from "shared/constants";
 
 const { rad } = math;
 const { Angles: angles } = CFrame;
 
 const PASTEL_BLUE = new BrickColor("Pastel Blue");
+const BRIGHT_RED = new BrickColor("Bright red");
 const ROTATION_DEGREES_PER_SECOND = 160;
 const OUT_OUT_BOUNDS_CFRAME = new CFrame(0, 1e8, 0);
 const MOUSE_IGNORE = [
@@ -39,17 +43,22 @@ export class BuildingController implements OnTick {
     const { hologram, currentStructureSize } = this;
     if (!hologram || !this.currentStructure || !currentStructureSize) return;
 
+    const rotationThisFrame = dt * ROTATION_DEGREES_PER_SECOND;
     if (UserInputService.IsKeyDown("R"))
-      this.rotation += dt * ROTATION_DEGREES_PER_SECOND;
+      this.rotation += rotationThisFrame;
     if (UserInputService.IsKeyDown("Q"))
-      this.rotation -= dt * ROTATION_DEGREES_PER_SECOND;
+      this.rotation -= rotationThisFrame;
 
-    const root = hologram.PrimaryPart!;
     const mousePosition = this.input.getMouseWorldPosition(MOUSE_IGNORE);
     if (!mousePosition) {
-      root.CFrame = OUT_OUT_BOUNDS_CFRAME;
+      hologram.PivotTo(OUT_OUT_BOUNDS_CFRAME);
       return;
     }
+
+    const canPlace = this.canPlaceHologram();
+    const parts = getDescendantsOfType(hologram, "BasePart");
+    for (const part of parts)
+      part.BrickColor = canPlace ? PASTEL_BLUE : BRIGHT_RED;
 
     const mouseCFrame = new CFrame(mousePosition.add(vector.create(0, currentStructureSize.Y / 2, 0)));
     hologram.PivotTo(mouseCFrame.mul(angles(0, rad(this.rotation), 0)));
@@ -88,6 +97,7 @@ export class BuildingController implements OnTick {
 
   private tryPlace(): void {
     if (!this.isInBuildMode()) return;
+    if (!this.canPlaceHologram()) return;
 
     const id = this.currentStructure!.GetAttribute<number>("ID")!;
     const recipe = getStructureRecipe(id);
@@ -98,6 +108,18 @@ export class BuildingController implements OnTick {
     const recipeIndex = getRecipeIndex(recipe);
     this.leaveBuildMode();
     messaging.server.emit(Message.PlaceStructure, { id, recipeIndex, cframe });
+  }
+
+  private canPlaceHologram(): boolean {
+    const { hologram } = this;
+    if (!hologram)
+      return false;
+
+    const root = hologram.PrimaryPart!;
+    const origin = root.Position;
+    const [_, size] = hologram.GetBoundingBox();
+    const overlappingParts = World.GetPartsInPart(root, STRUCTURE_OVERLAP_PARAMS);
+    return isValidStructureDistance(overlappingParts, size, origin);
   }
 
   private isInBuildMode(): boolean {

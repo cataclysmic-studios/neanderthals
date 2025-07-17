@@ -1,8 +1,22 @@
 import type { Trash } from "@rbxts/trash";
 import type { HashMap } from "@rbxts/serio";
 
-const { floor } = math;
+const { max, floor } = math;
 const { magnitude } = vector;
+
+export function isValidStructureDistance(overlappingParts: BasePart[], size: Vector3, origin: Vector3): boolean {
+  const overlappingStructures = new Set(overlappingParts.mapFiltered(p => p.FindFirstAncestorOfClass("Model")));
+  for (const structure of overlappingStructures) {
+    const position = structure.PrimaryPart!.Position;
+    const distance = distanceBetween(origin, position);
+    const closestDistance = max(size.X, size.Y, size.Z) / 3;
+    if (distance > closestDistance) continue;
+
+    return false;
+  }
+
+  return true;
+}
 
 export function getXPToLevelUp(level: number): number {
   return floor(25 + level ** 1.5) - 1;
@@ -25,7 +39,7 @@ export function objectFromEntries<K extends string | number | symbol, V>(entries
   return new Map(entries) as never; // goat hack
 }
 
-export function distanceBetween(a: Vector3, b: Vector3) {
+export function distanceBetween(a: Vector3, b: Vector3): number {
   return magnitude(a.sub(b));
 }
 

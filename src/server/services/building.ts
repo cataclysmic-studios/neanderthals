@@ -10,6 +10,8 @@ import { RECIPES } from "shared/recipes";
 import type { PlaceStructurePacket } from "shared/structs/packets";
 
 import type { InventoryService } from "./inventory";
+import { isValidStructureDistance } from "shared/utility";
+import { STRUCTURE_OVERLAP_PARAMS } from "shared/constants";
 
 @Service()
 export class BuildingService implements OnPlayerAdd, OnPlayerRemove {
@@ -48,6 +50,8 @@ export class BuildingService implements OnPlayerAdd, OnPlayerRemove {
     if (!success)
       return stopHacking(player, "failed to craft structure");
 
+    if (!this.canPlaceStructure(structureTemplate, cframe)) return;
+
     const structure = structureTemplate.Clone();
     structure.PivotTo(cframe);
     for (const part of getDescendantsOfType(structure, "BasePart"))
@@ -56,5 +60,12 @@ export class BuildingService implements OnPlayerAdd, OnPlayerRemove {
     structure.SetAttribute("Structure_OwnerID", player.UserId);
     structure.Parent = World.PlacedStructures;
     this.placedStructures.get(player)!.add(structure);
+  }
+
+  private canPlaceStructure(structureTemplate: Model, cframe: CFrame): boolean {
+    const [_, size] = structureTemplate.GetBoundingBox();
+    const overlappingParts = World.GetPartBoundsInBox(cframe, size, STRUCTURE_OVERLAP_PARAMS);
+    const origin = cframe.Position;
+    return isValidStructureDistance(overlappingParts, size, origin);
   }
 }
