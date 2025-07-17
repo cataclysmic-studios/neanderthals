@@ -52,7 +52,7 @@ export class BuildingController implements OnTick {
     }
 
     const mouseCFrame = new CFrame(mousePosition.add(vector.create(0, currentStructureSize.Y / 2, 0)));
-    root.CFrame = mouseCFrame.mul(angles(0, rad(this.rotation), 0));
+    hologram.PivotTo(mouseCFrame.mul(angles(0, rad(this.rotation), 0)));
   }
 
   public enterBuildMode(structure: Model): void {
