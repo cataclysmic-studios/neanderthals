@@ -4,14 +4,14 @@ import { Workspace as World } from "@rbxts/services";
 import { getDescendantsOfType } from "@rbxts/instance-utility";
 import { $nameof } from "rbxts-transform-debug";
 
+import { CREATURE_DRAW_DISTANCE } from "shared/constants";
 import { player } from "client/constants";
+import { distanceBetween } from "shared/utility";
 import SmoothValue from "shared/classes/smooth-value";
 
 import DestroyableComponent from "shared/base-components/destroyable";
-import { CreatureAnimator } from "./creature-animator";
-import { distanceBetween } from "shared/utility";
-import { CharacterController } from "client/controllers/character";
-import { CREATURE_DRAW_DISTANCE } from "shared/constants";
+import type { CreatureAnimator } from "./creature-animator";
+import type { CharacterController } from "client/controllers/character";
 
 const { clamp } = math;
 

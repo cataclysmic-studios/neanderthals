@@ -7,13 +7,13 @@ import type { OnPlayerAdd } from "server/hooks";
 
 @Service()
 export class CharacterService implements OnPlayerAdd {
-  public readonly added = new Signal<(player: Player, character: Model) => void>
+  public readonly added = new Signal<(player: Player, character: CharacterModel) => void>
 
   public onPlayerAdd(player: Player): void {
-    player.CharacterAdded.Connect(character => this.onCharacterAdd(player, character));
+    player.CharacterAdded.Connect(character => this.onCharacterAdd(player, character as never));
   }
 
-  private onCharacterAdd(player: Player, character: Model): void {
+  private onCharacterAdd(player: Player, character: CharacterModel): void {
     character.Parent = World.PlayerCharacterStorage;
 
     this.added.Fire(player, character);
