@@ -23,11 +23,15 @@ interface PartInfo {
   readonly transparency: number;
 }
 
+interface Attributes {
+  readonly Structure_OwnerID?: number;
+}
+
 @Component({
   tag: $nameof<Structure>(),
   ancestorWhitelist: [World]
 })
-export class Structure extends CreatesDropsComponent<{}, StructureModel> implements OnStart {
+export class Structure extends CreatesDropsComponent<Attributes, StructureModel> implements OnStart {
   public readonly config = require<StructureConfig>(this.instance.Config);
 
   private readonly aliveTrash = new Trash;

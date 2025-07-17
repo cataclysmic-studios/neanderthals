@@ -39,6 +39,7 @@ interface ReplicatedStorage extends Instance {
     }
     Structures: Folder & {
       WoodWall: StructureModel;
+      WoodGate: StructureModel;
       Campfire: StructureModel;
     };
     UI: Folder & {

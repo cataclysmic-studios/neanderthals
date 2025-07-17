@@ -45,6 +45,13 @@ interface ToolItem extends Model {
   };
 }
 
+interface GateStructureModel extends StructureModel {
+  Door: BasePart;
+  Button: BasePart & {
+    ClickDetector: ClickDetector;
+  };
+}
+
 interface StructureModel extends Model {
   Config: ModuleScript;
   Humanoid: Humanoid;
