@@ -100,9 +100,10 @@ export class HotbarUIController {
     const currentlyEquippedButNotThisSlot = this.selectedButton !== hotbarButton && this.tool.hasEquipped(tool); // lol
     if (!tool) return;
 
+    const slot = hotbarButton.Name as HotbarKeys[number];
     const equipped = currentlyEquippedButNotThisSlot
-      ? this.tool.equip(tool) as undefined || true
-      : this.tool.toggleEquipped(tool);
+      ? this.tool.equip(tool, slot) ?? true
+      : this.tool.toggleEquipped(tool, slot);
 
     this.selectedButton = equipped ? hotbarButton : undefined;
     this.updateSelectionColors();

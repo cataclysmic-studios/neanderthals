@@ -18,24 +18,26 @@ export class ToolController {
     character.died.Connect(() => this.unequip());
   }
 
-  public toggleEquipped(tool: ToolItem): boolean {
+  public toggleEquipped(tool: ToolItem, slot: HotbarKeys[number]): boolean {
     if (this.hasEquipped(tool)) {
       this.unequip();
       return false;
     }
 
     this.unequip();
-    this.equip(tool);
-    return true;
+    return this.equip(tool, slot);
   }
 
-  public equip(tool: ToolItem): void {
+  public equip(tool: ToolItem, slot: HotbarKeys[number]): boolean {
     const character = this.character.get();
-    if (!character || !this.character.isAlive())
-      return warn("Failed to equip tool: no character");
+    if (!character || !this.character.isAlive()) {
+      warn("Failed to equip tool: no character");
+      return false;
+    }
 
     this.equipped = weldTool(tool, character, this.trash);
-    messaging.server.emit(Message.EquipTool, tool);
+    messaging.server.emit(Message.EquipTool, slot);
+    return true;
   }
 
   public unequip(): void {

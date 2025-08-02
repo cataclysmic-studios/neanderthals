@@ -47,16 +47,16 @@ export const enum Message {
   JoinTribe,
   LeaveTribe,
   GetTribeChief,
-  ReturnTribeChief,
+  ReturnTribeChief
 }
 
 export interface MessageData {
   [Message.Damage]: DamagePacket;
   [Message.DamageCreature]: CreatureDamagePacket;
   [Message.ShowDamageDisplay]: Humanoid;
-  [Message.EquipTool]: ToolItem; // TODO: just the slot number
+  [Message.EquipTool]: HotbarKeys[number];
   [Message.UnequipTool]: undefined;
-  [Message.ReplicateEquipTool]: ToolEquipReplicationPacket; // TODO: just the slot number
+  [Message.ReplicateEquipTool]: ToolEquipReplicationPacket;
   [Message.ReplicateUnequipTool]: Player;
   [Message.UpdateHunger]: u8;
   [Message.InitializeData]: undefined;
