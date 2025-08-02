@@ -6,6 +6,9 @@ export const CREATURE_UPDATE_RATE = 10;
 export const DEFAULT_HITBOX_SIZE = vector.create(3.2, 3.6, 3.2);
 export const CREATURE_DRAW_DISTANCE = 150;
 
+export const PLAYER_SPEED = 16;
+export const PLAYER_WATER_SPEED = 8;
+
 export type TribeColorName = typeof TRIBE_COLORS[number]["Name"];
 export const TRIBE_COLORS = [
   new BrickColor("Bright red"),
