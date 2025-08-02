@@ -35,6 +35,7 @@ export class CharacterController implements OnRender, OnCharacterAdd {
   public async onCharacterAdd(character: CharacterModel): Promise<void> {
     this.spawned.Fire(character);
     character.Humanoid.Died.Once(() => this.died.Fire());
+    character.Humanoid.SetStateEnabled(Enum.HumanoidStateType.Swimming, false);
   }
 
   public isAlive(): boolean {
