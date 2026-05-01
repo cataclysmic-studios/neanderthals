@@ -6,13 +6,14 @@ import { assets } from "shared/constants";
 
 import type { CharacterController } from "./character";
 import type { AnimationController } from "./animation";
+import type { AudioController } from "./audio";
 import type { ToolController } from "./tool";
 import type { DamageController } from "./damage";
-import { TweenBuilder } from "@rbxts/twin";
 
 const SWING_COOLDOWN = 0.45;
 const SWING_ANIMATION = assets.Animations.Swing;
 const VISUALIZE_HITBOX = false;
+const RNG = new Random;
 
 function visualizeHitbox(origin: CFrame, direction: Vector3, hitboxSize: Vector3): void {
   const castCenterCFrame = origin.add(direction);
@@ -38,6 +39,7 @@ export class MeleeController implements OnFixed {
   public constructor(
     private readonly character: CharacterController,
     private readonly animation: AnimationController,
+    private readonly audio: AudioController,
     private readonly tool: ToolController,
     private readonly damage: DamageController
   ) {
@@ -64,6 +66,7 @@ export class MeleeController implements OnFixed {
     if (this.isSwinging) return;
     this.isSwinging = true;
 
+    this.audio.playCharacter("Swing", { speed: RNG.NextNumber(0.9, 1.1) });
     this.animation.play(SWING_ANIMATION, { fadeTime: 0 });
     this.raycast();
 

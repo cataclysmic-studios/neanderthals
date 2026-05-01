@@ -1,14 +1,18 @@
-import { u8, u16, i16, f24, Vector, List, Transform } from "@rbxts/serio";
+import { u8, u16, i16, f24, f32, Vector, List, Transform } from "@rbxts/serio";
 import type { ItemID } from "shared/item-id";
 import type { StructureID } from "shared/structure-id";
 
 export type DropID = u16;
 export type CreatureID = u16;
 
-export interface AudioPacket {
-  readonly name: AudioName;
+export interface PlayAudioOptions {
   readonly parent?: Instance;
-  readonly volume?: u8;
+  readonly volume?: f24;
+  readonly speed?: f32;
+}
+
+export interface AudioPacket extends PlayAudioOptions {
+  readonly name: AudioName;
 }
 
 export interface PlaceStructurePacket {

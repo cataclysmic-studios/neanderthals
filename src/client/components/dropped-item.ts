@@ -20,7 +20,7 @@ import type { InputController } from "client/controllers/input";
 import type { CharacterController } from "client/controllers/character";
 
 const PROMPT_UI = assets.UI.DroppedItemUI;
-const PICK_UP_TWEEN_INFO = new TweenInfo(0.25, Enum.EasingStyle.Sine);
+const PICK_UP_TWEEN_INFO = new TweenInfo(0.2, Enum.EasingStyle.Sine);
 
 @Component({
   tag: $nameof<DroppedItem>(),

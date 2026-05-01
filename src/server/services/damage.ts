@@ -16,7 +16,7 @@ import type { Structure } from "server/components/structure";
 const { clamp, floor } = math;
 const { magnitude } = vector;
 
-const RNG = new Random();
+const RNG = new Random;
 const DAMAGE_INDICATOR_INFO = new TweenInfo(1, Enum.EasingStyle.Sine);
 
 type DamageType = "Entity" | "Structure";
