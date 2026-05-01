@@ -43,6 +43,13 @@ interface ReplicatedStorage extends Instance {
       Campfire: StructureModel;
     };
     UI: Folder & {
+      DamageIndicator: Part & {
+        UI: BillboardGui & {
+          Amount: TextLabel & {
+            UIStroke: UIStroke;
+          };
+        };
+      };
       CookProgressUI: BillboardGui & {
         Progress: ProgressBarFrame;
       };

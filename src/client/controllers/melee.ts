@@ -8,6 +8,7 @@ import type { CharacterController } from "./character";
 import type { AnimationController } from "./animation";
 import type { ToolController } from "./tool";
 import type { DamageController } from "./damage";
+import { TweenBuilder } from "@rbxts/twin";
 
 const SWING_COOLDOWN = 0.45;
 const SWING_ANIMATION = assets.Animations.Swing;
@@ -92,6 +93,6 @@ export class MeleeController implements OnFixed {
     const hitModel = result.Instance.FindFirstAncestorOfClass("Model");
     if (!hitModel) return;
 
-    this.damage.deal(hitModel);
+    this.damage.deal(hitModel, result.Position);
   }
 }

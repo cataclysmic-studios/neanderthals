@@ -1,9 +1,10 @@
 import { Service, type OnStart } from "@flamework/core";
+import { Players, Workspace as World } from "@rbxts/services";
+import { TweenBuilder } from "@rbxts/twin";
 import type { Components } from "@flamework/components";
-import { Players } from "@rbxts/services";
 
 import { Message, messaging } from "shared/messaging";
-import { DEFAULT_HITBOX_SIZE, XZ } from "shared/constants";
+import { assets, DEFAULT_HITBOX_SIZE, XZ } from "shared/constants";
 import { findCreatureByID, stopHacking } from "server/utility";
 import { distanceBetween } from "shared/utility";
 
@@ -12,8 +13,11 @@ import { getItemByID } from "shared/utility/items";
 import type { ItemID } from "shared/item-id";
 import type { Structure } from "server/components/structure";
 
-const { clamp } = math;
+const { clamp, floor } = math;
 const { magnitude } = vector;
+
+const RNG = new Random();
+const DAMAGE_INDICATOR_INFO = new TweenInfo(1, Enum.EasingStyle.Sine);
 
 type DamageType = "Entity" | "Structure";
 
@@ -24,17 +28,21 @@ export class DamageService implements OnStart {
   ) { }
 
   public onStart(): void {
-    messaging.server.on(Message.Damage, (player, { humanoid, toolID }) => this.damage(player, humanoid, toolID));
-    messaging.server.on(Message.DamageCreature, (player, { id, toolID }) => this.damageCreature(player, id, toolID));
+    messaging.server.on(Message.Damage, (player, { humanoid, toolID, hitPosition }) =>
+      this.damage(player, humanoid, hitPosition, toolID)
+    );
+    messaging.server.on(Message.DamageCreature, (player, { id, toolID, hitPosition }) =>
+      this.damageCreature(player, id, hitPosition, toolID)
+    );
   }
 
-  private damageCreature(player: Player, id: number, toolID: ItemID): void {
+  private damageCreature(player: Player, id: number, hitPosition: Vector3, toolID: ItemID): void {
     const creature = findCreatureByID(id);
     if (!creature)
       return warn(`Failed to damage creature with ID ${id}: creature not found`);
 
     const humanoid = creature.Humanoid;
-    this.damage(player, humanoid, toolID, true);
+    this.damage(player, humanoid, hitPosition, toolID, true);
     messaging.client.emitAll(Message.CreatureHealthChange, {
       id,
       health: humanoid.Health,
@@ -42,7 +50,7 @@ export class DamageService implements OnStart {
     });
   }
 
-  private damage(player: Player, humanoid: Humanoid, toolID: ItemID, isCreature = false): void {
+  private damage(player: Player, humanoid: Humanoid, hitPosition: Vector3, toolID: ItemID, isCreature = false): void {
     const targetModel = humanoid.Parent;
     if (!targetModel || !targetModel.IsA("Model")) return;
 
@@ -84,7 +92,38 @@ export class DamageService implements OnStart {
     if (currentHealth !== newHealth)
       humanoid.Health = newHealth;
 
+    this.createIndicator(floor(damage), hitPosition);
+
     if (isCreature) return;
     messaging.client.emit(player, Message.ShowDamageDisplay, humanoid);
+  }
+
+  private createIndicator(damage: number, hitPosition: Vector3): void {
+    const randomDirection = RNG.NextUnitVector();
+    const randomSign = RNG.NextInteger(0, 1) * 2 - 1;
+    const randomMagnitude = randomSign * RNG.NextNumber(1.25, 2.5);
+    const randomOffset = randomDirection.mul(randomMagnitude);
+    const indicator = assets.UI.DamageIndicator.Clone();
+    indicator.UI.Amount.Text = tostring(damage)
+    indicator.Position = hitPosition;
+    indicator.Parent = World;
+
+    const goalPosition = hitPosition.add(randomOffset);
+    TweenBuilder.for(indicator.UI.Amount)
+      .info(DAMAGE_INDICATOR_INFO)
+      .propertiesBulk({
+        Rotation: randomMagnitude * 3,
+        TextTransparency: 1,
+      })
+      .play();
+    TweenBuilder.for(indicator.UI.Amount.UIStroke)
+      .info(DAMAGE_INDICATOR_INFO)
+      .property("Transparency", 1)
+      .play();
+    TweenBuilder.for(indicator)
+      .info(DAMAGE_INDICATOR_INFO)
+      .property("Position", goalPosition)
+      .onCompleted(() => indicator.Destroy())
+      .play();
   }
 }

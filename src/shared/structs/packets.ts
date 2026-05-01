@@ -22,6 +22,7 @@ export interface DropItemPacket {
 }
 
 interface BaseDamagePacket {
+  readonly hitPosition: Vector<i16>;
   readonly toolID: ItemID;
 }
 
