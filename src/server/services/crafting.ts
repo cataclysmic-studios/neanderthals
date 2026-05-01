@@ -2,6 +2,7 @@ import { Service } from "@flamework/core";
 
 import { Message, messaging } from "shared/messaging";
 import { RECIPES } from "shared/recipes";
+import type { ItemID } from "shared/item-id";
 import type { CraftingRecipe } from "shared/structs/crafting-recipe";
 
 import type { InventoryService } from "./inventory";
@@ -20,8 +21,8 @@ export class CraftingService {
     if (!canCraft)
       return false;
 
-    const yieldID = typeIs(yieldItem, "number") ? yieldItem : yieldItem[0];
-    const yieldCount = typeIs(yieldItem, "number") ? 1 : yieldItem[1];
+    const yieldID = typeIs(yieldItem, "string") ? yieldItem as ItemID : yieldItem[0];
+    const yieldCount = typeIs(yieldItem, "string") ? 1 : yieldItem[1];
     return await inventory.transaction(player, {
       add: [[yieldID, yieldCount]],
       remove: ingredients

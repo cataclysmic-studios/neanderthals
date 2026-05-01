@@ -6,11 +6,10 @@ import Signal from "@rbxts/lemon-signal";
 
 import type { OnPlayerAdd, OnPlayerRemove } from "../hooks";
 import { Message, messaging } from "shared/messaging";
-import { parseNumberMap, stringifyNumberMap } from "shared/utility/data";
 import { INITIAL_DATA, type PlayerData } from "shared/structs/player-data";
 
 const enum Scope {
-  Proto = "PROTO9"
+  Proto = "PROTO10"
 }
 
 @Service()
@@ -31,28 +30,19 @@ export class DataService implements OnStart, OnPlayerAdd, OnPlayerRemove {
 
   public onPlayerAdd(player: Player): void {
     const t = this.store as unknown as { _store: { _ctx: { schema: (value: unknown) => boolean } } };
-    t._store._ctx.schema = () => true;
+    t._store._ctx.schema = () => true; // poopy hack
 
     this.store.loadAsync(player);
-    this.store.updateAsync(player, data => {
-      data.inventory = parseNumberMap(data.inventory as never) as never;
-      return true;
-    });
   }
 
   public onPlayerRemove(player: Player): void {
-    this.store.updateAsync(player, data => {
-      data.inventory = stringifyNumberMap(data.inventory as never) as never;
-      return true;
-    });
     this.store.unloadAsync(player);
   }
 
   /** @hidden */
   public onPlayerLoad(player: Player): void {
-    const loadedData = this.store.get(player).expect() as Writable<PlayerData>;
+    const data = this.store.get(player).expect() as Writable<PlayerData>;
     player.SetAttribute("IsDataLoaded", true);
-    let data = { ...loadedData, inventory: parseNumberMap(loadedData.inventory as never) as never };
     this.loaded.Fire(player, data);
     messaging.client.emit(player, Message.DataUpdated, data);
   }
@@ -86,8 +76,6 @@ export class DataService implements OnStart, OnPlayerAdd, OnPlayerRemove {
   }
 
   private sendUpdate(player: Player, data: Writable<PlayerData>): void {
-    data = { ...data, inventory: parseNumberMap(data.inventory as never) as never };
-
     this.updated.Fire(player, data);
     messaging.client.emit(player, Message.DataUpdated, data);
   }

@@ -10,6 +10,7 @@ import { distanceBetween } from "shared/utility";
 import { getItemByID } from "shared/utility/items";
 
 import type { DroppedItem } from "./dropped-item";
+import { ItemID } from "shared/item-id";
 
 const { clamp, ceil } = math;
 
@@ -95,8 +96,7 @@ export class Campfire extends BaseComponent<{}, CampfireModel> implements OnFixe
       cookProgress.delete(droppedItem);
     }
 
-    // destroy all raw items before spawning cooked items to prevent any ID collision
-    const info: { cookedID: number, cframe: CFrame }[] = [];
+    const info: { cookedID: ItemID, cframe: CFrame }[] = [];
     for (const item of this.cookedItems) {
       info.push({
         cookedID: item.attributes.CookedVariant!,

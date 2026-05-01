@@ -1,4 +1,5 @@
 import { Service } from "@flamework/core";
+import type { StripMeta } from "@rbxts/serio";
 
 import { getXPToLevelUp } from "shared/utility";
 import type { PlayerData } from "shared/structs/player-data";
@@ -19,7 +20,7 @@ export class LevelsService {
     this.checkCanLevelUp(player, data => data.xp += xp);
   }
 
-  private async checkCanLevelUp(player: Player, before?: (data: DeepWritable<PlayerData>) => void): Promise<void> {
+  private async checkCanLevelUp(player: Player, before?: (data: DeepWritable<StripMeta<PlayerData>>) => void): Promise<void> {
     await this.data.update(player, data => {
       before?.(data);
       this.tryLevelUp(data);
@@ -34,7 +35,7 @@ export class LevelsService {
     return $tuple(canLevel, canLevel ? abs(neededXP) : undefined);
   }
 
-  private tryLevelUp(data: DeepWritable<PlayerData>): void {
+  private tryLevelUp(data: DeepWritable<StripMeta<PlayerData>>): void {
     const [canLevelUp, excessXP] = this.canLevelUp(data.level, data.xp);
     if (!canLevelUp) return;
     data.level += 1;

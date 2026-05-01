@@ -25,15 +25,15 @@ export class WaterDetectionController implements OnFixed {
   ) { }
 
   public onFixed(): void {
-    const character = this.character.get();
-    if (!character) return;
+    const root = this.character.getRoot();
+    const humanoid = this.character.getHumanoid();
+    if (!root || !humanoid) return;
 
-    const position = character.HumanoidRootPart.Position;
-    const material = getMaterialAt(position);
+    const material = getMaterialAt(root.Position);
     const nowInWater = material === Enum.Material.Water;
     if (nowInWater === this.inWater) return;
 
     this.inWater = nowInWater;
-    character.Humanoid.WalkSpeed = nowInWater ? PLAYER_WATER_SPEED : PLAYER_SPEED;
+    humanoid.WalkSpeed = nowInWater ? PLAYER_WATER_SPEED : PLAYER_SPEED;
   }
 }

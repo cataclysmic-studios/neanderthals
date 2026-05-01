@@ -9,17 +9,18 @@ import { recordDiff } from "shared/utility";
 import { getItemByID, isItemStackable } from "shared/utility/items";
 import { addViewportItem } from "client/utility";
 import { INITIAL_DATA } from "shared/structs/player-data";
-import { EXCLUSIVE_IDS } from "shared/item-id";
+import { EXCLUSIVE_IDS, type ItemID } from "shared/item-id";
 
 import type { ReplicaController } from "../replica";
 import type { CharacterController } from "../character";
 import type { HotbarUIController } from "./hotbar";
-import type { TribesUIController } from "./tribes";
 
 interface ItemFrameInfo {
   readonly button: ItemButton;
   readonly trash: Trash;
 }
+
+const DROP_OFFSET = vector.create(0, 1.5, 0);
 
 @Controller()
 export class InventoryUIController {
@@ -27,14 +28,13 @@ export class InventoryUIController {
 
   private readonly frame: PlayerGui["Main"]["Inventory"];
   private readonly itemContainer: ScrollingFrame;
-  private readonly buttonInfos = new Map<number, ItemFrameInfo>;
+  private readonly buttonInfos = new Map<ItemID, ItemFrameInfo>;
   private lastInventory = INITIAL_DATA.inventory;
 
   public constructor(
     replica: ReplicaController,
     private readonly character: CharacterController,
-    private readonly hotbar: HotbarUIController,
-    tribesUI: TribesUIController
+    private readonly hotbar: HotbarUIController
   ) {
     const frame = this.frame = mainScreen.Inventory;
     this.itemContainer = frame.Content;
@@ -49,7 +49,7 @@ export class InventoryUIController {
       }
 
       const deletionsRecord = recordDiff(last, data.inventory, false);
-      const deletions = new Set<number>;
+      const deletions = new Set<ItemID>;
       for (const [id] of pairs(deletionsRecord))
         deletions.add(id);
 
@@ -68,16 +68,16 @@ export class InventoryUIController {
     return this.frame.Visible;
   }
 
-  private update(changes: Record<number, Maybe<number>>, deletions: Set<number>): void {
+  private update(changes: Record<ItemID, Maybe<number>>, deletions: Set<ItemID>): void {
     for (const [id, diff] of pairs(changes)) {
       const info = this.buttonInfos.get(id);
       if (info && isItemStackable(id)) {
         const currentCount = this.lastInventory.get(id) ?? 0;
-        info.button.Count.Text = tostring(currentCount + diff);
+        info.button.Count.Text = tostring(currentCount + (diff as number));
         continue;
       }
 
-      this.createItemButton(id, diff);
+      this.createItemButton(id, diff as number);
     }
 
     for (const id of deletions) {
@@ -86,28 +86,28 @@ export class InventoryUIController {
     }
   }
 
-  private deleteItemButton(id: number): void {
+  private deleteItemButton(id: ItemID): void {
     this.buttonInfos.get(id)?.trash.destroy();
     this.buttonInfos.delete(id);
   }
 
-  private createItemButton(itemID: number, count: number): ItemButton {
-    const itemTemplate = getItemByID(itemID);
+  private createItemButton(id: ItemID, count: number): ItemButton {
+    const itemTemplate = getItemByID(id);
     const trash = new Trash;
     const button = assets.UI.InventoryItem.Clone();
     trash.linkToInstance(button);
-    addViewportItem(button.Viewport, itemID);
+    addViewportItem(button.Viewport, id);
 
     const isFood = itemTemplate.GetAttribute<boolean>("Food") ?? false;
     const isTool = itemTemplate.GetAttribute("ToolTier") !== undefined;
-    const canDrop = !EXCLUSIVE_IDS.has(itemID);
+    const canDrop = !EXCLUSIVE_IDS.has(id);
     button.Name = itemTemplate.Name;
     button.Count.Text = tostring(count);
     trash.add(button.MouseButton1Click.Connect(() => {
       if (isFood)
-        messaging.server.emit(Message.Eat, itemID);
+        messaging.server.emit(Message.Eat, id);
       else if (isTool)
-        this.hotbar.addItem(itemID);
+        this.hotbar.addItem(id);
     }));
     trash.add(button.MouseButton2Click.Connect(() => {
       if (!canDrop) return;
@@ -115,16 +115,15 @@ export class InventoryUIController {
       const characterPivot = this.character.getPivot();
       if (!characterPivot) return;
 
-      messaging.server.emit(Message.DropItem, {
-        id: itemID,
-        position: characterPivot.Position
-          .add(characterPivot.LookVector.mul(2))
-          .add(vector.create(0, 1.5, 0))
-      });
+      const position = characterPivot.Position
+        .add(characterPivot.LookVector.mul(2))
+        .add(DROP_OFFSET);
+
+      messaging.server.emit(Message.DropItem, { id, position });
     }));
     button.Parent = this.itemContainer;
 
-    this.buttonInfos.set(itemID, { button, trash });
+    this.buttonInfos.set(id, { button, trash });
     return button;
   }
 }

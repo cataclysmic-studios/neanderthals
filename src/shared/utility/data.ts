@@ -1,17 +1,6 @@
 import { getItemByID } from "./items";
+import type { ItemID } from "shared/item-id";
 import type { EquippedGear, PlayerData } from "shared/structs/player-data";
-
-export function stringifyNumberMap(map: { [id: number]: number }): { [key: string]: number } {
-  const out: { [key: string]: number } = {};
-  for (const [k, v] of pairs(map)) out[tostring(k)] = v;
-  return out;
-}
-
-export function parseNumberMap(map: { [key: string]: number }): { [id: number]: number } {
-  const out: { [id: number]: number } = {};
-  for (const [k, v] of pairs(map)) out[tonumber(k) as number] = v;
-  return out;
-}
 
 export function inventoryHasSpace({ equippedGear, hotbar, inventory }: PlayerData | DeepWritable<PlayerData>) {
   const maxBagSpace = getMaxBagSpace(equippedGear as never);
@@ -37,7 +26,11 @@ export function getMaxBagSpace(equippedGear: EquippedGear): number {
 }
 
 export function calculateBagSpace(hotbar: PlayerData["hotbar"], inventory: PlayerData["inventory"]): number {
-  const items = [...[...hotbar].map<[number, number]>((_, id) => [id, 1]), ...inventory];
+  const items = [
+    ...[...hotbar].mapFiltered<[ItemID, number]>(([_, id]) => id !== undefined ? [id, 1] : undefined!),
+    ...inventory
+  ];
+
   return items.reduce((sum, [id, count]) => {
     const item = getItemByID(id);
     const attributeName = "BagSpace";

@@ -1,7 +1,6 @@
-import type { u8, u16, HashMap } from "@rbxts/serio";
+import type { u8, u16, u24, HashMap } from "@rbxts/serio";
 
-import { Item } from "../item-id";
-import type { ItemID } from "./packets";
+import { ItemID } from "../item-id";
 
 export interface EquippedGear {
   readonly head?: ItemID;
@@ -12,16 +11,16 @@ export interface EquippedGear {
 }
 
 export interface PlayerData {
-  readonly hotbar: HashMap<HotbarKey["Name"], Maybe<ItemID>, u8>;
+  readonly hotbar: HashMap<HotbarKeyName, Maybe<ItemID>, u8>;
   readonly inventory: HashMap<ItemID, Maybe<u16>, u16>;
   readonly equippedGear: EquippedGear;
-  readonly level: number;
-  readonly xp: number;
+  readonly level: u8;
+  readonly xp: u24;
 }
 
 export const INITIAL_DATA: PlayerData = {
   hotbar: new Map([
-    ["One", Item.GodRock]
+    ["One", ItemID.Rock]
   ]),
   inventory: new Map,
   equippedGear: {},

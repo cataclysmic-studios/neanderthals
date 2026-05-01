@@ -10,10 +10,10 @@ import type {
   CreatureHealthChangePacket,
   DropItemPacket,
   DropID,
-  ItemID,
   AddHotbarItemPacket,
   PlaceStructurePacket
 } from "./structs/packets";
+import type { ItemID } from "./item-id";
 import type { PlayerData } from "./structs/player-data";
 import type { TribeColorName } from "./constants";
 
@@ -54,7 +54,7 @@ export interface MessageData {
   [Message.Damage]: DamagePacket;
   [Message.DamageCreature]: CreatureDamagePacket;
   [Message.ShowDamageDisplay]: Humanoid;
-  [Message.EquipTool]: HotbarKeys[number];
+  [Message.EquipTool]: HotbarKeyName;
   [Message.UnequipTool]: undefined;
   [Message.ReplicateEquipTool]: ToolEquipReplicationPacket;
   [Message.ReplicateUnequipTool]: Player;
@@ -69,7 +69,7 @@ export interface MessageData {
   [Message.UpdateCreatures]: CreatureUpdatePacket;
   [Message.Eat]: ItemID;
   [Message.AddHotbarItem]: AddHotbarItemPacket;
-  [Message.RemoveHotbarItem]: HotbarKey["Name"];
+  [Message.RemoveHotbarItem]: HotbarKeyName;
   [Message.Craft]: u8;
   [Message.PlaceStructure]: PlaceStructurePacket;
   [Message.CreateTribe]: TribeColorName;

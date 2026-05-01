@@ -1,11 +1,11 @@
-import { Item } from "shared/item-id";
+import { ItemID } from "shared/item-id";
 import { RecipeKind, type CraftingRecipe } from "shared/structs/crafting-recipe";
 
 export = {
   kind: RecipeKind.Tool,
-  yield: Item.StonePickaxe,
+  yield: ItemID.StonePickaxe,
   ingredients: [
-    [Item.Stick, 1],
-    [Item.Stone, 3]
+    [ItemID.Stick, 1],
+    [ItemID.Stone, 3]
   ]
 } satisfies CraftingRecipe;

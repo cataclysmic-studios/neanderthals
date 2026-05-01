@@ -6,9 +6,10 @@ import { Message, messaging } from "shared/messaging";
 import { player } from "client/constants";
 import { isValidStructureDistance } from "shared/utility";
 import { getRecipeIndex, getStructureRecipe } from "shared/recipes";
+import { STRUCTURE_OVERLAP_PARAMS } from "shared/constants";
+import type { StructureID } from "shared/structure-id";
 
 import type { InputController } from "./input";
-import { STRUCTURE_OVERLAP_PARAMS } from "shared/constants";
 
 const { rad } = math;
 const { Angles: angles } = CFrame;
@@ -99,7 +100,7 @@ export class BuildingController implements OnTick {
     if (!this.isInBuildMode()) return;
     if (!this.canPlaceHologram()) return;
 
-    const id = this.currentStructure!.GetAttribute<number>("ID")!;
+    const id = this.currentStructure!.GetAttribute<StructureID>("ID")!;
     const recipe = getStructureRecipe(id);
     if (!recipe)
       return warn("Failed to place structure: current structure model has no corresponding recipe");

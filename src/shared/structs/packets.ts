@@ -1,9 +1,8 @@
 import { u8, u16, i16, f24, Vector, List, Transform } from "@rbxts/serio";
-import { TribeColorName } from "shared/constants";
+import type { ItemID } from "shared/item-id";
+import type { StructureID } from "shared/structure-id";
 
-export type DropID = u8;
-export type ItemID = u8;
-export type StructureID = u8;
+export type DropID = u16;
 export type CreatureID = u16;
 
 export interface PlaceStructurePacket {
@@ -14,7 +13,7 @@ export interface PlaceStructurePacket {
 
 export interface AddHotbarItemPacket {
   readonly id: ItemID;
-  readonly slot: HotbarKey["Name"];
+  readonly slot: HotbarKeyName;
 }
 
 export interface DropItemPacket {

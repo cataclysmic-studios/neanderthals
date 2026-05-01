@@ -5,7 +5,7 @@ import { $nameof } from "rbxts-transform-debug";
 
 import type { OnFixed } from "shared/hooks";
 import { Message, messaging } from "shared/messaging";
-import { Item } from "shared/item-id";
+import { ItemID } from "shared/item-id";
 import { DEFAULT_DROPPED_ITEM_ATTRIBUTES, type DroppedItemAttributes } from "shared/structs/dropped-item-attributes";
 
 import DestroyableComponent from "shared/base-components/destroyable";
@@ -104,9 +104,7 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
   }
 
   private async pickUp(player: Player): Promise<void> {
-    assert(this.itemID >= 0, "Item ID for dropped item @" + this.instance.GetFullName() + "is < 0");
-
-    if (this.itemID === Item.Flux) {
+    if (this.itemID === ItemID.Flux) {
       const xpGain = this.instance.GetAttribute<number>("XP") ?? 6;
       this.levels.addXP(player, xpGain);
     } else {

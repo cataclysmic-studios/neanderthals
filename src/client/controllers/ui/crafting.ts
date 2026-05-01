@@ -8,10 +8,12 @@ import { getRecipeIndex, RECIPES } from "shared/recipes";
 import { getItemByID, getDisplayName, getStructureByID } from "shared/utility/items";
 import { addViewportItem } from "client/utility";
 import { RecipeKind, type CraftingRecipe } from "shared/structs/crafting-recipe";
+import type { ItemID } from "shared/item-id";
+import type { StructureID } from "shared/structure-id";
 
 import type { ReplicaController } from "../replica";
 import type { BuildingController } from "../building";
-import { InventoryUIController } from "./inventory";
+import type { InventoryUIController } from "./inventory";
 
 const DEFAULT_TEXT_COLOR = new Color3(1, 1, 1);
 const NOT_ENOUGH_TEXT_COLOR = new Color3(0.7, 0, 0);
@@ -54,10 +56,10 @@ export class CraftingUIController {
 
   private createRecipeFrame(recipe: CraftingRecipe): Maybe<RecipeFrame> {
     const { kind, yield: yieldItem, ingredients, requiredLevel } = recipe;
-    const yieldID = typeIs(yieldItem, "number") ? yieldItem : yieldItem[0];
+    const yieldID = typeIs(yieldItem, "string") ? yieldItem : yieldItem[0];
     const model = recipe.kind === RecipeKind.Structure
-      ? getStructureByID(yieldID)
-      : getItemByID(yieldID);
+      ? getStructureByID(yieldID as StructureID)
+      : getItemByID(yieldID as ItemID);
 
     // TODO: required level UI
     const frame = assets.UI.CraftingRecipeFrame.Clone();
@@ -81,7 +83,7 @@ export class CraftingUIController {
     return frame;
   }
 
-  private createIngredientFrame(parent: Frame, [id, count]: [number, number]): void {
+  private createIngredientFrame(parent: Frame, [id, count]: [ItemID, number]): void {
     const item = getItemByID(id);
     if (!item) return;
 
@@ -107,14 +109,13 @@ export class CraftingUIController {
     return ingredients.every(([id, count]) => this.hasEnough(id, count));
   }
 
-  private getTextColor(id: number, requiredCount: number): Color3 {
+  private getTextColor(id: ItemID, requiredCount: number): Color3 {
     return this.hasEnough(id, requiredCount)
       ? DEFAULT_TEXT_COLOR
       : NOT_ENOUGH_TEXT_COLOR;
   }
 
-
-  private hasEnough(id: number, requiredCount: number): boolean {
+  private hasEnough(id: ItemID, requiredCount: number): boolean {
     const itemCount = this.replica.data.inventory.get(id);
     return itemCount !== undefined && itemCount >= requiredCount;
   }

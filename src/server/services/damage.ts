@@ -7,9 +7,10 @@ import { DEFAULT_HITBOX_SIZE, XZ } from "shared/constants";
 import { findCreatureByID, stopHacking } from "server/utility";
 import { distanceBetween } from "shared/utility";
 
-import type { Structure } from "server/components/structure";
 import { ToolKind } from "shared/structs/tool-kind";
 import { getItemByID } from "shared/utility/items";
+import type { ItemID } from "shared/item-id";
+import type { Structure } from "server/components/structure";
 
 const { clamp } = math;
 const { magnitude } = vector;
@@ -27,7 +28,7 @@ export class DamageService implements OnStart {
     messaging.server.on(Message.DamageCreature, (player, { id, toolID }) => this.damageCreature(player, id, toolID));
   }
 
-  private damageCreature(player: Player, id: number, toolID: number): void {
+  private damageCreature(player: Player, id: number, toolID: ItemID): void {
     const creature = findCreatureByID(id);
     if (!creature)
       return warn(`Failed to damage creature with ID ${id}: creature not found`);
@@ -41,7 +42,7 @@ export class DamageService implements OnStart {
     });
   }
 
-  private damage(player: Player, humanoid: Humanoid, toolID: number, isCreature = false): void {
+  private damage(player: Player, humanoid: Humanoid, toolID: ItemID, isCreature = false): void {
     const targetModel = humanoid.Parent;
     if (!targetModel || !targetModel.IsA("Model")) return;
 

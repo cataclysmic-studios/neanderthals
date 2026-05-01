@@ -1,17 +1,20 @@
+import type { ItemID } from "shared/item-id";
+import type { StructureID } from "shared/structure-id";
+
 export const enum RecipeKind {
   Tool,
   Structure
 }
 
 interface BaseCraftingRecipe {
-  readonly ingredients: [id: number, count: number][];
+  readonly ingredients: [id: ItemID, count: number][];
   readonly requiredLevel?: number;
 }
 
 export type CraftingRecipe = BaseCraftingRecipe & ({
   readonly kind: RecipeKind.Tool;
-  readonly yield: number | [id: number, count: number];
+  readonly yield: ItemID | [id: ItemID, count: number];
 } | {
   readonly kind: RecipeKind.Structure;
-  readonly yield: number;
+  readonly yield: StructureID;
 });

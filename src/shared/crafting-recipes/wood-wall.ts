@@ -1,11 +1,11 @@
-import { Item } from "shared/item-id";
-import { Structure } from "shared/structure-id";
+import { ItemID } from "shared/item-id";
+import { StructureID } from "shared/structure-id";
 import { RecipeKind, type CraftingRecipe } from "shared/structs/crafting-recipe";
 
 export = {
   kind: RecipeKind.Structure,
-  yield: Structure.WoodWall,
+  yield: StructureID.WoodWall,
   ingredients: [
-    [Item.Log, 3]
+    [ItemID.Log, 3]
   ]
 } satisfies CraftingRecipe;

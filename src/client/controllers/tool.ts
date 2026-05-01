@@ -6,6 +6,7 @@ import { DEFAULT_HITBOX_SIZE } from "shared/constants";
 import { weldTool } from "shared/utility";
 
 import type { CharacterController } from "./character";
+import { ItemID } from "shared/item-id";
 
 @Controller()
 export class ToolController {
@@ -18,7 +19,7 @@ export class ToolController {
     character.died.Connect(() => this.unequip());
   }
 
-  public toggleEquipped(tool: ToolItem, slot: HotbarKeys[number]): boolean {
+  public toggleEquipped(tool: ToolItem, slot: HotbarKeyName): boolean {
     if (this.hasEquipped(tool)) {
       this.unequip();
       return false;
@@ -28,7 +29,7 @@ export class ToolController {
     return this.equip(tool, slot);
   }
 
-  public equip(tool: ToolItem, slot: HotbarKeys[number]): boolean {
+  public equip(tool: ToolItem, slot: HotbarKeyName): boolean {
     const character = this.character.get();
     if (!character || !this.character.isAlive()) {
       warn("Failed to equip tool: no character");
@@ -50,8 +51,8 @@ export class ToolController {
     return this.equipped!.GetAttribute<Vector3>("HitboxSize") ?? DEFAULT_HITBOX_SIZE;
   }
 
-  public getID(): number {
-    return this.equipped!.GetAttribute<number>("ID")!;
+  public getID(): ItemID {
+    return this.equipped!.GetAttribute<ItemID>("ID")!;
   }
 
   public hasEquipped(tool?: ToolItem): boolean {

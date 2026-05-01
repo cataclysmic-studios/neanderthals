@@ -1,3 +1,5 @@
+import type { ItemID } from "shared/item-id";
+
 interface BaseDroppedItemAttributes {
   readonly DisplayName?: string;
   readonly Food?: boolean;
@@ -5,15 +7,15 @@ interface BaseDroppedItemAttributes {
   readonly HungerWhenEaten?: number;
   readonly CanCook?: boolean;
   readonly CookSpeed?: number;
-  readonly CookedVariant?: number;
-  readonly ID: number;
+  readonly CookedVariant?: ItemID;
+  readonly ID: ItemID;
   readonly DropID: number;
 }
 
 export type DroppedItemAttributes = BaseDroppedItemAttributes & ({
   readonly CanCook: true;
   readonly CookSpeed: number;
-  readonly CookedVariant: number;
+  readonly CookedVariant: ItemID;
 } | {
   readonly CanCook: false;
   readonly CookSpeed?: undefined;

@@ -37,7 +37,7 @@ interface PlayerGui extends BasePlayerGui {
           UIStroke: UIStroke;
         };
       };
-    } & Record<HotbarKey["Name"], HotbarButton>;
+    } & Record<HotbarKeyName, HotbarButton>;
     Inventory: Frame & {
       Content: ScrollingFrame;
       Separator: Frame;

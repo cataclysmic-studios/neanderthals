@@ -20,7 +20,7 @@ import type { InputController } from "client/controllers/input";
 import type { CharacterController } from "client/controllers/character";
 
 const PROMPT_UI = assets.UI.DroppedItemUI;
-const PICK_UP_TWEEN_INFO = new TweenInfo(1, Enum.EasingStyle.Sine);
+const PICK_UP_TWEEN_INFO = new TweenInfo(0.25, Enum.EasingStyle.Sine);
 
 @Component({
   tag: $nameof<DroppedItem>(),
@@ -62,10 +62,10 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
 
     const dropID = this.attributes.DropID;
     const prompt = this.prompt = this.components.addComponent<DroppedItemPrompt>(promptUI);
-    trash.add(prompt.consumed.Connect(message => {
+    trash.add(prompt.consumed.Connect(async message => {
       if (message === Message.EatDrop && !this.attributes.Food) return;
       if (message === Message.PickUpDrop && !inventoryHasSpace(this.replica.data)) return;
-      this.pickUpAnimation();
+      await this.pickUpAnimation();
       messaging.server.emit(message, dropID);
     }));
   }
@@ -94,27 +94,29 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
     this.toggleHover(true);
   }
 
-  private pickUpAnimation(): void {
+  private async pickUpAnimation(): Promise<void> {
     const characterPivot = this.character.getPivot();
     if (!characterPivot) return;
 
     const { instance } = this;
     this.prompt.destroy();
 
-    for (const part of getDescendantsOfType(instance, "BasePart")) {
-      part.CanCollide = false;
-      part.CastShadow = false;
-      TweenBuilder.for(part)
-        .info(PICK_UP_TWEEN_INFO)
-        .property("Transparency", 1)
-        .play();
-    }
+    return new Promise(resolve => {
+      for (const part of getDescendantsOfType(instance, "BasePart")) {
+        part.CanCollide = false;
+        part.CastShadow = false;
+        TweenBuilder.for(part)
+          .info(PICK_UP_TWEEN_INFO)
+          .property("Transparency", 1)
+          .play();
+      }
 
-    TweenBuilder.forModel(instance)
-      .info(PICK_UP_TWEEN_INFO)
-      .property("Value", characterPivot)
-      .onCompleted(() => this.destroy())
-      .play();
+      TweenBuilder.forModel(instance)
+        .info(PICK_UP_TWEEN_INFO)
+        .property("Value", characterPivot)
+        .onCompleted(resolve)
+        .play();
+    })
   }
 
   private toggleHover(on: boolean): void {

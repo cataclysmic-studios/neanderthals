@@ -4,14 +4,14 @@ import { Message, messaging } from "shared/messaging";
 import { dropItem, stopHacking } from "server/utility";
 import { getItemByID } from "shared/utility/items";
 import { inventoryHasSpace } from "shared/utility/data";
-import { EXCLUSIVE_IDS } from "shared/item-id";
+import { EXCLUSIVE_IDS, type ItemID } from "shared/item-id";
 import type { PlayerData } from "shared/structs/player-data";
 
 import type { DataService } from "./data";
 
 interface TransactionInfo {
-  readonly add: [id: number, count: number][];
-  readonly remove: [id: number, count: number][];
+  readonly add: [id: ItemID, count: number][];
+  readonly remove: [id: ItemID, count: number][];
 }
 
 @Service()
@@ -32,7 +32,6 @@ export class InventoryService {
     return await this.data.update(player, data => {
       const { inventory } = data;
       for (let [id, count] of add) {
-        id = tonumber(id)!;
         const itemCount = inventory.get(id);
         if (itemCount !== undefined && EXCLUSIVE_IDS.has(id)) continue;
         if (!inventoryHasSpace(data))
@@ -42,7 +41,6 @@ export class InventoryService {
       }
 
       for (let [id, count] of remove) {
-        id = tonumber(id)!;
         const itemCount = inventory.get(id);
         if (itemCount === undefined || EXCLUSIVE_IDS.has(id)) continue;
 
@@ -57,8 +55,7 @@ export class InventoryService {
     });
   }
 
-  public async addItem(player: Player, id: number, count = 1): Promise<boolean> {
-    id = tonumber(id)!;
+  public async addItem(player: Player, id: ItemID, count = 1): Promise<boolean> {
     const data = await this.data.get(player);
     if (data.inventory.has(id) && EXCLUSIVE_IDS.has(id))
       return false;
@@ -73,8 +70,7 @@ export class InventoryService {
     });
   }
 
-  public async removeItem(player: Player, id: number, count = 1, after?: (data: DeepWritable<PlayerData>) => boolean): Promise<boolean> {
-    id = tonumber(id)!;
+  public async removeItem(player: Player, id: ItemID, count = 1, after?: (data: DeepWritable<PlayerData>) => boolean): Promise<boolean> {
     if (!await this.has(player, id) || EXCLUSIVE_IDS.has(id))
       return false;
 
@@ -96,14 +92,12 @@ export class InventoryService {
     });
   }
 
-  public async getItemCount(player: Player, id: number): Promise<number> {
-    id = tonumber(id)!;
+  public async getItemCount(player: Player, id: ItemID): Promise<number> {
     const { inventory } = await this.data.get(player);
     return inventory.get(id) ?? 0;
   }
 
-  public async has(player: Player, id: number, count?: number): Promise<boolean> {
-    id = tonumber(id)!;
+  public async has(player: Player, id: ItemID, count?: number): Promise<boolean> {
     const { inventory } = await this.data.get(player);
 
     const hasItem = inventory.has(id);
@@ -112,7 +106,7 @@ export class InventoryService {
       : hasItem;
   }
 
-  private async dropItem(player: Player, id: number, position: Vector3): Promise<void> {
+  private async dropItem(player: Player, id: ItemID, position: Vector3): Promise<void> {
     const item = getItemByID(id);
     if (!item)
       return stopHacking(player, "invalid item ID (no corresponding item) when dropping item");
@@ -123,9 +117,7 @@ export class InventoryService {
     dropItem(item, new CFrame(position));
   }
 
-  private addHotbarItem(data: DeepWritable<PlayerData>, id: number, slot: HotbarKey["Name"]): boolean {
-    id = tonumber(id)!;
-
+  private addHotbarItem(data: DeepWritable<PlayerData>, id: ItemID, slot: HotbarKeyName): boolean {
     const { hotbar } = data;
     data.inventory.delete(id);
 
@@ -138,13 +130,13 @@ export class InventoryService {
     return true;
   }
 
-  private removeHotbarItem(data: DeepWritable<PlayerData>, slot: HotbarKey["Name"]): boolean {
+  private removeHotbarItem(data: DeepWritable<PlayerData>, slot: HotbarKeyName): boolean {
     const id = data.hotbar.get(slot);
     if (id === undefined)
       return false;
 
     data.hotbar.delete(slot);
-    data.inventory.set(id as number, 1);
+    data.inventory.set(id, 1);
     return true;
   }
 }

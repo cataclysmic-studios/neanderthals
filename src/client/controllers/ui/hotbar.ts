@@ -11,6 +11,7 @@ import type { PlayerData } from "shared/structs/player-data";
 
 import type { CharacterController } from "../character";
 import type { ToolController } from "../tool";
+import { ItemID } from "shared/item-id";
 
 const WHITE = new Color3(1, 1, 1);
 const DEFAULT_VIEWPORT_COLOR = Color3.fromRGB(30, 30, 30);
@@ -57,7 +58,7 @@ export class HotbarUIController {
     }
   }
 
-  public addItem(id: number, slot?: HotbarKey["Name"]): void {
+  public addItem(id: ItemID, slot?: HotbarKeyName): void {
     const button = slot !== undefined
       ? this.frame[slot]
       : this.getNextEmptyHotbarButton();
@@ -91,8 +92,8 @@ export class HotbarUIController {
   }
 
   public selectButton(hotbarButton: HotbarButton): void
-  public selectButton(hotbarSlot: HotbarKey["Name"]): void
-  public selectButton(hotbarButton: HotbarButton | HotbarKey["Name"]): void {
+  public selectButton(hotbarSlot: HotbarKeyName): void
+  public selectButton(hotbarButton: HotbarButton | HotbarKeyName): void {
     if (typeIs(hotbarButton, "string"))
       hotbarButton = this.frame[hotbarButton];
 
@@ -100,7 +101,7 @@ export class HotbarUIController {
     const currentlyEquippedButNotThisSlot = this.selectedButton !== hotbarButton && this.tool.hasEquipped(tool); // lol
     if (!tool) return;
 
-    const slot = hotbarButton.Name as HotbarKeys[number];
+    const slot = hotbarButton.Name as HotbarKeyName;
     const equipped = currentlyEquippedButNotThisSlot
       ? this.tool.equip(tool, slot) ?? true
       : this.tool.toggleEquipped(tool, slot);
@@ -126,7 +127,7 @@ export class HotbarUIController {
     }));
   }
 
-  private addViewportItem(hotbarButton: HotbarButton, id: number): void {
+  private addViewportItem(hotbarButton: HotbarButton, id: ItemID): void {
     addViewportItem(hotbarButton.Viewport, id);
     hotbarButton.SetAttribute("CurrentItem", id);
   }
@@ -145,7 +146,7 @@ export class HotbarUIController {
   }
 
   private getViewportItem(hotbarButton: HotbarButton): Maybe<ToolItem> {
-    const itemID = hotbarButton.GetAttribute<number>("CurrentItem");
+    const itemID = hotbarButton.GetAttribute<ItemID>("CurrentItem");
     return itemID !== undefined
       ? getItemByID<ToolItem>(itemID)
       : undefined;
