@@ -2,6 +2,7 @@ import { ItemID } from "shared/item-id";
 import type { ToolKind } from "./tool-kind";
 
 export interface StructureConfig {
+  readonly hitSound: AudioName;
   readonly xp?: number;
   readonly respawnTime?: number;
   readonly noRespawn?: boolean;
