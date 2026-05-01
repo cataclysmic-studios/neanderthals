@@ -11,7 +11,8 @@ import type {
   DropItemPacket,
   DropID,
   AddHotbarItemPacket,
-  PlaceStructurePacket
+  PlaceStructurePacket,
+  AudioPacket
 } from "./structs/packets";
 import type { ItemID } from "./item-id";
 import type { PlayerData } from "./structs/player-data";
@@ -47,7 +48,9 @@ export const enum Message {
   JoinTribe,
   LeaveTribe,
   GetTribeChief,
-  ReturnTribeChief
+  ReturnTribeChief,
+  PlayAudio,
+  ReplicateAudio
 }
 
 export interface MessageData {
@@ -79,4 +82,6 @@ export interface MessageData {
   [Message.LeaveTribe]: undefined;
   [Message.GetTribeChief]: undefined;
   [Message.ReturnTribeChief]: Maybe<Player>;
+  [Message.PlayAudio]: AudioPacket;
+  [Message.ReplicateAudio]: AudioPacket;
 }

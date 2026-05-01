@@ -1,3 +1,5 @@
+type AudioName = ExtractKeys<ReplicatedStorage["Assets"]["Audio"], Sound>;
+
 interface HotbarButton extends ImageButton {
   Viewport: ViewportFrame;
 }

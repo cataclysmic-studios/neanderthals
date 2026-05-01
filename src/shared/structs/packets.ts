@@ -5,6 +5,12 @@ import type { StructureID } from "shared/structure-id";
 export type DropID = u16;
 export type CreatureID = u16;
 
+export interface AudioPacket {
+  readonly name: AudioName;
+  readonly parent?: Instance;
+  readonly volume?: u8;
+}
+
 export interface PlaceStructurePacket {
   readonly id: StructureID;
   readonly recipeIndex: u8;

@@ -42,6 +42,9 @@ interface ReplicatedStorage extends Instance {
       WoodGate: StructureModel;
       Campfire: StructureModel;
     };
+    Audio: Folder & {
+      Swing: Sound;
+    };
     UI: Folder & {
       DamageIndicator: Part & {
         UI: BillboardGui & {
