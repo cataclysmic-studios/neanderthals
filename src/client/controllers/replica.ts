@@ -13,7 +13,9 @@ export class ReplicaController implements OnStart {
 
   public onStart(): void {
     messaging.client.on(Message.DataUpdated, data => this.onDataUpdate(data));
-    messaging.server.emit(Message.InitializeData);
+    messaging.client.once(Message.SyncContent, () =>
+      messaging.server.emit(Message.InitializeData)
+    );
   }
 
   private onDataUpdate(data: PlayerData): void {

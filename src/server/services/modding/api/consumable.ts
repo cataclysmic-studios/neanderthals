@@ -8,8 +8,8 @@ export class ConsumableModdingAPIService {
     private readonly hunger: HungerService
   ) { }
 
-  public whenEaten(callback: (info: PlayerEatInfo) => void): () => void {
-    const conn = this.hunger.eaten.Connect(callback);
+  public whenConsumed(callback: (info: PlayerEatInfo) => void): () => void {
+    const conn = this.hunger.consumed.Connect(callback);
     return () => conn.Disconnect();
   }
 }

@@ -63,7 +63,7 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
     const dropID = this.attributes.DropID;
     const prompt = this.prompt = this.components.addComponent<DroppedItemPrompt>(promptUI);
     trash.add(prompt.consumed.Connect(async message => {
-      if (message === Message.EatDrop && !this.attributes.Food) return;
+      if (message === Message.EatDrop && !this.attributes.Consumable) return;
       if (message === Message.PickUpDrop && !inventoryHasSpace(this.replica.data)) return;
       await this.pickUpAnimation();
       messaging.server.emit(message, dropID);
@@ -130,7 +130,7 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
     if (dragging && on) return;
     if (promptUI.Enabled === on) return;
     promptUI.ItemName.Text = this.displayName;
-    promptUI.Eat.TextTransparency = this.attributes.Food ? 0 : 1;
+    promptUI.Eat.TextTransparency = this.attributes.Consumable ? 0 : 1;
     promptUI.Enabled = on;
   }
 }

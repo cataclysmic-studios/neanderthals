@@ -9,7 +9,7 @@ import { getRawContents } from "./utility";
 import { ItemRegistry } from "shared/registry/item-registry";
 import { StructureRegistry } from "shared/registry/structure-registry";
 import { RecipeRegistry } from "shared/registry/recipe-registry";
-import type { Mod, ModFolder, ModRepo } from "shared/structs/mod";
+import type { Mod, ModRepo } from "shared/structs/mod";
 import type { ContentDescriptor, DisplayableDescriptor, ItemDescriptor, ModManifest, StructureDescriptor } from "shared/structs/mod-manifest";
 
 import type { ModContentService } from "./content";
@@ -23,18 +23,19 @@ export class ModLoaderService implements OnStart {
   public readonly loadedAll = new Signal<() => void>;
 
   private readonly loadedMods = new Map<string, Mod>;
-  private readonly modList: ModList = [
-    "R-unic/fish-mod"
-  ];
 
   public constructor(
     private readonly content: ModContentService
   ) { }
 
   public async onStart(): Promise<void> {
+    await this.loadMods(["R-unic/fish-mod"]);
+  }
+
+  public async loadMods(modList: ModList): Promise<void> {
     print("Loading mods...");
-    print("Mod list:", this.modList);
-    for (const mod of this.modList) {
+    print("Mod list:", modList);
+    for (const mod of modList) {
       const repo = typeIs(mod, "string") ? mod : mod[0];
       const branch = typeIs(mod, "string") ? "master" : mod[1];
       await this.loadGitHub(repo, branch);
@@ -46,7 +47,7 @@ export class ModLoaderService implements OnStart {
       messaging.client.emit(player, Message.SyncContent, RecipeRegistry.getAll());
     });
     this.loadedAll.Fire();
-    print(`Finished loading ${this.modList.size()} mod(s)!`);
+    print(`Finished loading ${modList.size()} mod(s)!`);
   }
 
   private async loadGitHub(repo: ModRepo, branch = "master"): Promise<void> {
@@ -80,13 +81,13 @@ export class ModLoaderService implements OnStart {
     if (!mod.manifest.consumables) return;
     for (const descriptor of mod.manifest.consumables) {
       const model = this.content.getAsset<Model>(mod, descriptor.model);
-      model.SetAttribute("Food", true);
+      model.SetAttribute("Consumable", true);
 
       if (descriptor.healthGiven !== undefined) {
-        model.SetAttribute("HealthWhenEaten", descriptor.healthGiven);
+        model.SetAttribute("HealthWhenConsumed", descriptor.healthGiven);
       }
       if (descriptor.hungerGiven !== undefined) {
-        model.SetAttribute("HungerWhenEaten", descriptor.hungerGiven);
+        model.SetAttribute("HungerWhenConsumed", descriptor.hungerGiven);
       }
       if ("cookSpeed" in descriptor) {
         model.SetAttribute("CanCook", true);
@@ -120,6 +121,7 @@ export class ModLoaderService implements OnStart {
 
   private registerItem(model: Model, descriptor: ItemDescriptor): void {
     this.registerDisplayable(model, descriptor);
+    model.SetAttribute("BagSpace", descriptor.bagSpace);
     model.Parent = assets.Items;
     ItemRegistry.register(model);
   }

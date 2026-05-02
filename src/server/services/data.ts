@@ -23,7 +23,7 @@ export class DataService implements OnStart, OnPlayerAdd, OnPlayerRemove {
     schema: Flamework.createGuard<Writable<PlayerData>>(),
   });
 
-  public onStart(): void {
+  public async onStart(): Promise<void> {
     game.BindToClose(() => this.store.closeAsync());
     messaging.server.on(Message.InitializeData, player => this.onPlayerLoad(player));
   }

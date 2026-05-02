@@ -99,14 +99,14 @@ export class InventoryUIController {
     trash.linkToInstance(button);
     addViewportItem(button.Viewport, id);
 
-    const isFood = itemTemplate.GetAttribute<boolean>("Food") ?? false;
+    const isConsumable = itemTemplate.GetAttribute<boolean>("Consumable") ?? false;
     const isTool = itemTemplate.GetAttribute("ToolTier") !== undefined;
     const canDrop = !EXCLUSIVE_IDS.has(id);
     button.Name = itemTemplate.Name;
     button.Count.Text = tostring(count);
     trash.add(button.MouseButton1Click.Connect(() => {
-      if (isFood)
-        messaging.server.emit(Message.Eat, id);
+      if (isConsumable)
+        messaging.server.emit(Message.Consume, id);
       else if (isTool)
         this.hotbar.addItem(id);
     }));

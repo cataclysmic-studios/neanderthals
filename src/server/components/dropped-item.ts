@@ -64,8 +64,8 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
     }));
     trash.add(messaging.server.on(Message.EatDrop, (player, dropID) => {
       if (dropID !== this.dropID) return;
-      if (!this.attributes.Food) return;
-      this.eat(player);
+      if (!this.attributes.Consumable) return;
+      this.consume(player);
     }));
 
     trash.add(dragDetector.DragStart.Connect(() => {
@@ -89,8 +89,8 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
     dragDetector.Parent = instance;
   }
 
-  public eat(player: Player): void {
-    this.hunger.eat(player, this.instance);
+  public consume(player: Player): void {
+    this.hunger.consume(player, this.instance);
     this.destroy();
   }
 

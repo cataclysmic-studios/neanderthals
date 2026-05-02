@@ -38,7 +38,7 @@ export const enum Message {
   SpawnCreature,
   UpdateCreatures,
   CreatureHealthChange,
-  Eat,
+  Consume,
   AddHotbarItem,
   RemoveHotbarItem,
   Craft,
@@ -72,7 +72,7 @@ export interface MessageData {
   [Message.SpawnCreature]: CreatureSpawnPacket;
   [Message.CreatureHealthChange]: CreatureHealthChangePacket;
   [Message.UpdateCreatures]: CreatureUpdatePacket;
-  [Message.Eat]: GameID;
+  [Message.Consume]: GameID;
   [Message.AddHotbarItem]: AddHotbarItemPacket;
   [Message.RemoveHotbarItem]: HotbarKeyName;
   [Message.Craft]: u8;

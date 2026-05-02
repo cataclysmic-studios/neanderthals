@@ -7,8 +7,8 @@ import { assets } from "shared/constants";
 import { dropItem } from "server/utility";
 import { distanceBetween } from "shared/utility";
 import { ItemRegistry } from "shared/registry/item-registry";
+import type { GameID } from "shared/structs/packets";
 import type { OnFixed } from "shared/hooks";
-import type { ItemID } from "shared/item-id";
 
 import type { DroppedItem } from "./dropped-item";
 
@@ -96,7 +96,7 @@ export class Campfire extends BaseComponent<{}, CampfireModel> implements OnFixe
       cookProgress.delete(droppedItem);
     }
 
-    const info: { cookedID: ItemID, cframe: CFrame }[] = [];
+    const info: { cookedID: GameID, cframe: CFrame }[] = [];
     for (const item of this.cookedItems) {
       info.push({
         cookedID: item.attributes.CookedVariant!,

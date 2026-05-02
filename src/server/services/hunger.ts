@@ -22,22 +22,22 @@ export interface PlayerEatInfo {
 
 @Service()
 export class HungerService implements OnTick, OnPlayerRemove {
-  public readonly eaten = new Signal<(info: PlayerEatInfo) => void>;
+  public readonly consumed = new Signal<(info: PlayerEatInfo) => void>;
 
   private readonly playerHunger = new Map<Player, number>;
   private elapsed = 0;
 
   public constructor(character: CharacterService, inventory: InventoryService) {
-    messaging.server.on(Message.Eat, async (player, id) => {
+    messaging.server.on(Message.Consume, async (player, id) => {
       const item = ItemRegistry.get(id);
       if (!item)
-        return stopHacking(player, "invalid item ID (no corresponding item) when eating item");
+        return stopHacking(player, "invalid item ID (no corresponding item) when consuming item");
 
       if (!await inventory.has(player, id))
-        return stopHacking(player, "attempt to eat item not in inventory");
+        return stopHacking(player, "attempt to consume item not in inventory");
 
       inventory.removeItem(player, id);
-      this.eat(player, item);
+      this.consume(player, item);
     });
 
     character.added.Connect(player => this.onCharacterAdd(player));
@@ -60,32 +60,32 @@ export class HungerService implements OnTick, OnPlayerRemove {
     this.playerHunger.delete(player);
   }
 
-  public eat(player: Player, item: Model): void {
+  public consume(player: Player, item: Model): void {
     const character = player.Character as CharacterModel;
     if (!character) return;
 
     const attributes = item.GetAttributes();
     const id = attributes.get("ID") as string;
-    const attributeName = "HungerWhenEaten";
-    const hungerWhenEaten = attributes.get(attributeName) as number;
-    if (hungerWhenEaten === undefined) {
-      return warn(`Failed to eat '${item}': consumable item has no '${attributeName}' attribute`);
+    const attributeName = "HungerWhenConsumed";
+    const hungerWhenConsumed = attributes.get(attributeName) as number;
+    if (hungerWhenConsumed === undefined) {
+      return warn(`Failed to consume '${item}': consumable item has no '${attributeName}' attribute`);
     }
 
-    const healthWhenEaten = attributes.get("HealthWhenEaten") as number;
+    const healthWhenConsumed = attributes.get("HealthWhenConsumed") as number;
     const humanoid = character.Humanoid;
     let healthGained = 0;
-    if (healthWhenEaten !== undefined) {
-      const newHealth = clamp(humanoid.Health + healthWhenEaten, 0, humanoid.MaxHealth);
+    if (healthWhenConsumed !== undefined) {
+      const newHealth = clamp(humanoid.Health + healthWhenConsumed, 0, humanoid.MaxHealth);
       healthGained = newHealth - humanoid.Health;
       humanoid.Health = newHealth;
     }
 
     const hunger = this.playerHunger.get(player)!;
-    const newHunger = clamp(hunger + hungerWhenEaten, 0, 100);
+    const newHunger = clamp(hunger + hungerWhenConsumed, 0, 100);
     const hungerGained = newHunger - hunger;
     this.playerHunger.set(player, newHunger);
-    this.eaten.Fire({ player, id, hungerGained, healthGained });
+    this.consumed.Fire({ player, id, hungerGained, healthGained });
     messaging.client.emit(player, Message.UpdateHunger, newHunger);
   }
 
