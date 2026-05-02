@@ -24,6 +24,7 @@ interface Snapshot {
   readonly cframe: CFrame;
 }
 
+const OUT_OF_BOUNDS_CFRAME = new CFrame(0, 1e8, 0);
 @Component({ tag: $nameof<CreatureSync>() })
 export class CreatureSync extends DestroyableComponent<{ ID: number }, CreatureModel> implements OnTick {
   public readonly id = this.attributes.ID;
@@ -35,6 +36,7 @@ export class CreatureSync extends DestroyableComponent<{ ID: number }, CreatureM
   private snapshotBuffer: Snapshot[] = [];
   private latestCFrame = this.cframe;
   private timeNow = 0;
+  private rendered = true;
 
   public constructor(
     components: Components,
@@ -57,15 +59,13 @@ export class CreatureSync extends DestroyableComponent<{ ID: number }, CreatureM
 
     const { root, animator } = this;
     const cframe = this.getLerpedCFrame(World.GetServerTimeNow() - INTERPOLATION_DELAY);
-    const lastCFrame = this.cframe;
-    this.cframe = cframe; // update cframe asap
-
     const distance = distanceBetween(cframe.Position, this.character.getPositionOrDefault());
     if (distance > CREATURE_DRAW_DISTANCE) {
-      this.cframe = new CFrame(0, 1e8, 0);
-      return;
+      return this.derender();
     }
 
+    const lastCFrame = this.cframe;
+    this.render(cframe); // update cframe asap
     root.AssemblyLinearVelocity = vector.zero;
     root.AssemblyAngularVelocity = vector.zero;
 
@@ -75,6 +75,21 @@ export class CreatureSync extends DestroyableComponent<{ ID: number }, CreatureM
       animator.startWalk();
     else if (!moving && isWalkAnimationPlaying)
       animator.stopWalk();
+  }
+
+  public isRendered(): boolean {
+    return this.rendered;
+  }
+
+  private render(cframe: CFrame): void {
+    this.rendered = true;
+    this.cframe = cframe;
+  }
+
+  private derender(): void {
+    if (!this.rendered) return;
+    this.rendered = false;
+    this.cframe = OUT_OF_BOUNDS_CFRAME;
   }
 
   public update(cframe: CFrame): void {

@@ -25,6 +25,7 @@ export class TribesUIController {
     private readonly tribes: TribesController
 
   ) {
+    subscribe(tribes.tribeTeam, () => this.update());
     messaging.client.on(Message.TribeCreated, chief => {
       // TODO: notify of tribe creation
 
@@ -32,7 +33,6 @@ export class TribesUIController {
       this.update(chief);
     });
 
-    subscribe(tribes.tribeTeam, () => this.update());
 
     const { visibleTrash, frame } = this;
     const visibilityUpdate = () => {

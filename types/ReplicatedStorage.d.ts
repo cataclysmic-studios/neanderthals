@@ -44,6 +44,9 @@ interface ReplicatedStorage extends Instance {
     };
     Audio: Folder & {
       Swing: Sound;
+      RockHit: Sound;
+      WoodHit: Sound;
+      LeafHit: Sound;
     };
     UI: Folder & {
       DamageIndicator: Part & {

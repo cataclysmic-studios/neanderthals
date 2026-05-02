@@ -75,7 +75,6 @@ export class TribesService {
       members: new Set
     };
 
-    print("Chief", chief, "has founded the", team, "tribe");
     chief.Team = team;
     trash.add(chief.Destroying.Once(() => this.leave(chief, tribe)));
     this.tribes.add(tribe);

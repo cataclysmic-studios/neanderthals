@@ -54,8 +54,9 @@ export class CreatureController implements OnTick, OnFixed {
 
   public onFixed(): void {
     const animators = this.components.getAllComponents<CreatureAnimator>();
-    for (const animator of animators)
+    for (const animator of animators) {
       animator.tryIdle();
+    }
   }
 
   private onHealthChanged(id: number, newHealth: number): void {
