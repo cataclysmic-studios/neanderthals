@@ -28,7 +28,7 @@ export class ModLoaderService implements OnStart {
   ];
 
   public constructor(
-    private readonly content: ModContentService,
+    private readonly content: ModContentService
   ) { }
 
   public async onStart(): Promise<void> {
@@ -45,6 +45,7 @@ export class ModLoaderService implements OnStart {
     Players.PlayerAdded.Connect(player => {
       messaging.client.emit(player, Message.SyncContent, RecipeRegistry.getAll());
     });
+    this.loadedAll.Fire();
     print(`Finished loading ${this.modList.size()} mod(s)!`);
   }
 
@@ -59,7 +60,7 @@ export class ModLoaderService implements OnStart {
     print(`Loading mod ${manifest.metadata.id}@${manifest.metadata.version}`);
     print("Manifest:", manifest)
 
-    const folder = this.createFolder(manifest);
+    const folder = this.content.createFolder(manifest);
     const mod: Mod = { repo, branch, folder, manifest };
     await this.content.downloadAssets(mod);
     this.registerAllModContent(mod);
@@ -155,15 +156,5 @@ export class ModLoaderService implements OnStart {
         model.AddTag(tag);
       }
     }
-  }
-
-  private createFolder(manifest: ModManifest): ModFolder {
-    const folder = new Instance("Folder")
-    folder.Name = manifest.metadata.name + "@" + manifest.metadata.version;
-
-    const assetsFolder = new Instance("Folder", folder);
-    assetsFolder.Name = "assets";
-
-    return folder as never;
   }
 }

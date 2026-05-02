@@ -22,7 +22,7 @@ export interface PlayerStructurePlacedInfo {
 
 @Service()
 export class BuildingService implements OnPlayerAdd, OnPlayerRemove {
-  public readonly structurePlaced = new Signal<(info: PlayerStructurePlacedInfo) => void>();
+  public readonly structurePlaced = new Signal<(info: PlayerStructurePlacedInfo) => void>;
 
   private readonly placedStructures = new Map<Player, Set<Model>>;
 

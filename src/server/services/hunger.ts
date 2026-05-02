@@ -22,7 +22,7 @@ export interface PlayerEatInfo {
 
 @Service()
 export class HungerService implements OnTick, OnPlayerRemove {
-  public readonly eaten = new Signal<(info: PlayerEatInfo) => void>();
+  public readonly eaten = new Signal<(info: PlayerEatInfo) => void>;
 
   private readonly playerHunger = new Map<Player, number>;
   private elapsed = 0;

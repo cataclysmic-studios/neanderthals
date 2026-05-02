@@ -16,7 +16,7 @@ import type { ToolController } from "../tool";
 
 const WHITE = new Color3(1, 1, 1);
 const DEFAULT_VIEWPORT_COLOR = Color3.fromRGB(30, 30, 30);
-const SELECTED_VIEWPORT_COLOR = DEFAULT_VIEWPORT_COLOR.Lerp(WHITE, 0.25);
+const SELECTED_VIEWPORT_COLOR = DEFAULT_VIEWPORT_COLOR.Lerp(WHITE, 0.2);
 const FADE_OUT_TWEEN_INFO = new TweenInfo(1);
 
 @Controller()

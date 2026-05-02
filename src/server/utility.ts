@@ -23,7 +23,8 @@ let cumulativeDropID = 0;
  * If not specified, the item will be spawned at the origin.
  * @param amount The number of items to spawn. If not specified, only one item will be spawned.
  */
-export function dropItem(itemTemplate: PVInstance, origin: CFrame, radius: Vector3 = vector.zero, amount = 1): void {
+export function dropItem(itemTemplate: PVInstance, origin: CFrame, radius: Vector3 = vector.zero, amount = 1): number[] {
+  const droppedIDs: number[] = [];
   for (const _ of $range(1, amount)) {
     const id = cumulativeDropID++;
     const drop = itemTemplate.Clone();
@@ -37,6 +38,7 @@ export function dropItem(itemTemplate: PVInstance, origin: CFrame, radius: Vecto
     drop.Destroying.Once(() => cumulativeDropID = clamp(id - 1, 0, 255));
     drop.Parent = World.DroppedItems;
     drop.AddTag("DroppedItem");
+    droppedIDs.push(id);
 
     for (const part of getDescendantsOfType(drop, "BasePart")) {
       if (part.GetAttribute("UseDefaultDroppedCollisions") === true) continue;
@@ -44,4 +46,6 @@ export function dropItem(itemTemplate: PVInstance, origin: CFrame, radius: Vecto
       part.CollisionGroup = "DroppedItems";
     }
   }
+
+  return droppedIDs;
 }

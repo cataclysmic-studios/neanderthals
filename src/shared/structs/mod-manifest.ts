@@ -31,24 +31,15 @@ export interface DisplayableDescriptor extends ContentDescriptor {
   readonly displayOffset?: JsonCFrame;
 }
 
-export const enum ImplementationKind {
-  Consumable = "consumable",
-  Structure = "structure",
+export interface ImplementableDescriptor extends ContentDescriptor {
+  readonly implementation?: string;
 }
-
-export type ImplementableDescriptor<Kind extends ImplementationKind> = ContentDescriptor & ({
-  readonly implementationKind: Kind;
-  readonly implementation: string;
-} | {
-  readonly implementationKind?: undefined;
-  readonly implementation?: undefined;
-});
 
 export interface NaturalStructureDescriptor extends ContentDescriptor {
 
 }
 
-export type StructureDescriptor = ImplementableDescriptor<ImplementationKind.Structure> & DisplayableDescriptor;
+export interface StructureDescriptor extends ImplementableDescriptor, DisplayableDescriptor { }
 
 export interface ItemDescriptor extends DisplayableDescriptor {
   readonly bagSpace: number;
@@ -59,12 +50,12 @@ interface RawItemDescriptor extends ItemDescriptor {
   readonly cookedVariant: string;
 }
 
-type ConsumableDescriptor = ImplementableDescriptor<ImplementationKind.Consumable> & ItemDescriptor & {
+interface ConsumableDescriptor extends ImplementableDescriptor, ItemDescriptor {
   readonly healthGiven?: number;
   readonly hungerGiven?: number;
-};
+}
 
-type RawConsumableDescriptor = ConsumableDescriptor & RawItemDescriptor;
+interface RawConsumableDescriptor extends ConsumableDescriptor, RawItemDescriptor { }
 
 interface ToolDescriptor extends ItemDescriptor {
   readonly tier: number;

@@ -12,6 +12,7 @@ import DestroyableComponent from "shared/base-components/destroyable";
 import type { InventoryService } from "server/services/inventory";
 import type { LevelsService } from "server/services/levels";
 import type { HungerService } from "server/services/hunger";
+import { MainModdingAPIService } from "server/services/modding/api/main";
 
 const { magnitude } = vector;
 
@@ -44,7 +45,8 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
   public constructor(
     private readonly inventory: InventoryService,
     private readonly levels: LevelsService,
-    private readonly hunger: HungerService
+    private readonly hunger: HungerService,
+    private readonly mainModdingAPI: MainModdingAPIService
   ) { super(); }
 
   public onStart(): void {
@@ -112,6 +114,7 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
       if (!success) return;
     }
 
+    this.mainModdingAPI.dropPickedUp.Fire(this.dropID, this.itemID);
     this.destroy();
   }
 

@@ -2,15 +2,14 @@ import { Flamework, Service } from "@flamework/core";
 import { HttpService, InsertService } from "@rbxts/services";
 
 import { getRawContents } from "./utility";
-import { ImplementationKind } from "shared/structs/mod-manifest";
-import type { Mod } from "shared/structs/mod";
-import type { Implementation, ModdingAPI } from "./api";
+import type { Mod, ModFolder } from "shared/structs/mod";
 import type { ImplementableDescriptor, ModManifest } from "shared/structs/mod-manifest";
 
-import type { ConsumableModdingAPIService } from "./api/consumable";
-import type { StructureModdingAPIService } from "./api/structure";
+import type { MainModdingAPIService } from "./api/main";
 
 declare function loadstring<Fn extends Callback = Callback>(source: string, chunkName?: string): Fn;
+
+type Implementation = (id: string, mainAPI: MainModdingAPIService) => void;
 
 interface AssetManifest {
   readonly assetID: number;
@@ -36,11 +35,14 @@ function collectAssets(manifest: ModManifest): Set<string> {
   return assets;
 }
 
+function hasImplementation(obj: ImplementableDescriptor): obj is ImplementableDescriptor & { readonly implementation: string } {
+  return "implementation" in obj;
+}
+
 @Service()
 export class ModContentService {
   public constructor(
-    private readonly consumableModdingAPI: ConsumableModdingAPIService,
-    private readonly structureModdingAPI: StructureModdingAPIService
+    private readonly mainModdingAPI: MainModdingAPIService
   ) { }
 
   public async downloadAssets(mod: Mod): Promise<void> {
@@ -69,37 +71,25 @@ export class ModContentService {
     return asset;
   }
 
-  public async loadImplementation<Kind extends ImplementationKind, T extends ImplementableDescriptor<Kind>>(
-    mod: Mod,
-    descriptor: T
-  ): Promise<void> {
-    if (!this.hasImplementation(descriptor)) return;
+  public async loadImplementation(mod: Mod, descriptor: ImplementableDescriptor): Promise<void> {
+    if (!hasImplementation(descriptor)) return;
 
     const implementationSource = await getRawContents(mod, descriptor.implementation);
-    const api = this.getAPI(descriptor.implementationKind);
-    const implementation = loadstring<() => Implementation<Kind>>(implementationSource, mod.manifest.metadata.id)();
+    const implementation = loadstring<() => Implementation>(implementationSource, mod.manifest.metadata.id)();
     if (!implementation)
       return warn(`Failed to load implementation for content "${descriptor.id}": ${descriptor.implementation}`);
 
-    implementation(descriptor.id, api);
-    print(`Registered ${descriptor.implementationKind} implementation for content "${descriptor.id}": ${descriptor.implementation}`);
+    implementation(descriptor.id, this.mainModdingAPI);
+    print(`Registered implementation for content "${descriptor.id}": ${descriptor.implementation}`);
   }
 
-  private getAPI<Kind extends ImplementationKind>(kind: Kind): ModdingAPI<Kind> {
-    switch (kind) {
-      case ImplementationKind.Consumable:
-        return this.consumableModdingAPI as never;
-      case ImplementationKind.Structure:
-        return this.structureModdingAPI as never;
+  public createFolder(manifest: ModManifest): ModFolder {
+    const folder = new Instance("Folder")
+    folder.Name = manifest.metadata.name + "@" + manifest.metadata.version;
 
-      default:
-        return undefined!;
-    }
-  }
+    const assetsFolder = new Instance("Folder", folder);
+    assetsFolder.Name = "assets";
 
-  private hasImplementation<Kind extends ImplementationKind, T extends ImplementableDescriptor<Kind>>(
-    obj: T
-  ): obj is T & Required<ImplementableDescriptor<Kind>> {
-    return "implementationKind" in obj && "implementation" in obj;
+    return folder as never;
   }
 }
