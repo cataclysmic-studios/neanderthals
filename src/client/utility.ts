@@ -1,7 +1,7 @@
 import { Workspace as World } from "@rbxts/services";
 import ViewportModel from "@rbxts/viewportmodel";
 
-import { getItemByID } from "shared/utility/items";
+import { ItemRegistry } from "shared/registry/item-registry";
 import type { ItemID } from "shared/item-id";
 
 const { rad } = math;
@@ -18,7 +18,7 @@ const ITEM_ORIENTATION = angles(0, rad(45), 0);
 export function addViewportItem<T extends Model>(viewport: ViewportFrame, item: T): void;
 export function addViewportItem<T extends Model>(viewport: ViewportFrame, id: ItemID): void;
 export function addViewportItem<T extends Model>(viewport: ViewportFrame, id: T | ItemID): void {
-  const itemTemplate = typeIs(id, "string") ? getItemByID<T>(id) : id;
+  const itemTemplate = typeIs(id, "string") ? ItemRegistry.get(id) : id;
   const displayOffset = itemTemplate.GetAttribute<CFrame>("DisplayOffset") ?? CFrame.identity;
   const item = itemTemplate.Clone();
   let camera = viewport.FindFirstChildOfClass("Camera");

@@ -6,7 +6,7 @@ import { Message, messaging } from "shared/messaging";
 import { assets } from "shared/constants";
 import { mainScreen } from "client/constants";
 import { recordDiff } from "shared/utility";
-import { getItemByID, isItemStackable } from "shared/utility/items";
+import { isItemStackable } from "shared/utility/items";
 import { addViewportItem } from "client/utility";
 import { INITIAL_DATA } from "shared/structs/player-data";
 import { EXCLUSIVE_IDS, type ItemID } from "shared/item-id";
@@ -14,6 +14,7 @@ import { EXCLUSIVE_IDS, type ItemID } from "shared/item-id";
 import type { ReplicaController } from "../replica";
 import type { CharacterController } from "../character";
 import type { HotbarUIController } from "./hotbar";
+import { ItemRegistry } from "shared/registry/item-registry";
 
 interface ItemFrameInfo {
   readonly button: ItemButton;
@@ -92,7 +93,7 @@ export class InventoryUIController {
   }
 
   private createItemButton(id: ItemID, count: number): ItemButton {
-    const itemTemplate = getItemByID(id);
+    const itemTemplate = ItemRegistry.get(id);
     const trash = new Trash;
     const button = assets.UI.InventoryItem.Clone();
     trash.linkToInstance(button);

@@ -3,7 +3,7 @@ import { Service, type OnTick } from "@flamework/core";
 import type { OnPlayerRemove } from "server/hooks";
 import { Message, messaging } from "shared/messaging";
 import { stopHacking } from "server/utility";
-import { getItemByID } from "shared/utility/items";
+import { ItemRegistry } from "shared/registry/item-registry";
 
 import type { CharacterService } from "./character";
 import type { InventoryService } from "./inventory";
@@ -19,7 +19,7 @@ export class HungerService implements OnTick, OnPlayerRemove {
 
   public constructor(character: CharacterService, inventory: InventoryService) {
     messaging.server.on(Message.Eat, async (player, id) => {
-      const item = getItemByID(id);
+      const item = ItemRegistry.get(id);
       if (!item)
         return stopHacking(player, "invalid item ID (no corresponding item) when eating item");
 

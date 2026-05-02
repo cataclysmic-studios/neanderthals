@@ -7,10 +7,10 @@ import { Message, messaging } from "shared/messaging";
 import { assets, DEFAULT_HITBOX_SIZE, XZ } from "shared/constants";
 import { findCreatureByID, stopHacking } from "server/utility";
 import { distanceBetween } from "shared/utility";
-
 import { ToolKind } from "shared/structs/tool-kind";
-import { getItemByID } from "shared/utility/items";
+import { ItemRegistry } from "shared/registry/item-registry";
 import type { ItemID } from "shared/item-id";
+
 import type { Structure } from "server/components/structure";
 
 const { clamp, floor } = math;
@@ -58,7 +58,7 @@ export class DamageService implements OnStart {
     const damageType = targetPlayer || isCreature ? "Entity" : humanoid.GetAttribute<DamageType>("DamageType");
     if (damageType === undefined) return;
 
-    const tool = getItemByID<ToolItem>(toolID);
+    const tool = ItemRegistry.get<ToolItem>(toolID);
     if (!tool)
       return stopHacking(player);
 

@@ -22,8 +22,10 @@ interface ReplicatedStorage extends Instance {
       Log: Model;
       Stick: Model;
       Stone: Model;
-      RawMeat: Model;
-      CookedMeat: Model;
+      RawPork: Model;
+      CookedPork: Model;
+      RawBeef: Model;
+      CookedBeef: Model;
       RawIron: Model;
       IronBar: Model;
       Flux: Model;

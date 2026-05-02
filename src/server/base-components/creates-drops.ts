@@ -1,7 +1,7 @@
 import { BaseComponent } from "@flamework/components";
 
 import { dropItem } from "server/utility";
-import { getItemByID } from "shared/utility/items";
+import { ItemRegistry } from "shared/registry/item-registry";
 import type { ItemID } from "shared/item-id";
 
 export abstract class CreatesDropsComponent<A extends {} = {}, I extends PVInstance = PVInstance> extends BaseComponent<A, I> {
@@ -11,7 +11,7 @@ export abstract class CreatesDropsComponent<A extends {} = {}, I extends PVInsta
     if (!drops) return;
 
     for (const [id, count] of drops) {
-      const item = getItemByID(id);
+      const item = ItemRegistry.get(id);
       dropItem(item, pivot, radius, count);
     }
   }

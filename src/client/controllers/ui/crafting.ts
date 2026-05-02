@@ -5,8 +5,9 @@ import { Message, messaging } from "shared/messaging";
 import { assets } from "shared/constants";
 import { mainScreen } from "client/constants";
 import { getRecipeIndex, RECIPES } from "shared/recipes";
-import { getItemByID, getDisplayName, getStructureByID } from "shared/utility/items";
+import { getDisplayName, getStructureByID } from "shared/utility/items";
 import { addViewportItem } from "client/utility";
+import { ItemRegistry } from "shared/registry/item-registry";
 import { RecipeKind, type CraftingRecipe } from "shared/structs/crafting-recipe";
 import type { ItemID } from "shared/item-id";
 import type { StructureID } from "shared/structure-id";
@@ -59,7 +60,7 @@ export class CraftingUIController {
     const yieldID = typeIs(yieldItem, "string") ? yieldItem : yieldItem[0];
     const model = recipe.kind === RecipeKind.Structure
       ? getStructureByID(yieldID as StructureID)
-      : getItemByID(yieldID as ItemID);
+      : ItemRegistry.get(yieldID);
 
     // TODO: required level UI
     const frame = assets.UI.CraftingRecipeFrame.Clone();
@@ -84,7 +85,7 @@ export class CraftingUIController {
   }
 
   private createIngredientFrame(parent: Frame, [id, count]: [ItemID, number]): void {
-    const item = getItemByID(id);
+    const item = ItemRegistry.get(id);
     if (!item) return;
 
     const frame = assets.UI.IngredientFrame.Clone();

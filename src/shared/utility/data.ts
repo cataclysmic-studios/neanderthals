@@ -1,4 +1,4 @@
-import { getItemByID } from "./items";
+import { ItemRegistry } from "shared/registry/item-registry";
 import type { ItemID } from "shared/item-id";
 import type { EquippedGear, PlayerData } from "shared/structs/player-data";
 
@@ -14,7 +14,7 @@ export function getMaxBagSpace(equippedGear: EquippedGear): number {
     return DEFAULT_BAG_SPACE;
 
   const bagID = equippedGear.bag;
-  const bagItem = getItemByID(bagID);
+  const bagItem = ItemRegistry.get(bagID);
   const attributeName = "BagSpaceGiven";
   const bagSpace = bagItem.GetAttribute<number>(attributeName);
   if (bagSpace === undefined) {
@@ -32,7 +32,7 @@ export function calculateBagSpace(hotbar: PlayerData["hotbar"], inventory: Playe
   ];
 
   return items.reduce((sum, [id, count]) => {
-    const item = getItemByID(id);
+    const item = ItemRegistry.get(id);
     const attributeName = "BagSpace";
     const bagSpaceUsed = item.GetAttribute<number>("BagSpace");
     if (bagSpaceUsed === undefined) {

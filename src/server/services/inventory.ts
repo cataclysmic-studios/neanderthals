@@ -2,8 +2,8 @@ import { Service } from "@flamework/core";
 
 import { Message, messaging } from "shared/messaging";
 import { dropItem, stopHacking } from "server/utility";
-import { getItemByID } from "shared/utility/items";
 import { inventoryHasSpace } from "shared/utility/data";
+import { ItemRegistry } from "shared/registry/item-registry";
 import { EXCLUSIVE_IDS, type ItemID } from "shared/item-id";
 import type { PlayerData } from "shared/structs/player-data";
 
@@ -107,7 +107,7 @@ export class InventoryService {
   }
 
   private async dropItem(player: Player, id: ItemID, position: Vector3): Promise<void> {
-    const item = getItemByID(id);
+    const item = ItemRegistry.get(id);
     if (!item)
       return stopHacking(player, "invalid item ID (no corresponding item) when dropping item");
     if (EXCLUSIVE_IDS.has(id))

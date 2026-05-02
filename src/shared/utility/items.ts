@@ -1,19 +1,7 @@
 import { assets } from "../constants";
+import { ItemRegistry } from "shared/registry/item-registry";
 import type { StructureID } from "shared/structure-id";
 import type { ItemID } from "shared/item-id";
-
-const items = assets.Items.GetChildren() as Model[];
-const itemCache = new Map<ItemID, Model>;
-for (const item of items) {
-  const id = item.GetAttribute<ItemID>("ID");
-  assert(id !== undefined, `Item '${item}' has no ID`);
-  assert(typeIs(id, "string"), `Item ID '${id}' on item '${item}' is invalid; must be a string`);
-  itemCache.set(id, item);
-}
-
-export function getItemByID<T extends Model = Model>(id: ItemID): T {
-  return itemCache.get(id) as T;
-}
 
 const structures = assets.Structures.GetChildren() as Model[];
 const structureCache = new Map<StructureID, Model>;
@@ -40,6 +28,6 @@ export function getDisplayName(item: Model, { uppercase = true }: DisplayNameOpt
 export function isItemStackable(itemID: ItemID): boolean;
 export function isItemStackable(item: Model): boolean;
 export function isItemStackable(item: Model | ItemID): boolean {
-  item = typeIs(item, "string") ? getItemByID(item) : item;
+  item = typeIs(item, "string") ? ItemRegistry.get(item) : item;
   return item.GetAttribute("ToolTier") === undefined;
 }

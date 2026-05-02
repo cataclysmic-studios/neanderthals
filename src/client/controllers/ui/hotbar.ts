@@ -5,13 +5,14 @@ import { Trash } from "@rbxts/trash";
 
 import { Message, messaging } from "shared/messaging";
 import { mainScreen } from "client/constants";
-import { getDisplayName, getItemByID } from "shared/utility/items";
+import { getDisplayName } from "shared/utility/items";
 import { addViewportItem, removeViewportItem } from "client/utility";
+import { ItemRegistry } from "shared/registry/item-registry";
+import type { ItemID } from "shared/item-id";
 import type { PlayerData } from "shared/structs/player-data";
 
 import type { CharacterController } from "../character";
 import type { ToolController } from "../tool";
-import { ItemID } from "shared/item-id";
 
 const WHITE = new Color3(1, 1, 1);
 const DEFAULT_VIEWPORT_COLOR = Color3.fromRGB(30, 30, 30);
@@ -148,7 +149,7 @@ export class HotbarUIController {
   private getViewportItem(hotbarButton: HotbarButton): Maybe<ToolItem> {
     const itemID = hotbarButton.GetAttribute<ItemID>("CurrentItem");
     return itemID !== undefined
-      ? getItemByID<ToolItem>(itemID)
+      ? ItemRegistry.get<ToolItem>(itemID)
       : undefined;
   }
 

@@ -3,14 +3,14 @@ import { Workspace as World } from "@rbxts/services";
 import { getChildrenOfType } from "@rbxts/instance-utility";
 import { $nameof } from "rbxts-transform-debug";
 
-import type { OnFixed } from "shared/hooks";
 import { assets } from "shared/constants";
 import { dropItem } from "server/utility";
 import { distanceBetween } from "shared/utility";
-import { getItemByID } from "shared/utility/items";
+import { ItemRegistry } from "shared/registry/item-registry";
+import type { OnFixed } from "shared/hooks";
+import type { ItemID } from "shared/item-id";
 
 import type { DroppedItem } from "./dropped-item";
-import { ItemID } from "shared/item-id";
 
 const { clamp, ceil } = math;
 
@@ -106,7 +106,7 @@ export class Campfire extends BaseComponent<{}, CampfireModel> implements OnFixe
     }
 
     for (const { cookedID, cframe } of info)
-      dropItem(getItemByID(cookedID), cframe);
+      dropItem(ItemRegistry.get(cookedID), cframe);
 
     this.cookedItems = new Set;
   }
