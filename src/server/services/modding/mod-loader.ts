@@ -1,60 +1,34 @@
-import { Flamework, type OnStart, Service } from "@flamework/core";
-import { HttpService, InsertService, Players } from "@rbxts/services";
+import { Flamework, Service, type OnStart } from "@flamework/core";
+import { HttpService, Players } from "@rbxts/services";
+import Signal from "@rbxts/lemon-signal";
 
 import { Message, messaging } from "shared/messaging";
 import { assets } from "shared/constants";
 import { validateItems, validateStructures } from "shared/validation";
-import { ImplementationKind } from "shared/structs/mod-manifest";
+import { getRawContents } from "./utility";
 import { ItemRegistry } from "shared/registry/item-registry";
 import { StructureRegistry } from "shared/registry/structure-registry";
 import { RecipeRegistry } from "shared/registry/recipe-registry";
-import type { Implementation, ModdingAPI } from "./api";
-import type { ContentDescriptor, DisplayableDescriptor, ImplementableDescriptor, ItemDescriptor, ModManifest, StructureDescriptor } from "shared/structs/mod-manifest";
+import type { Mod, ModFolder, ModRepo } from "shared/structs/mod";
+import type { ContentDescriptor, DisplayableDescriptor, ItemDescriptor, ModManifest, StructureDescriptor } from "shared/structs/mod-manifest";
 
-import type { ConsumableModdingAPIService } from "./api/consumable";
-import type { StructureModdingAPIService } from "./api/structure";
+import type { ModContentService } from "./content";
 
-const BASE_URL = "https://raw.githubusercontent.com/"
-const ASSETS_TO_COLLECT = ["resources", "consumables", "tools", "naturalStructures", "structures"] as const
-const modGuard = Flamework.createGuard<ModManifest>();
-const assetManifestGuard = Flamework.createGuard<AssetManifest>();
-
-declare function loadstring<Fn extends Callback = Callback>(source: string, chunkName?: string): Fn
-
-type ModRepo = `${string}/${string}`;
 type ModList = readonly (ModRepo | [repo: ModRepo, branch: string])[];
 
-interface ModFolder extends Folder {
-  readonly assets: Folder;
-  readonly impl: Folder;
-}
-
-interface AssetManifest {
-  readonly assetID: number;
-}
-
-interface Mod {
-  readonly repo: ModRepo;
-  readonly branch: string;
-  readonly folder: ModFolder;
-  readonly manifest: ModManifest;
-}
-
-function getAssetName(path: string): string {
-  const [name] = path.match("([^/\\]+)%.json$");
-  return tostring(name!);
-}
+const manifestGuard = Flamework.createGuard<ModManifest>();
 
 @Service()
 export class ModLoaderService implements OnStart {
-  private readonly loaded = new Map<string, Mod>;
+  public readonly loadedAll = new Signal<() => void>;
+
+  private readonly loadedMods = new Map<string, Mod>;
   private readonly modList: ModList = [
     "R-unic/fish-mod"
   ];
 
   public constructor(
-    private readonly consumableModdingAPI: ConsumableModdingAPIService,
-    private readonly structureModdingAPI: StructureModdingAPIService
+    private readonly content: ModContentService,
   ) { }
 
   public async onStart(): Promise<void> {
@@ -76,16 +50,20 @@ export class ModLoaderService implements OnStart {
 
   private async loadGitHub(repo: ModRepo, branch = "master"): Promise<void> {
     print("Loading mod from GitHub:", repo + "@" + branch);
-    const manifestJSON = await this.getRawContents(repo, branch, "manifest.json");
-    const manifest = this.loadManifest(manifestJSON);
+    const manifestJSON = await getRawContents(repo, branch, "manifest.json");
+    const manifest = HttpService.JSONDecode(manifestJSON);
+    if (!manifestGuard(manifest)) {
+      return error("Failed to load mod: invalid mod JSON");
+    }
+
     print(`Loading mod ${manifest.metadata.id}@${manifest.metadata.version}`);
     print("Manifest:", manifest)
 
     const folder = this.createFolder(manifest);
     const mod: Mod = { repo, branch, folder, manifest };
-    await this.downloadAssets(mod);
+    await this.content.downloadAssets(mod);
     this.registerAllModContent(mod);
-    this.loaded.set(manifest.metadata.id, mod);
+    this.loadedMods.set(manifest.metadata.id, mod);
     print("Finished loading mod " + manifest.metadata.id + "@" + manifest.metadata.version + "!");
   }
 
@@ -100,7 +78,7 @@ export class ModLoaderService implements OnStart {
   private registerConsumables(mod: Mod): void {
     if (!mod.manifest.consumables) return;
     for (const descriptor of mod.manifest.consumables) {
-      const model = this.getAsset<Model>(mod, descriptor.model);
+      const model = this.content.getAsset<Model>(mod, descriptor.model);
       model.SetAttribute("Food", true);
 
       if (descriptor.healthGiven !== undefined) {
@@ -116,18 +94,18 @@ export class ModLoaderService implements OnStart {
       }
 
       this.registerItem(model, descriptor);
-      this.registerImplementation(mod, descriptor);
+      this.content.loadImplementation(mod, descriptor);
     }
   }
 
   private registerStructures(mod: Mod): void {
     if (!mod.manifest.structures) return;
     for (const descriptor of mod.manifest.structures) {
-      const model = this.getAsset<Model>(mod, descriptor.model);
+      const model = this.content.getAsset<Model>(mod, descriptor.model);
       model.AddTag("Structure");
 
       this.registerStructure(model, descriptor);
-      this.registerImplementation(mod, descriptor);
+      this.content.loadImplementation(mod, descriptor);
     }
   }
 
@@ -179,49 +157,6 @@ export class ModLoaderService implements OnStart {
     }
   }
 
-  private async registerImplementation<Kind extends ImplementationKind, T extends ImplementableDescriptor<Kind>>(
-    mod: Mod,
-    descriptor: T
-  ): Promise<void> {
-    if (!this.hasImplementation(descriptor)) return;
-
-    const implementationSource = await this.getRawContents(mod, descriptor.implementation);
-    const api = this.getAPI(descriptor.implementationKind);
-    const implementation = loadstring<() => Implementation<Kind>>(implementationSource, mod.manifest.metadata.id)();
-    if (!implementation)
-      return warn(`Failed to load implementation for content "${descriptor.id}": ${descriptor.implementation}`);
-
-    implementation(descriptor.id, api);
-    print(`Registered ${descriptor.implementationKind} implementation for content "${descriptor.id}": ${descriptor.implementation}`);
-  }
-
-  private getAPI<Kind extends ImplementationKind>(kind: Kind): ModdingAPI<Kind> {
-    switch (kind) {
-      case ImplementationKind.Consumable:
-        return this.consumableModdingAPI as never;
-      case ImplementationKind.Structure:
-        return this.structureModdingAPI as never;
-
-      default:
-        return undefined!;
-    }
-  }
-
-  private hasImplementation<Kind extends ImplementationKind, T extends ImplementableDescriptor<Kind>>(
-    obj: T
-  ): obj is T & Required<ImplementableDescriptor<Kind>> {
-    return "implementationKind" in obj && "implementation" in obj;
-  }
-
-  private loadManifest(json: string): ModManifest {
-    const manifest = HttpService.JSONDecode(json);
-    if (!modGuard(manifest)) {
-      return error("Failed to load mod: invalid mod JSON");
-    }
-
-    return manifest;
-  }
-
   private createFolder(manifest: ModManifest): ModFolder {
     const folder = new Instance("Folder")
     folder.Name = manifest.metadata.name + "@" + manifest.metadata.version;
@@ -230,61 +165,5 @@ export class ModLoaderService implements OnStart {
     assetsFolder.Name = "assets";
 
     return folder as never;
-  }
-
-  private async downloadAssets(mod: Mod): Promise<void> {
-    print("Downloading assets for", mod.manifest.metadata.id + "@" + mod.manifest.metadata.version);
-    const assetPaths = this.collectAssets(mod.manifest);
-    for (const path of assetPaths) {
-      const content = await this.getRawContents(mod, path);
-      const manifest = HttpService.JSONDecode(content);
-      const errorMessage = "Failed to load mod asset: " + path;
-      if (!assetManifestGuard(manifest)) {
-        return error(errorMessage)
-      }
-
-      const { assetID } = manifest;
-      const [asset] = InsertService.LoadAsset(assetID).GetChildren();
-      asset.Name = getAssetName(path);
-      asset.Parent = mod.folder.assets;
-      print("Loaded", path);
-    }
-  }
-
-  private collectAssets(manifest: ModManifest): Set<string> {
-    const assets = new Set<string>;
-    for (const kind of ASSETS_TO_COLLECT) {
-      if (!(kind in manifest)) continue;
-      for (const content of manifest[kind]!) {
-        assets.add(content.model);
-      }
-    }
-
-    return assets;
-  }
-
-  private async getRawContents(repo: ModRepo, branch: string, path: string): Promise<string>;
-  private async getRawContents(mod: Mod, path: string): Promise<string>;
-  private async getRawContents(a: ModRepo | Mod, b: string, c?: string): Promise<string> {
-    const repo = typeIs(a, "string") ? a : a.repo;
-    const branch = typeIs(a, "string") ? b : a.branch;
-    const path = typeIs(c, "string") ? c : b;
-
-    return new Promise((resolve, reject) => {
-      try {
-        const url = BASE_URL + repo + "/refs/heads/" + branch + "/" + path;
-        const content = HttpService.GetAsync(url, true);
-        resolve(content);
-      } catch (e) {
-        reject(e);
-      }
-    })
-  }
-
-  private getAsset<T extends Instance = Instance>(mod: Mod, path: string): T {
-    const asset = mod.folder.assets.FindFirstChild<T>(getAssetName(path));
-    assert(asset !== undefined, "Could not find mod asset: " + path);
-
-    return asset;
   }
 }
