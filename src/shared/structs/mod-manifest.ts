@@ -1,6 +1,7 @@
 import { CraftingRecipe } from "shared/structs/crafting-recipe";
 import { StructureConfig } from "shared/structs/structure-config";
 import { ToolKind } from "shared/structs/tool-kind";
+import { I } from "ts-toolbelt";
 
 interface JsonVector {
   readonly x: number;
@@ -21,9 +22,10 @@ export interface ModMetadata {
   readonly authors: string[];
 }
 
-interface ContentDescriptor {
+export interface ContentDescriptor {
   readonly model: string;
   readonly id: string;
+  readonly tags?: string[];
 }
 
 export interface DisplayableDescriptor extends ContentDescriptor {
@@ -31,13 +33,24 @@ export interface DisplayableDescriptor extends ContentDescriptor {
   readonly displayOffset?: JsonCFrame;
 }
 
+export const enum ImplementationKind {
+  Consumable = "consumable",
+  Structure = "structure",
+}
+
+export type ImplementableDescriptor<Kind extends ImplementationKind> = ContentDescriptor & ({
+  readonly implementationKind: Kind;
+  readonly implementation: string;
+} | {
+  readonly implementationKind?: undefined;
+  readonly implementation?: undefined;
+});
+
 export interface NaturalStructureDescriptor extends ContentDescriptor, StructureConfig {
 
 }
 
-export interface StructureDescriptor extends DisplayableDescriptor, StructureConfig {
-
-}
+export type StructureDescriptor = ImplementableDescriptor<ImplementationKind.Structure> & DisplayableDescriptor & StructureConfig;
 
 export interface ItemDescriptor extends DisplayableDescriptor {
   readonly bagSpace: number;
@@ -48,14 +61,12 @@ interface RawItemDescriptor extends ItemDescriptor {
   readonly cookedVariant: string;
 }
 
-interface ConsumableDescriptor extends ItemDescriptor {
+type ConsumableDescriptor = ImplementableDescriptor<ImplementationKind.Consumable> & ItemDescriptor & {
   readonly healthGiven?: number;
   readonly hungerGiven?: number;
-}
+};
 
-interface RawConsumableDescriptor extends ConsumableDescriptor, RawItemDescriptor {
-
-}
+type RawConsumableDescriptor = ConsumableDescriptor & RawItemDescriptor;
 
 interface ToolDescriptor extends ItemDescriptor {
   readonly tier: number;

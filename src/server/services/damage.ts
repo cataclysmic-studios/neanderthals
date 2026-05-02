@@ -36,7 +36,7 @@ export class DamageService implements OnStart {
     );
   }
 
-  private damageCreature(player: Player, id: number, hitPosition: Vector3, toolID: ItemID): void {
+  private damageCreature(player: Player, id: number, hitPosition: Vector3, toolID: string): void {
     const creature = findCreatureByID(id);
     if (!creature)
       return warn(`Failed to damage creature with ID ${id}: creature not found`);
@@ -50,7 +50,7 @@ export class DamageService implements OnStart {
     });
   }
 
-  private damage(player: Player, humanoid: Humanoid, hitPosition: Vector3, toolID: ItemID, isCreature = false): void {
+  private damage(player: Player, humanoid: Humanoid, hitPosition: Vector3, toolID: string, isCreature = false): void {
     const targetModel = humanoid.Parent;
     if (!targetModel || !targetModel.IsA("Model")) return;
 

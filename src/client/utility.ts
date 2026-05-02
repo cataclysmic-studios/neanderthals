@@ -2,7 +2,6 @@ import { Workspace as World } from "@rbxts/services";
 import ViewportModel from "@rbxts/viewportmodel";
 
 import { ItemRegistry } from "shared/registry/item-registry";
-import type { ItemID } from "shared/item-id";
 
 const { rad } = math;
 const { identity, Angles: angles } = CFrame;
@@ -16,8 +15,8 @@ export function findCreatureByID(id: number): Maybe<CreatureModel> {
 
 const ITEM_ORIENTATION = angles(0, rad(45), 0);
 export function addViewportItem<T extends Model>(viewport: ViewportFrame, item: T): void;
-export function addViewportItem<T extends Model>(viewport: ViewportFrame, id: ItemID): void;
-export function addViewportItem<T extends Model>(viewport: ViewportFrame, id: T | ItemID): void {
+export function addViewportItem<T extends Model>(viewport: ViewportFrame, id: string): void;
+export function addViewportItem<T extends Model>(viewport: ViewportFrame, id: T | string): void {
   const itemTemplate = typeIs(id, "string") ? ItemRegistry.get(id) : id;
   const displayOffset = itemTemplate.GetAttribute<CFrame>("DisplayOffset") ?? CFrame.identity;
   const item = itemTemplate.Clone();

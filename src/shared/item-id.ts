@@ -25,7 +25,7 @@ export const enum ItemID {
 }
 
 /** Items which may only have one copy in a players inventory and may not be dropped */
-export const EXCLUSIVE_IDS = new Set<ItemID>([
+export const EXCLUSIVE_IDS = new Set<string>([
   ItemID.GodRock,
   ItemID.Rock
 ]);

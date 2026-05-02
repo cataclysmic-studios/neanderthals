@@ -5,11 +5,11 @@ import { getDescendantsOfType } from "@rbxts/instance-utility";
 import { Message, messaging } from "shared/messaging";
 import { player } from "client/constants";
 import { isValidStructureDistance } from "shared/utility";
-import { getRecipeIndex, getStructureRecipe } from "shared/recipes";
 import { STRUCTURE_OVERLAP_PARAMS } from "shared/constants";
 import type { StructureID } from "shared/structure-id";
 
 import type { InputController } from "./input";
+import { RecipeRegistry } from "shared/registry/recipe-registry";
 
 const { rad } = math;
 const { Angles: angles } = CFrame;
@@ -101,12 +101,12 @@ export class BuildingController implements OnTick {
     if (!this.canPlaceHologram()) return;
 
     const id = this.currentStructure!.GetAttribute<StructureID>("ID")!;
-    const recipe = getStructureRecipe(id);
+    const recipe = RecipeRegistry.getStructure(id);
     if (!recipe)
       return warn("Failed to place structure: current structure model has no corresponding recipe");
 
     const cframe = this.hologram!.GetPivot();
-    const recipeIndex = getRecipeIndex(recipe);
+    const recipeIndex = RecipeRegistry.getIndex(recipe);
     this.leaveBuildMode();
     messaging.server.emit(Message.PlaceStructure, { id, recipeIndex, cframe });
   }

@@ -29,7 +29,7 @@ export class InventoryUIController {
 
   private readonly frame: PlayerGui["Main"]["Inventory"];
   private readonly itemContainer: ScrollingFrame;
-  private readonly buttonInfos = new Map<ItemID, ItemFrameInfo>;
+  private readonly buttonInfos = new Map<string, ItemFrameInfo>;
   private lastInventory = INITIAL_DATA.inventory;
 
   public constructor(
@@ -50,7 +50,7 @@ export class InventoryUIController {
       }
 
       const deletionsRecord = recordDiff(last, data.inventory, false);
-      const deletions = new Set<ItemID>;
+      const deletions = new Set<string>;
       for (const [id] of pairs(deletionsRecord))
         deletions.add(id);
 
@@ -69,7 +69,7 @@ export class InventoryUIController {
     return this.frame.Visible;
   }
 
-  private update(changes: Record<ItemID, Maybe<number>>, deletions: Set<ItemID>): void {
+  private update(changes: Record<string, Maybe<number>>, deletions: Set<string>): void {
     for (const [id, diff] of pairs(changes)) {
       const info = this.buttonInfos.get(id);
       if (info && isItemStackable(id)) {
@@ -87,12 +87,12 @@ export class InventoryUIController {
     }
   }
 
-  private deleteItemButton(id: ItemID): void {
+  private deleteItemButton(id: string): void {
     this.buttonInfos.get(id)?.trash.destroy();
     this.buttonInfos.delete(id);
   }
 
-  private createItemButton(id: ItemID, count: number): ItemButton {
+  private createItemButton(id: string, count: number): ItemButton {
     const itemTemplate = ItemRegistry.get(id);
     const trash = new Trash;
     const button = assets.UI.InventoryItem.Clone();

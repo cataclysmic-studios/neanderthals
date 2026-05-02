@@ -1,7 +1,6 @@
-import { u8, u16, i16, f24, f32, Vector, List, Transform } from "@rbxts/serio";
-import type { ItemID } from "shared/item-id";
-import type { StructureID } from "shared/structure-id";
+import type { u8, u16, i16, f24, f32, Vector, List, Transform, String } from "@rbxts/serio";
 
+export type GameID = String<u8>;
 export type DropID = u16;
 export type CreatureID = u16;
 
@@ -16,24 +15,24 @@ export interface AudioPacket extends PlayAudioOptions {
 }
 
 export interface PlaceStructurePacket {
-  readonly id: StructureID;
+  readonly id: GameID;
   readonly recipeIndex: u8;
   readonly cframe: Transform<f24>;
 }
 
 export interface AddHotbarItemPacket {
-  readonly id: ItemID;
+  readonly id: GameID;
   readonly slot: HotbarKeyName;
 }
 
 export interface DropItemPacket {
-  readonly id: ItemID;
+  readonly id: GameID;
   readonly position: Vector<i16>;
 }
 
 interface BaseDamagePacket {
   readonly hitPosition: Vector<i16>;
-  readonly toolID: ItemID;
+  readonly toolID: GameID;
 }
 
 export interface DamagePacket extends BaseDamagePacket {

@@ -27,7 +27,7 @@ export function getMaxBagSpace(equippedGear: EquippedGear): number {
 
 export function calculateBagSpace(hotbar: PlayerData["hotbar"], inventory: PlayerData["inventory"]): number {
   const items = [
-    ...[...hotbar].mapFiltered<[ItemID, number]>(([_, id]) => id !== undefined ? [id, 1] : undefined!),
+    ...[...hotbar].mapFiltered<[string, number]>(([_, id]) => id !== undefined ? [id, 1] : undefined!),
     ...inventory
   ];
 

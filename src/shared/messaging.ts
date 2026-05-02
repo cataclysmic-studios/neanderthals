@@ -1,5 +1,5 @@
 import { MessageEmitter } from "@rbxts/tether";
-import type { u8 } from "@rbxts/serio";
+import type { List, Packed, u8 } from "@rbxts/serio";
 
 import type {
   CreatureSpawnPacket,
@@ -12,11 +12,12 @@ import type {
   DropID,
   AddHotbarItemPacket,
   PlaceStructurePacket,
-  AudioPacket
+  AudioPacket,
+  GameID
 } from "./structs/packets";
-import type { ItemID } from "./item-id";
 import type { PlayerData } from "./structs/player-data";
 import type { TribeColorName } from "./constants";
+import type { CraftingRecipe } from "./structs/crafting-recipe";
 
 export const messaging = MessageEmitter.create<MessageData>();
 
@@ -50,7 +51,8 @@ export const enum Message {
   GetTribeChief,
   ReturnTribeChief,
   PlayAudio,
-  ReplicateAudio
+  ReplicateAudio,
+  SyncRecipes
 }
 
 export interface MessageData {
@@ -70,7 +72,7 @@ export interface MessageData {
   [Message.SpawnCreature]: CreatureSpawnPacket;
   [Message.CreatureHealthChange]: CreatureHealthChangePacket;
   [Message.UpdateCreatures]: CreatureUpdatePacket;
-  [Message.Eat]: ItemID;
+  [Message.Eat]: GameID;
   [Message.AddHotbarItem]: AddHotbarItemPacket;
   [Message.RemoveHotbarItem]: HotbarKeyName;
   [Message.Craft]: u8;
@@ -84,4 +86,5 @@ export interface MessageData {
   [Message.ReturnTribeChief]: Maybe<Player>;
   [Message.PlayAudio]: AudioPacket;
   [Message.ReplicateAudio]: AudioPacket;
+  [Message.SyncRecipes]: Packed<List<CraftingRecipe, u8>>;
 }

@@ -4,13 +4,12 @@ import { getChildrenOfType } from "@rbxts/instance-utility";
 import { Message, messaging } from "shared/messaging";
 import { assets } from "shared/constants";
 import { mainScreen } from "client/constants";
-import { getRecipeIndex, RECIPES } from "shared/recipes";
-import { getDisplayName, getStructureByID } from "shared/utility/items";
 import { addViewportItem } from "client/utility";
+import { getDisplayName } from "shared/utility/items";
 import { ItemRegistry } from "shared/registry/item-registry";
+import { StructureRegistry } from "shared/registry/structure-registry";
+import { RecipeRegistry } from "shared/registry/recipe-registry";
 import { RecipeKind, type CraftingRecipe } from "shared/structs/crafting-recipe";
-import type { ItemID } from "shared/item-id";
-import type { StructureID } from "shared/structure-id";
 
 import type { ReplicaController } from "../replica";
 import type { BuildingController } from "../building";
@@ -47,7 +46,7 @@ export class CraftingUIController {
       }
     });
 
-    for (const recipe of RECIPES) {
+    for (const recipe of RecipeRegistry.getAll()) {
       const frame = this.createRecipeFrame(recipe);
       if (!frame) continue;
 
@@ -59,7 +58,7 @@ export class CraftingUIController {
     const { kind, yield: yieldItem, ingredients, requiredLevel } = recipe;
     const yieldID = typeIs(yieldItem, "string") ? yieldItem : yieldItem[0];
     const model = recipe.kind === RecipeKind.Structure
-      ? getStructureByID(yieldID as StructureID)
+      ? StructureRegistry.get(yieldID)
       : ItemRegistry.get(yieldID);
 
     // TODO: required level UI
@@ -75,7 +74,7 @@ export class CraftingUIController {
     frame.Craft.MouseButton1Click.Connect(() => {
       if (!this.canCraft(ingredients)) return;
       if (kind === RecipeKind.Tool)
-        messaging.server.emit(Message.Craft, getRecipeIndex(recipe));
+        messaging.server.emit(Message.Craft, RecipeRegistry.getIndex(recipe));
       else if (kind === RecipeKind.Structure)
         this.building.enterBuildMode(model);
     });
@@ -84,7 +83,7 @@ export class CraftingUIController {
     return frame;
   }
 
-  private createIngredientFrame(parent: Frame, [id, count]: [ItemID, number]): void {
+  private createIngredientFrame(parent: Frame, [id, count]: [string, number]): void {
     const item = ItemRegistry.get(id);
     if (!item) return;
 
@@ -110,13 +109,13 @@ export class CraftingUIController {
     return ingredients.every(([id, count]) => this.hasEnough(id, count));
   }
 
-  private getTextColor(id: ItemID, requiredCount: number): Color3 {
+  private getTextColor(id: string, requiredCount: number): Color3 {
     return this.hasEnough(id, requiredCount)
       ? DEFAULT_TEXT_COLOR
       : NOT_ENOUGH_TEXT_COLOR;
   }
 
-  private hasEnough(id: ItemID, requiredCount: number): boolean {
+  private hasEnough(id: string, requiredCount: number): boolean {
     const itemCount = this.replica.data.inventory.get(id);
     return itemCount !== undefined && itemCount >= requiredCount;
   }

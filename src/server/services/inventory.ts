@@ -10,8 +10,8 @@ import type { PlayerData } from "shared/structs/player-data";
 import type { DataService } from "./data";
 
 interface TransactionInfo {
-  readonly add: [id: ItemID, count: number][];
-  readonly remove: [id: ItemID, count: number][];
+  readonly add: [id: string, count: number][];
+  readonly remove: [id: string, count: number][];
 }
 
 @Service()
@@ -55,7 +55,7 @@ export class InventoryService {
     });
   }
 
-  public async addItem(player: Player, id: ItemID, count = 1): Promise<boolean> {
+  public async addItem(player: Player, id: string, count = 1): Promise<boolean> {
     const data = await this.data.get(player);
     if (data.inventory.has(id) && EXCLUSIVE_IDS.has(id))
       return false;
@@ -70,7 +70,7 @@ export class InventoryService {
     });
   }
 
-  public async removeItem(player: Player, id: ItemID, count = 1, after?: (data: DeepWritable<PlayerData>) => boolean): Promise<boolean> {
+  public async removeItem(player: Player, id: string, count = 1, after?: (data: DeepWritable<PlayerData>) => boolean): Promise<boolean> {
     if (!await this.has(player, id) || EXCLUSIVE_IDS.has(id))
       return false;
 
@@ -92,12 +92,12 @@ export class InventoryService {
     });
   }
 
-  public async getItemCount(player: Player, id: ItemID): Promise<number> {
+  public async getItemCount(player: Player, id: string): Promise<number> {
     const { inventory } = await this.data.get(player);
     return inventory.get(id) ?? 0;
   }
 
-  public async has(player: Player, id: ItemID, count?: number): Promise<boolean> {
+  public async has(player: Player, id: string, count?: number): Promise<boolean> {
     const { inventory } = await this.data.get(player);
 
     const hasItem = inventory.has(id);
@@ -106,7 +106,7 @@ export class InventoryService {
       : hasItem;
   }
 
-  private async dropItem(player: Player, id: ItemID, position: Vector3): Promise<void> {
+  private async dropItem(player: Player, id: string, position: Vector3): Promise<void> {
     const item = ItemRegistry.get(id);
     if (!item)
       return stopHacking(player, "invalid item ID (no corresponding item) when dropping item");
@@ -117,7 +117,7 @@ export class InventoryService {
     dropItem(item, new CFrame(position));
   }
 
-  private addHotbarItem(data: DeepWritable<PlayerData>, id: ItemID, slot: HotbarKeyName): boolean {
+  private addHotbarItem(data: DeepWritable<PlayerData>, id: string, slot: HotbarKeyName): boolean {
     const { hotbar } = data;
     data.inventory.delete(id);
 

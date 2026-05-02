@@ -1,20 +1,29 @@
 import { Service } from "@flamework/core";
 import { Workspace as World } from "@rbxts/services";
 import { getDescendantsOfType } from "@rbxts/instance-utility";
+import Signal from "@rbxts/lemon-signal";
 
 import type { OnPlayerAdd, OnPlayerRemove } from "server/hooks";
 import { Message, messaging } from "shared/messaging";
 import { stopHacking } from "server/utility";
-import { getStructureByID } from "shared/utility/items";
-import { RECIPES } from "shared/recipes";
+import { isValidStructureDistance } from "shared/utility";
+import { StructureRegistry } from "shared/registry/structure-registry";
+import { STRUCTURE_OVERLAP_PARAMS } from "shared/constants";
 import type { PlaceStructurePacket } from "shared/structs/packets";
 
 import type { InventoryService } from "./inventory";
-import { isValidStructureDistance } from "shared/utility";
-import { STRUCTURE_OVERLAP_PARAMS } from "shared/constants";
+import { RecipeRegistry } from "shared/registry/recipe-registry";
+
+export interface PlayerStructurePlacedInfo {
+  readonly player: Player;
+  readonly id: string;
+  readonly model: Model;
+}
 
 @Service()
 export class BuildingService implements OnPlayerAdd, OnPlayerRemove {
+  public structurePlaced = new Signal<(info: PlayerStructurePlacedInfo) => void>();
+
   private readonly placedStructures = new Map<Player, Set<Model>>;
 
   public constructor(
@@ -35,11 +44,14 @@ export class BuildingService implements OnPlayerAdd, OnPlayerRemove {
   }
 
   private async place(player: Player, { id, recipeIndex, cframe }: PlaceStructurePacket): Promise<void> {
-    const recipe = RECIPES[recipeIndex];
+    const recipe = RecipeRegistry.get(recipeIndex);
     if (!recipe)
       return stopHacking(player, "recipe index does not exist");
 
-    const structureTemplate = getStructureByID(id);
+    if (recipe.yield !== id)
+      return stopHacking(player, "recipe yield does not match structure ID");
+
+    const structureTemplate = StructureRegistry.get(id);
     if (!structureTemplate)
       return stopHacking(player, "no structure with ID " + id);
 

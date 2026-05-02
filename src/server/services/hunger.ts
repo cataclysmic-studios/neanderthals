@@ -1,4 +1,5 @@
 import { Service, type OnTick } from "@flamework/core";
+import Signal from "@rbxts/lemon-signal";
 
 import type { OnPlayerRemove } from "server/hooks";
 import { Message, messaging } from "shared/messaging";
@@ -12,8 +13,17 @@ const { clamp } = math;
 
 const HUNGER_TICK_INTERVAL = 4;
 
+export interface PlayerEatInfo {
+  readonly player: Player;
+  readonly id: string;
+  readonly hungerGained: number;
+  readonly healthGained: number;
+}
+
 @Service()
 export class HungerService implements OnTick, OnPlayerRemove {
+  public readonly eaten = new Signal<(info: PlayerEatInfo) => void>();
+
   private readonly playerHunger = new Map<Player, number>;
   private elapsed = 0;
 
@@ -55,19 +65,27 @@ export class HungerService implements OnTick, OnPlayerRemove {
     if (!character) return;
 
     const attributes = item.GetAttributes();
+    const id = attributes.get("ID") as string;
     const attributeName = "HungerWhenEaten";
     const hungerWhenEaten = attributes.get(attributeName) as number;
-    if (hungerWhenEaten === undefined)
-      return warn(`Failed to eat '${item}': food item has no '${attributeName}' attribute`);
+    if (hungerWhenEaten === undefined) {
+      return warn(`Failed to eat '${item}': consumable item has no '${attributeName}' attribute`);
+    }
 
     const healthWhenEaten = attributes.get("HealthWhenEaten") as number;
     const humanoid = character.Humanoid;
-    if (healthWhenEaten !== undefined)
-      humanoid.Health = clamp(humanoid.Health + healthWhenEaten, 0, humanoid.MaxHealth);
+    let healthGained = 0;
+    if (healthWhenEaten !== undefined) {
+      const newHealth = clamp(humanoid.Health + healthWhenEaten, 0, humanoid.MaxHealth);
+      healthGained = newHealth - humanoid.Health;
+      humanoid.Health = newHealth;
+    }
 
     const hunger = this.playerHunger.get(player)!;
     const newHunger = clamp(hunger + hungerWhenEaten, 0, 100);
+    const hungerGained = newHunger - hunger;
     this.playerHunger.set(player, newHunger);
+    this.eaten.Fire({ player, id, hungerGained, healthGained });
     messaging.client.emit(player, Message.UpdateHunger, newHunger);
   }
 

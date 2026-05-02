@@ -59,7 +59,7 @@ export class HotbarUIController {
     }
   }
 
-  public addItem(id: ItemID, slot?: HotbarKeyName): void {
+  public addItem(id: string, slot?: HotbarKeyName): void {
     const button = slot !== undefined
       ? this.frame[slot]
       : this.getNextEmptyHotbarButton();
@@ -128,7 +128,7 @@ export class HotbarUIController {
     }));
   }
 
-  private addViewportItem(hotbarButton: HotbarButton, id: ItemID): void {
+  private addViewportItem(hotbarButton: HotbarButton, id: string): void {
     addViewportItem(hotbarButton.Viewport, id);
     hotbarButton.SetAttribute("CurrentItem", id);
   }
