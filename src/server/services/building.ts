@@ -22,7 +22,7 @@ export interface PlayerStructurePlacedInfo {
 
 @Service()
 export class BuildingService implements OnPlayerAdd, OnPlayerRemove {
-  public structurePlaced = new Signal<(info: PlayerStructurePlacedInfo) => void>();
+  public readonly structurePlaced = new Signal<(info: PlayerStructurePlacedInfo) => void>();
 
   private readonly placedStructures = new Map<Player, Set<Model>>;
 
@@ -72,6 +72,7 @@ export class BuildingService implements OnPlayerAdd, OnPlayerRemove {
     structure.SetAttribute("Structure_OwnerID", player.UserId);
     structure.Parent = World.PlacedStructures;
     this.placedStructures.get(player)!.add(structure);
+    this.structurePlaced.Fire({ player, id, model: structure });
   }
 
   private canPlaceStructure(structureTemplate: Model, cframe: CFrame): boolean {

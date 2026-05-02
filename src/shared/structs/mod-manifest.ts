@@ -1,7 +1,5 @@
-import { CraftingRecipe } from "shared/structs/crafting-recipe";
-import { StructureConfig } from "shared/structs/structure-config";
-import { ToolKind } from "shared/structs/tool-kind";
-import { I } from "ts-toolbelt";
+import type { CraftingRecipe } from "shared/structs/crafting-recipe";
+import type { ToolKind } from "shared/structs/tool-kind";
 
 interface JsonVector {
   readonly x: number;
@@ -46,11 +44,11 @@ export type ImplementableDescriptor<Kind extends ImplementationKind> = ContentDe
   readonly implementation?: undefined;
 });
 
-export interface NaturalStructureDescriptor extends ContentDescriptor, StructureConfig {
+export interface NaturalStructureDescriptor extends ContentDescriptor {
 
 }
 
-export type StructureDescriptor = ImplementableDescriptor<ImplementationKind.Structure> & DisplayableDescriptor & StructureConfig;
+export type StructureDescriptor = ImplementableDescriptor<ImplementationKind.Structure> & DisplayableDescriptor;
 
 export interface ItemDescriptor extends DisplayableDescriptor {
   readonly bagSpace: number;

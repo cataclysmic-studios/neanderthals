@@ -35,7 +35,7 @@ class RecipeRegistryClass extends Registry {
       this.categorize(recipe);
   }
 
-  public getAll(): readonly CraftingRecipe[] {
+  public getAll(): CraftingRecipe[] {
     return this.allRecipes;
   }
 

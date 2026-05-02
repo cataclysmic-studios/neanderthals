@@ -3,8 +3,8 @@ import type { u8 } from "@rbxts/serio";
 import type { GameID } from "./packets";
 
 export const enum RecipeKind {
-  Tool,
-  Structure
+  Tool = "tool",
+  Structure = "structure"
 }
 
 interface BaseCraftingRecipe {
