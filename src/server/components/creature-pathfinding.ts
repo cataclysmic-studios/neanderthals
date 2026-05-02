@@ -139,12 +139,18 @@ export class CreaturePathfinding extends DestroyableComponent<Attributes, Creatu
     return new Promise((resolve, reject) => {
       const { path } = this;
       const startPosition = this.root.Position;
-      path.ComputeAsync(startPosition, position);
-
-      if (path.Status !== Enum.PathStatus.Success)
-        return reject("Pathfinding failed: " + path.Status.Name);
+      try {
+        path.ComputeAsync(startPosition, position);
+        if (path.Status !== Enum.PathStatus.Success)
+          return reject("Pathfinding failed: " + path.Status.Name);
+      } catch (e) {
+        return reject(e);
+      }
 
       this.waypoints = path.GetWaypoints();
+      if (this.waypoints.size() === 0)
+        return reject("No waypoints found");
+
       this.currentWaypointIndex = 0;
       this.isMoving = true;
       resolve();

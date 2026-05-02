@@ -9,7 +9,6 @@ import type { CreatureConfig } from "shared/structs/creature-config";
 
 import { CreatesDropsComponent } from "server/base-components/creates-drops";
 import type { CreaturePathfindingService } from "server/services/creature";
-import type { CharacterService } from "server/services/character";
 import type { LevelsService } from "server/services/levels";
 
 interface Attributes {
@@ -35,7 +34,6 @@ export class CreatureSpawn extends CreatesDropsComponent<Attributes, BasePart> i
 
   public constructor(
     private readonly pathfinding: CreaturePathfindingService,
-    private readonly character: CharacterService,
     private readonly levels: LevelsService
   ) {
     super();
