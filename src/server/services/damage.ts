@@ -12,6 +12,7 @@ import { ItemRegistry } from "shared/registry/item-registry";
 import type { ItemID } from "shared/item-id";
 
 import type { Structure } from "server/components/structure";
+import { CreatureConfig } from "shared/structs/creature-config";
 
 const { clamp, floor } = math;
 const { magnitude } = vector;

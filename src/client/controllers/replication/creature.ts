@@ -2,14 +2,16 @@ import { Controller, OnTick } from "@flamework/core";
 import type { Components } from "@flamework/components";
 import { Workspace as World } from "@rbxts/services";
 
-import type { OnFixed } from "shared/hooks";
 import { Message, messaging } from "shared/messaging";
 import { assets } from "shared/constants";
 import { findCreatureByID } from "client/utility";
+import type { OnFixed } from "shared/hooks";
+import type { CreatureConfig } from "shared/structs/creature-config";
 import type { CreatureSpawnPacket, CreatureUpdatePacket } from "shared/structs/packets";
 
 import type { CreatureAnimator } from "client/components/replication/creature-animator";
 import type { CreatureSync } from "client/components/replication/creature-sync";
+import type { AudioController } from "../audio";
 import type { MainUIController } from "../ui/main";
 
 export const creatureStorage = new Instance("Folder");
@@ -32,6 +34,7 @@ function spawn({ name, id, position, health }: CreatureSpawnPacket): void {
 export class CreatureController implements OnTick, OnFixed {
   public constructor(
     private readonly components: Components,
+    private readonly audio: AudioController,
     private readonly mainUI: MainUIController
   ) {
     messaging.client.on(Message.SpawnCreature, spawn);
@@ -63,8 +66,10 @@ export class CreatureController implements OnTick, OnFixed {
     const creature = findCreatureByID(id);
     if (!creature) return;
 
+    const config = require<CreatureConfig>(creature.Config);
     const humanoid = creature.Humanoid;
     humanoid.Health = newHealth;
+    this.audio.playRandomSpeed(config.damageSound, { parent: creature });
     this.mainUI.showDamageDisplay(creature.Name, newHealth, humanoid.MaxHealth);
 
     if (newHealth > 0) return;

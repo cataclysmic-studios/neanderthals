@@ -1,8 +1,11 @@
 import { Component } from "@flamework/components";
 import { $nameof } from "rbxts-transform-debug";
-import DestroyableComponent from "shared/base-components/destroyable";
 
 import type { PlayAnimationOptions } from "shared/structs/animation";
+import type { CreatureConfig } from "shared/structs/creature-config";
+
+import DestroyableComponent from "shared/base-components/destroyable";
+import type { AudioController } from "client/controllers/audio";
 
 const { random } = math;
 const { clock } = os;
@@ -11,6 +14,7 @@ const getNextIdleTime = () => random(6, 20);
 
 @Component({ tag: $nameof<CreatureAnimator>() })
 export class CreatureAnimator extends DestroyableComponent<{ ID: number }, CreatureModel> {
+  private readonly config = require<CreatureConfig>(this.instance.Config);
   private readonly humanoid;
   private readonly idleAnimation;
   private readonly walkAnimation;
@@ -21,7 +25,9 @@ export class CreatureAnimator extends DestroyableComponent<{ ID: number }, Creat
   private idle = false;
   private walking = false;
 
-  public constructor() {
+  public constructor(
+    private readonly audio: AudioController
+  ) {
     super();
     this.trash.add(() => this.tracks = undefined!);
 
@@ -42,6 +48,7 @@ export class CreatureAnimator extends DestroyableComponent<{ ID: number }, Creat
     const idleLength = getNextIdleTime();
     task.delay(idleLength, () => this.idle = false);
 
+    this.audio.play(this.config.idleSound, undefined, false);
     this.playAnimation(idleAnimation, { fadeTime: 0, priority: Enum.AnimationPriority.Idle });
     this.lastIdle = clock();
     this.nextIdleTime = getNextIdleTime();

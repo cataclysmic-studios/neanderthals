@@ -7,6 +7,8 @@ import type { PlayAudioOptions } from "shared/structs/packets";
 
 import type { CharacterController } from "./character";
 
+const RNG = new Random
+
 @Controller()
 export class AudioController implements OnStart {
   public constructor(
@@ -19,13 +21,25 @@ export class AudioController implements OnStart {
     );
   }
 
+  public playRandomSpeed(name: AudioName, options?: PlayAudioOptions, interval = 0.1, replicate = true): Sound {
+    const sound = this.replicate(name, options);
+    if (!replicate)
+      return sound;
+
+    const { parent, volume, speed = 1 } = options ?? {};
+    const randomizedSpeed = RNG.NextNumber(speed - interval, speed + interval);
+    messaging.server.emit(Message.PlayAudio, { name, parent, volume, speed: randomizedSpeed });
+
+    return sound;
+  }
+
   public play(name: AudioName, options?: PlayAudioOptions, replicate = true): Sound {
     const sound = this.replicate(name, options);
     if (!replicate)
       return sound;
 
-    const { parent, volume } = options ?? {};
-    messaging.server.emit(Message.PlayAudio, { name, parent, volume });
+    const { parent, volume, speed } = options ?? {};
+    messaging.server.emit(Message.PlayAudio, { name, parent, volume, speed });
     return sound;
   }
 

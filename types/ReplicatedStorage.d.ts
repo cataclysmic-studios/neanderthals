@@ -46,6 +46,8 @@ interface ReplicatedStorage extends Instance {
     };
     Audio: Folder & {
       Swing: Sound;
+      PigIdle: Sound;
+      PigDamage: Sound;
       RockHit: Sound;
       WoodHit: Sound;
       LeafHit: Sound;

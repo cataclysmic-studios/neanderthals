@@ -6,8 +6,6 @@ import type { StructureConfig } from "shared/structs/structure-config";
 import type { AudioController } from "./audio";
 import type { ToolController } from "./tool";
 
-const RNG = new Random;
-
 @Controller()
 export class DamageController {
   public constructor(
@@ -29,7 +27,7 @@ export class DamageController {
       if (isStructure) {
         const configModule = model.WaitForChild("Config") as ModuleScript;
         const config = require<StructureConfig>(configModule);
-        this.audio.play(config.hitSound, { parent: model, speed: RNG.NextNumber(0.9, 1.1) });
+        this.audio.playRandomSpeed(config.hitSound, { parent: model });
       }
 
       messaging.server.emit(Message.Damage, { humanoid, toolID, hitPosition });
