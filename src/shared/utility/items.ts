@@ -4,7 +4,7 @@ interface DisplayNameOptions {
   readonly uppercase?: boolean;
 }
 
-export function getDisplayName(item: Model, { uppercase = true }: DisplayNameOptions = {}): string {
+export function getDisplayName(item: Instance, { uppercase = true }: DisplayNameOptions = {}): string {
   const name = item.GetAttribute<string>("DisplayName") ?? item.Name;
   return uppercase ? name.upper() : name;
 }

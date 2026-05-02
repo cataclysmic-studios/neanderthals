@@ -15,6 +15,7 @@ import type { HotbarUIController } from "./hotbar";
 import { ActionButtonsUIController } from "./action-buttons";
 import { InventoryUIController } from "./inventory";
 import { TribesUIController } from "./tribes";
+import { getDisplayName } from "shared/utility/items";
 
 const { floor } = math;
 const { delay } = task;
@@ -101,7 +102,7 @@ export class MainUIController implements OnCharacterAdd {
     healthBar.Amount.Text = tostring(floor(health)); // TODO: comma format
     healthBar.Bar.Size = UDim2.fromScale(health / maxHealth, 1);
 
-    const name = typeIs(humanoid, "string") ? humanoid : humanoid.Parent!.Name.upper();
+    const name = typeIs(humanoid, "string") ? humanoid : getDisplayName(humanoid.Parent!);
     damageDisplay.Title.Text = name;
     damageDisplay.Visible = true;
 
