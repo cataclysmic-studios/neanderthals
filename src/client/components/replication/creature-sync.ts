@@ -7,7 +7,7 @@ import { $nameof } from "rbxts-transform-debug";
 import { CREATURE_DRAW_DISTANCE } from "shared/constants";
 import { player } from "client/constants";
 import { distanceBetween } from "shared/utility";
-import SmoothValue from "shared/classes/smooth-value";
+import SmoothValue from "shared/utility/smooth-value";
 
 import DestroyableComponent from "shared/base-components/destroyable";
 import type { CreatureAnimator } from "./creature-animator";

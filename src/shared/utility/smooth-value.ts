@@ -1,4 +1,4 @@
-import { lerp } from "../utility";
+import { lerp } from ".";
 
 const { min } = math;
 
