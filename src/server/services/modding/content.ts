@@ -6,6 +6,7 @@ import type { Mod, ModFolder } from "shared/structs/mod";
 import type { ImplementableDescriptor, ModManifest } from "shared/structs/mod-manifest";
 
 import type { MainModdingAPIService } from "./api/main";
+import type { ModRulesService } from "./rules";
 
 declare function loadstring<Fn extends Callback = Callback>(source: string, chunkName?: string): Fn;
 
@@ -42,7 +43,7 @@ function hasImplementation(obj: ImplementableDescriptor): obj is ImplementableDe
 @Service()
 export class ModContentService {
   public constructor(
-    private readonly mainModdingAPI: MainModdingAPIService
+    private readonly rules: ModRulesService
   ) { }
 
   public async downloadAssets(mod: Mod): Promise<void> {
@@ -75,11 +76,13 @@ export class ModContentService {
     if (!hasImplementation(descriptor)) return;
 
     const implementationSource = await getRawContents(mod, descriptor.implementation);
-    const implementation = loadstring<() => Implementation>(implementationSource, mod.manifest.metadata.id)();
+    const loadModule = loadstring<() => Implementation>(implementationSource, descriptor.implementation);
+    const implementation = loadModule();
     if (!implementation)
       return warn(`Failed to load implementation for content "${descriptor.id}": ${descriptor.implementation}`);
 
-    implementation(descriptor.id, this.mainModdingAPI);
+    const mainModdingAPI = this.rules.getSandboxedModdingAPI();
+    implementation(descriptor.id, mainModdingAPI);
     print(`Registered implementation for content "${descriptor.id}": ${descriptor.implementation}`);
   }
 

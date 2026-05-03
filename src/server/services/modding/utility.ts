@@ -2,7 +2,7 @@ import { HttpService } from "@rbxts/services";
 
 import type { Mod, ModRepo } from "shared/structs/mod";
 
-const BASE_URL = "https://raw.githubusercontent.com/"
+const BASE_URL = "https://raw.githubusercontent.com/";
 
 export async function getRawContents(repo: ModRepo, branch: string, path: string): Promise<string>;
 export async function getRawContents(mod: Mod, path: string): Promise<string>;

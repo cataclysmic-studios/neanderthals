@@ -13,6 +13,7 @@ import type { Mod, ModRepo } from "shared/structs/mod";
 import type { ContentDescriptor, DisplayableDescriptor, ItemDescriptor, ModManifest, StructureDescriptor } from "shared/structs/mod-manifest";
 
 import type { ModContentService } from "./content";
+import type { ModRulesService } from "./rules";
 
 type ModList = readonly (ModRepo | [repo: ModRepo, branch: string])[];
 
@@ -25,7 +26,8 @@ export class ModLoaderService implements OnStart {
   private readonly loadedMods = new Map<string, Mod>;
 
   public constructor(
-    private readonly content: ModContentService
+    private readonly content: ModContentService,
+    private readonly rules: ModRulesService
   ) { }
 
   public async onStart(): Promise<void> {
@@ -114,6 +116,17 @@ export class ModLoaderService implements OnStart {
   private registerRecipes(mod: Mod): void {
     if (!mod.manifest.recipes) return;
     for (const recipe of mod.manifest.recipes) {
+      const isCircular = recipe.ingredients.some(ingredient => {
+        return typeIs(recipe.yield, "string") ?
+          recipe.yield === ingredient[0] && 1 === ingredient[1]
+          : recipe.yield[0] === ingredient[0] && recipe.yield[1] === ingredient[1]
+      });
+
+      if (this.rules.current.noCircularRecipes && isCircular) {
+        warn("Recipe is circular and rules do not allow for circular recipes:", recipe);
+        continue;
+      }
+
       RecipeRegistry.register(recipe);
       print("Registered recipe:", recipe);
     }
