@@ -6,6 +6,6 @@ export = {
   kind: RecipeKind.Structure,
   yield: StructureID.WoodWall,
   ingredients: [
-    [ItemID.Log, 3]
+    [ItemID.Log, 4]
   ]
 } satisfies CraftingRecipe;

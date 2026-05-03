@@ -22,6 +22,7 @@ export const enum ItemID {
   IronBar = "neanderthals:iron_bar",
   RawGold = "neanderthals:raw_gold",
   GoldBar = "neanderthals:gold_bar",
+  WildBerry = "neanderthals:wild_berry",
 }
 
 /** Items which may only have one copy in a players inventory and may not be dropped */

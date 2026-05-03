@@ -6,7 +6,7 @@ export = {
   kind: RecipeKind.Structure,
   yield: StructureID.WoodGate,
   ingredients: [
-    [ItemID.Log, 3],
-    [ItemID.Stick, 1]
+    [ItemID.Log, 4],
+    [ItemID.Stick, 2]
   ]
 } satisfies CraftingRecipe;
