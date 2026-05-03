@@ -64,7 +64,7 @@ export class BuildingService implements OnPlayerAdd, OnPlayerRemove {
       return stopHacking(player, "failed to craft structure");
 
     const { requiredSurface } = require<StructureConfig>(structureTemplate.Config);
-    if (requiredSurface !== undefined && material !== requiredSurface)
+    if (requiredSurface !== undefined && Enum.Material.FromValue(material) !== requiredSurface)
       if (!this.canPlaceStructure(structureTemplate, cframe)) return;
 
     const structure = structureTemplate.Clone();

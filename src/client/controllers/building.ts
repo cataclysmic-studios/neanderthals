@@ -119,7 +119,7 @@ export class BuildingController implements OnTick {
     const cframe = this.hologram!.GetPivot();
     const recipeIndex = RecipeRegistry.getIndex(recipe);
     this.leaveBuildMode();
-    messaging.server.emit(Message.PlaceStructure, { id, recipeIndex, cframe, material });
+    messaging.server.emit(Message.PlaceStructure, { id, recipeIndex, cframe, material: material.Value });
   }
 
   private canPlaceHologram(material: Enum.Material): boolean {
