@@ -50,6 +50,13 @@ export class HungerService implements OnTick, OnPlayerRemove {
         const newHunger = clamp(hunger - 0.25, 0, 100);
         this.playerHunger.set(player, newHunger);
         messaging.client.emit(player, Message.UpdateHunger, newHunger);
+
+        if (newHunger === 0) {
+          const character = player.Character as CharacterModel;
+          if (!character) continue;
+
+          character.Humanoid.Health -= 1;
+        }
       }
 
       this.elapsed -= HUNGER_TICK_INTERVAL;

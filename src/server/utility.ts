@@ -26,10 +26,10 @@ let cumulativeDropID = 0;
 export function dropItem(itemTemplate: PVInstance, origin: CFrame, radius: Vector3 = vector.zero, amount = 1): number[] {
   const droppedIDs: number[] = [];
   for (const _ of $range(1, amount)) {
-    const id = cumulativeDropID++;
-    droppedIDs.push(id);
-
     task.spawn(() => {
+      const id = cumulativeDropID++;
+      droppedIDs.push(id);
+
       const drop = itemTemplate.Clone();
       const x = radius.X / 2;
       const y = min(radius.Y / 2, 5);
@@ -39,15 +39,15 @@ export function dropItem(itemTemplate: PVInstance, origin: CFrame, radius: Vecto
       drop.SetAttribute("DropID", id);
       drop.PivotTo(origin.add(offset));
       drop.Destroying.Once(() => cumulativeDropID = clamp(id - 1, 0, 255));
-      drop.Parent = World.DroppedItems;
-      drop.AddTag("DroppedItem");
-
       for (const part of getDescendantsOfType(drop, "BasePart")) {
         if (part.GetAttribute("UseDefaultDroppedCollisions") === true) continue;
         part.CanCollide = true;
         part.CollisionGroup = "DroppedItems";
       }
-    });
+
+      drop.Parent = World.DroppedItems;
+      drop.AddTag("DroppedItem");
+    })
   }
 
   return droppedIDs;
