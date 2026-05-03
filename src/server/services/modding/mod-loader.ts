@@ -21,8 +21,6 @@ const manifestGuard = Flamework.createGuard<ModManifest>();
 
 @Service()
 export class ModLoaderService implements OnStart {
-  public readonly loadedAll = new Signal<() => void>;
-
   private readonly loadedMods = new Map<string, Mod>;
 
   public constructor(
@@ -31,7 +29,7 @@ export class ModLoaderService implements OnStart {
   ) { }
 
   public async onStart(): Promise<void> {
-    await this.loadMods(["R-unic/fish-mod"]);
+    await this.loadMods(["R-unic/create-mod"]);
   }
 
   public async loadMods(modList: ModList): Promise<void> {
@@ -44,11 +42,9 @@ export class ModLoaderService implements OnStart {
     }
 
     // sync modded recipes every time a player joins
-    messaging.client.emitAll(Message.SyncContent, RecipeRegistry.getAll());
-    Players.PlayerAdded.Connect(player => {
+    messaging.server.on(Message.ReadyForContent, player => {
       messaging.client.emit(player, Message.SyncContent, RecipeRegistry.getAll());
     });
-    this.loadedAll.Fire();
     print(`Finished loading ${modList.size()} mod(s)!`);
   }
 

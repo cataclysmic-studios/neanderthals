@@ -28,6 +28,16 @@ export class InventoryService {
     );
   }
 
+  public async get(player: Player): Promise<PlayerData["inventory"]> {
+    const data = await this.data.get(player);
+    return data.inventory;
+  }
+
+  public async getHotbar(player: Player): Promise<PlayerData["hotbar"]> {
+    const data = await this.data.get(player);
+    return data.hotbar;
+  }
+
   public async transaction(player: Player, { add, remove }: TransactionInfo): Promise<boolean> {
     return await this.data.update(player, data => {
       const { inventory } = data;

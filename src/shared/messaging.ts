@@ -52,7 +52,8 @@ export const enum Message {
   ReturnTribeChief,
   PlayAudio,
   ReplicateAudio,
-  SyncContent
+  SyncContent,
+  ReadyForContent
 }
 
 export interface MessageData {
@@ -87,4 +88,5 @@ export interface MessageData {
   [Message.PlayAudio]: AudioPacket;
   [Message.ReplicateAudio]: AudioPacket;
   [Message.SyncContent]: Packed<List<CraftingRecipe, u8>>;
+  [Message.ReadyForContent]: undefined;
 }

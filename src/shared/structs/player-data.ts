@@ -11,6 +11,8 @@ export interface EquippedGear {
   readonly bag?: GameID;
 }
 
+// TODO: sort inventories by unique server IDs
+// server data should be persistent even when the actual roblox server closes
 export interface PlayerData {
   readonly hotbar: HashMap<HotbarKeyName, Maybe<GameID>, u8>;
   readonly inventory: HashMap<GameID, Maybe<u16>, u16>;

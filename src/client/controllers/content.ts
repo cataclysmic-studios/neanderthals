@@ -10,12 +10,16 @@ import { RecipeRegistry } from "shared/registry/recipe-registry";
 export class ContentController implements OnStart {
   public readonly synced = new Signal<() => void>;
 
+  public isSynced = false;
+
   public onStart(): void {
     messaging.client.on(Message.SyncContent, recipes => {
       RecipeRegistry.sync(recipes);
       ItemRegistry.loadVanilla(); // silly hack lol
       StructureRegistry.loadVanilla();
+      this.isSynced = true;
       this.synced.Fire();
     });
+    messaging.server.emit(Message.ReadyForContent);
   }
 }

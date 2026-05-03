@@ -1,5 +1,4 @@
 import { ItemRegistry } from "shared/registry/item-registry";
-import type { ItemID } from "shared/item-id";
 import type { EquippedGear, PlayerData } from "shared/structs/player-data";
 
 export function inventoryHasSpace({ equippedGear, hotbar, inventory }: PlayerData | DeepWritable<PlayerData>) {
