@@ -18,6 +18,7 @@ export interface PlaceStructurePacket {
   readonly id: GameID;
   readonly recipeIndex: u8;
   readonly cframe: Transform<f24>;
+  readonly material: Enum.Material;
 }
 
 export interface AddHotbarItemPacket {

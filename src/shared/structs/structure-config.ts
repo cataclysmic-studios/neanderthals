@@ -10,4 +10,5 @@ export interface StructureConfig {
   readonly destroyedStructure?: GameID;
   readonly minimumToolTier?: number;
   readonly toolKind?: ToolKind;
+  readonly requiredSurface?: Enum.Material;
 }

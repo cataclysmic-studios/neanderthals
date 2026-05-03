@@ -13,6 +13,7 @@ import type { PlaceStructurePacket } from "shared/structs/packets";
 
 import type { InventoryService } from "./inventory";
 import { RecipeRegistry } from "shared/registry/recipe-registry";
+import { StructureConfig } from "shared/structs/structure-config";
 
 export interface PlayerStructurePlacedInfo {
   readonly player: Player;
@@ -43,7 +44,7 @@ export class BuildingService implements OnPlayerAdd, OnPlayerRemove {
     this.placedStructures.delete(player);
   }
 
-  private async place(player: Player, { id, recipeIndex, cframe }: PlaceStructurePacket): Promise<void> {
+  private async place(player: Player, { id, recipeIndex, cframe, material }: PlaceStructurePacket): Promise<void> {
     const recipe = RecipeRegistry.get(recipeIndex);
     if (!recipe)
       return stopHacking(player, "recipe index does not exist");
@@ -51,7 +52,7 @@ export class BuildingService implements OnPlayerAdd, OnPlayerRemove {
     if (recipe.yield !== id)
       return stopHacking(player, "recipe yield does not match structure ID");
 
-    const structureTemplate = StructureRegistry.get(id);
+    const structureTemplate = StructureRegistry.get<StructureModel>(id);
     if (!structureTemplate)
       return stopHacking(player, "no structure with ID " + id);
 
@@ -62,7 +63,9 @@ export class BuildingService implements OnPlayerAdd, OnPlayerRemove {
     if (!success)
       return stopHacking(player, "failed to craft structure");
 
-    if (!this.canPlaceStructure(structureTemplate, cframe)) return;
+    const { requiredSurface } = require<StructureConfig>(structureTemplate.Config);
+    if (requiredSurface !== undefined && material !== requiredSurface)
+      if (!this.canPlaceStructure(structureTemplate, cframe)) return;
 
     const structure = structureTemplate.Clone();
     structure.PivotTo(cframe);

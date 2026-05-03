@@ -10,6 +10,7 @@ import type { StructureID } from "shared/structure-id";
 
 import type { InputController } from "./input";
 import { RecipeRegistry } from "shared/registry/recipe-registry";
+import { StructureConfig } from "shared/structs/structure-config";
 
 const { rad } = math;
 const { Angles: angles } = CFrame;
@@ -29,9 +30,9 @@ const MOUSE_IGNORE = [
 @Controller()
 export class BuildingController implements OnTick {
   private readonly mouse = player.GetMouse();
-  private currentStructure?: Model;
+  private currentStructure?: StructureModel;
   private currentStructureSize?: Vector3;
-  private hologram?: Model;
+  private hologram?: StructureModel;
   private rotation = 0;
 
   public constructor(
@@ -50,13 +51,15 @@ export class BuildingController implements OnTick {
     if (UserInputService.IsKeyDown("Q"))
       this.rotation -= rotationThisFrame;
 
-    const mousePosition = this.input.getMouseWorldPosition(MOUSE_IGNORE);
-    if (!mousePosition) {
+    const rayResult = this.input.createMouseRaycast(MOUSE_IGNORE);
+    if (!rayResult) {
       hologram.PivotTo(OUT_OUT_BOUNDS_CFRAME);
       return;
     }
 
-    const canPlace = this.canPlaceHologram();
+    const mousePosition = rayResult.Position;
+    const material = rayResult.Material;
+    const canPlace = this.canPlaceHologram(material);
     const parts = getDescendantsOfType(hologram, "BasePart");
     for (const part of parts)
       part.BrickColor = canPlace ? PASTEL_BLUE : BRIGHT_RED;
@@ -65,7 +68,7 @@ export class BuildingController implements OnTick {
     hologram.PivotTo(mouseCFrame.mul(angles(0, rad(this.rotation), 0)));
   }
 
-  public enterBuildMode(structure: Model): void {
+  public enterBuildMode(structure: StructureModel): void {
     if (this.isInBuildMode()) return;
 
     const hologram = structure.Clone();
@@ -75,6 +78,9 @@ export class BuildingController implements OnTick {
       part.CastShadow = false;
 
       if (part.Transparency >= 1) continue;
+      if (part.IsA("UnionOperation")) {
+        part.UsePartColor = true;
+      }
       part.BrickColor = PASTEL_BLUE;
       part.Material = Enum.Material.Glass;
       part.Transparency = 0.5;
@@ -98,7 +104,12 @@ export class BuildingController implements OnTick {
 
   private tryPlace(): void {
     if (!this.isInBuildMode()) return;
-    if (!this.canPlaceHologram()) return;
+
+    const rayResult = this.input.createMouseRaycast(MOUSE_IGNORE);
+    if (!rayResult) return;
+
+    const material = rayResult.Material;
+    if (!this.canPlaceHologram(material)) return;
 
     const id = this.currentStructure!.GetAttribute<StructureID>("ID")!;
     const recipe = RecipeRegistry.getStructure(id);
@@ -108,12 +119,16 @@ export class BuildingController implements OnTick {
     const cframe = this.hologram!.GetPivot();
     const recipeIndex = RecipeRegistry.getIndex(recipe);
     this.leaveBuildMode();
-    messaging.server.emit(Message.PlaceStructure, { id, recipeIndex, cframe });
+    messaging.server.emit(Message.PlaceStructure, { id, recipeIndex, cframe, material });
   }
 
-  private canPlaceHologram(): boolean {
-    const { hologram } = this;
-    if (!hologram)
+  private canPlaceHologram(material: Enum.Material): boolean {
+    const { hologram, currentStructure } = this;
+    if (!hologram || !currentStructure)
+      return false;
+
+    const { requiredSurface } = require<StructureConfig>(currentStructure.Config);
+    if (requiredSurface !== undefined && material !== requiredSurface)
       return false;
 
     const root = hologram.PrimaryPart!;

@@ -87,7 +87,7 @@ export class CraftingUIController {
       if (kind === RecipeKind.Tool)
         messaging.server.emit(Message.Craft, RecipeRegistry.getIndex(recipe));
       else if (kind === RecipeKind.Structure)
-        this.building.enterBuildMode(model);
+        this.building.enterBuildMode(model as StructureModel);
     });
     frame.Parent = this.storage;
 

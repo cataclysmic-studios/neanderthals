@@ -46,7 +46,7 @@ export class InputController implements OnStart {
     return this.createMouseRaycast(extraFilter, distance)?.Instance;
   }
 
-  private createMouseRaycast(extraFilter: Instance[] = [], distance = 1000): Maybe<RaycastResult> {
+  public createMouseRaycast(extraFilter: Instance[] = [], distance = 1000): Maybe<RaycastResult> {
     const camera = World.CurrentCamera!;
     const { X, Y } = UserInputService.GetMouseLocation();
     const { Origin, Direction } = camera.ViewportPointToRay(X, Y);
