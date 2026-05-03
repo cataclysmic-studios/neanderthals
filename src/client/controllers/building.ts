@@ -5,14 +5,13 @@ import { getDescendantsOfType } from "@rbxts/instance-utility";
 import { Message, messaging } from "shared/messaging";
 import { player } from "client/constants";
 import { isValidStructureDistance } from "shared/utility";
+import { RecipeRegistry } from "shared/registry/recipe-registry";
 import { STRUCTURE_OVERLAP_PARAMS } from "shared/constants";
-import type { StructureID } from "shared/structure-id";
+import type { StructureConfig } from "shared/structs/structure-config";
 
 import type { InputController } from "./input";
-import { RecipeRegistry } from "shared/registry/recipe-registry";
-import { StructureConfig } from "shared/structs/structure-config";
 
-const { rad } = math;
+const { rad, round } = math;
 const { Angles: angles } = CFrame;
 
 const PASTEL_BLUE = new BrickColor("Pastel Blue");
@@ -32,6 +31,7 @@ export class BuildingController implements OnTick {
   private readonly mouse = player.GetMouse();
   private currentStructure?: StructureModel;
   private currentStructureSize?: Vector3;
+  private currentStructureConfig?: StructureConfig;
   private hologram?: StructureModel;
   private rotation = 0;
 
@@ -42,8 +42,9 @@ export class BuildingController implements OnTick {
   }
 
   public onTick(dt: number): void {
-    const { hologram, currentStructureSize } = this;
-    if (!hologram || !this.currentStructure || !currentStructureSize) return;
+    const { hologram, currentStructureSize, currentStructureConfig } = this;
+    if (!this.isInBuildMode()) return;
+    if (!hologram || !currentStructureSize || !currentStructureConfig) return;
 
     const rotationThisFrame = dt * ROTATION_DEGREES_PER_SECOND;
     if (UserInputService.IsKeyDown("R"))
@@ -53,16 +54,22 @@ export class BuildingController implements OnTick {
 
     const rayResult = this.input.createMouseRaycast(MOUSE_IGNORE);
     if (!rayResult) {
-      hologram.PivotTo(OUT_OUT_BOUNDS_CFRAME);
-      return;
+      return hologram.PivotTo(OUT_OUT_BOUNDS_CFRAME);
     }
 
-    const mousePosition = rayResult.Position;
+    let mousePosition = rayResult.Position;
     const material = rayResult.Material;
     const canPlace = this.canPlaceHologram(material);
     const parts = getDescendantsOfType(hologram, "BasePart");
     for (const part of parts)
       part.BrickColor = canPlace ? PASTEL_BLUE : BRIGHT_RED;
+
+    if (currentStructureConfig.gridSize !== undefined) {
+      const gridSize = currentStructureConfig.gridSize;
+      const snappedX = round(mousePosition.X / gridSize) * gridSize;
+      const snappedZ = round(mousePosition.Z / gridSize) * gridSize;
+      mousePosition = vector.create(snappedX, mousePosition.Y, snappedZ);
+    }
 
     const mouseCFrame = new CFrame(mousePosition.add(vector.create(0, currentStructureSize.Y / 2, 0)));
     hologram.PivotTo(mouseCFrame.mul(angles(0, rad(this.rotation), 0)));
@@ -91,6 +98,7 @@ export class BuildingController implements OnTick {
     this.hologram = hologram;
     this.currentStructure = structure;
     this.currentStructureSize = size;
+    this.currentStructureConfig = require<StructureConfig>(structure.Config);
     hologram.Parent = World.StructureHolograms;
   }
 
@@ -100,6 +108,7 @@ export class BuildingController implements OnTick {
     this.hologram = undefined;
     this.currentStructure = undefined;
     this.currentStructureSize = undefined;
+    this.currentStructureConfig = undefined;
   }
 
   private tryPlace(): void {
@@ -111,7 +120,7 @@ export class BuildingController implements OnTick {
     const material = rayResult.Material;
     if (!this.canPlaceHologram(material)) return;
 
-    const id = this.currentStructure!.GetAttribute<StructureID>("ID")!;
+    const id = this.currentStructure!.GetAttribute<string>("ID")!;
     const recipe = RecipeRegistry.getStructure(id);
     if (!recipe)
       return warn("Failed to place structure: current structure model has no corresponding recipe");
@@ -123,11 +132,11 @@ export class BuildingController implements OnTick {
   }
 
   private canPlaceHologram(material: Enum.Material): boolean {
-    const { hologram, currentStructure } = this;
-    if (!hologram || !currentStructure)
+    const { hologram, currentStructure, currentStructureConfig } = this;
+    if (!hologram || !currentStructure || !currentStructureConfig)
       return false;
 
-    const { requiredSurface } = require<StructureConfig>(currentStructure.Config);
+    const { requiredSurface } = currentStructureConfig;
     if (requiredSurface !== undefined && material !== requiredSurface)
       return false;
 

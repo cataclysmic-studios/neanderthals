@@ -11,4 +11,5 @@ export interface StructureConfig {
   readonly minimumToolTier?: number;
   readonly toolKind?: ToolKind;
   readonly requiredSurface?: Enum.Material;
+  readonly gridSize?: number;
 }
