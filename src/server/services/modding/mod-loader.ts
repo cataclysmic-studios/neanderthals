@@ -22,29 +22,35 @@ const manifestGuard = Flamework.createGuard<ModManifest>();
 @Service()
 export class ModLoaderService implements OnStart {
   private readonly loadedMods = new Map<string, Mod>;
+  private readonly loadedPlayers = new Set<Player>;
 
   public constructor(
     private readonly content: ModContentService,
     private readonly rules: ModRulesService
   ) { }
 
-  public async onStart(): Promise<void> {
-    await this.loadMods(["R-unic/create-mod"]);
+  public onStart(): void {
+    this.loadMods(["R-unic/create-mod"]);
   }
 
   public async loadMods(modList: ModList): Promise<void> {
     print("Loading mods...");
     print("Mod list:", modList);
+    const loaded = new Signal<(player: Player) => void>();
+    messaging.server.on(Message.ReadyForContent, player => {
+      this.loadedPlayers.add(player);
+      loaded.Fire(player);
+    });
     for (const mod of modList) {
       const repo = typeIs(mod, "string") ? mod : mod[0];
       const branch = typeIs(mod, "string") ? "master" : mod[1];
       await this.loadGitHub(repo, branch);
     }
 
-    // sync modded recipes every time a player joins
-    messaging.server.on(Message.ReadyForContent, player => {
-      messaging.client.emit(player, Message.SyncContent, RecipeRegistry.getAll());
-    });
+    // sync modded content for players
+    const recipes = RecipeRegistry.getAll();
+    messaging.client.emit([...this.loadedPlayers], Message.SyncContent, recipes);
+    loaded.Connect(player => messaging.client.emit(player, Message.SyncContent, recipes));
     print(`Finished loading ${modList.size()} mod(s)!`);
   }
 

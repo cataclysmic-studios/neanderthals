@@ -63,9 +63,9 @@ export class BuildingService implements OnPlayerAdd, OnPlayerRemove {
     if (!success)
       return stopHacking(player, "failed to craft structure");
 
-    const { requiredSurface } = require<StructureConfig>(structureTemplate.Config);
-    if (requiredSurface !== undefined && Enum.Material.FromValue(material) !== requiredSurface)
-      if (!this.canPlaceStructure(structureTemplate, cframe)) return;
+    const { requiredSurface, stackable } = require<StructureConfig>(structureTemplate.Config);
+    if (requiredSurface !== undefined && Enum.Material.FromValue(material) !== requiredSurface) return;
+    if (!this.canPlaceStructure(structureTemplate, cframe)) return;
 
     const structure = structureTemplate.Clone();
     structure.PivotTo(cframe);
@@ -73,7 +73,7 @@ export class BuildingService implements OnPlayerAdd, OnPlayerRemove {
       part.Anchored = true;
 
     structure.SetAttribute("Structure_OwnerID", player.UserId);
-    structure.Parent = World.PlacedStructures;
+    structure.Parent = stackable ? World.StackableStructures : World.PlacedStructures;
     this.placedStructures.get(player)!.add(structure);
     this.structurePlaced.Fire({ player, id, model: structure });
   }

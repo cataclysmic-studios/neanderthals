@@ -11,7 +11,7 @@ import type { StructureConfig } from "shared/structs/structure-config";
 
 import type { InputController } from "./input";
 
-const { rad, round } = math;
+const { abs, rad, round } = math;
 const { Angles: angles } = CFrame;
 
 const PASTEL_BLUE = new BrickColor("Pastel Blue");
@@ -25,6 +25,10 @@ const MOUSE_IGNORE = [
   World.StructureSpawns,
   World.StructureHolograms
 ];
+
+function gridSnap(coord: number, gridSize: number): number {
+  return round(coord / gridSize) * gridSize;
+}
 
 @Controller()
 export class BuildingController implements OnTick {
@@ -58,20 +62,38 @@ export class BuildingController implements OnTick {
     }
 
     let mousePosition = rayResult.Position;
+    const normal = rayResult.Normal;
     const material = rayResult.Material;
     const canPlace = this.canPlaceHologram(material);
     const parts = getDescendantsOfType(hologram, "BasePart");
     for (const part of parts)
       part.BrickColor = canPlace ? PASTEL_BLUE : BRIGHT_RED;
 
-    if (currentStructureConfig.gridSize !== undefined) {
-      const gridSize = currentStructureConfig.gridSize;
-      const snappedX = round(mousePosition.X / gridSize) * gridSize;
-      const snappedZ = round(mousePosition.Z / gridSize) * gridSize;
-      mousePosition = vector.create(snappedX, mousePosition.Y, snappedZ);
+    let yOffset = currentStructureSize.Y / 2;
+    const { gridSize, gridSnapY, stackable } = currentStructureConfig;
+    if (stackable) {
+      let offsetDistance = 0;
+      if (abs(normal.X) > 0.5) {
+        offsetDistance = currentStructureSize.X / 2;
+      } else if (abs(normal.Z) > 0.5) {
+        offsetDistance = currentStructureSize.Z / 2;
+      } else if (abs(normal.Y) > 0.5) {
+        offsetDistance = currentStructureSize.Y / 2;
+      }
+
+      const offset = normal.mul(offsetDistance - 0.001);
+      mousePosition = mousePosition.add(offset);
+      yOffset = 0;
     }
 
-    const mouseCFrame = new CFrame(mousePosition.add(vector.create(0, currentStructureSize.Y / 2, 0)));
+    if (gridSize !== undefined) {
+      const snappedX = gridSnap(mousePosition.X, gridSize);
+      const snappedZ = gridSnap(mousePosition.Z, gridSize);
+      const y = gridSnapY ? gridSnap(mousePosition.Y, gridSize) : mousePosition.Y;
+      mousePosition = vector.create(snappedX, y, snappedZ);
+    }
+
+    const mouseCFrame = new CFrame(mousePosition.add(vector.create(0, yOffset, 0)));
     hologram.PivotTo(mouseCFrame.mul(angles(0, rad(this.rotation), 0)));
   }
 

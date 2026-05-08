@@ -5,6 +5,7 @@ interface Workspace extends WorldModel {
   StructureSpawns: Folder;
   NaturalStructures: Folder;
   PlacedStructures: Folder;
+  StackableStructures: Folder;
   StructureHolograms: Folder;
   DroppedItems: Folder;
 }
