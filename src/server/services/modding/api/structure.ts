@@ -1,6 +1,6 @@
 import { Service } from "@flamework/core";
 
-import type { BuildingService, PlayerStructurePlacedInfo } from "server/services/building";
+import type { BuildingService, PlayerStructureInfo } from "server/services/building";
 
 @Service()
 export class StructureModdingAPIService {
@@ -8,7 +8,7 @@ export class StructureModdingAPIService {
     private readonly building: BuildingService
   ) { }
 
-  public whenPlaced(callback: (info: PlayerStructurePlacedInfo) => void): () => void {
+  public whenPlaced(callback: (info: PlayerStructureInfo) => void): () => void {
     const conn = this.building.structurePlaced.Connect(callback);
     return () => conn.Disconnect();
   }

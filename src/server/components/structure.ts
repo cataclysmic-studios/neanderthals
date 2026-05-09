@@ -10,6 +10,7 @@ import { ToolKind } from "shared/structs/tool-kind";
 import type { StructureConfig } from "shared/structs/structure-config";
 
 import { CreatesDropsComponent } from "server/base-components/creates-drops";
+import type { BuildingService } from "server/services/building";
 import type { LevelsService } from "server/services/levels";
 
 const DEFAULT_RESPAWN_TIME = 60;
@@ -24,6 +25,7 @@ interface PartInfo {
 }
 
 interface Attributes {
+  readonly ID?: string;
   readonly Structure_OwnerID?: number;
 }
 
@@ -42,6 +44,7 @@ export class Structure extends CreatesDropsComponent<Attributes, StructureModel>
   private alive = false;
 
   public constructor(
+    private readonly building: BuildingService,
     private readonly levels: LevelsService
   ) { super(); }
 
@@ -72,6 +75,16 @@ export class Structure extends CreatesDropsComponent<Attributes, StructureModel>
     this.aliveTrash.purge();
     this.shakeTween?.Destroy();
     this.shakeTween = undefined;
+
+    const ownerID = this.attributes.Structure_OwnerID;
+    const id = this.attributes.ID;
+    if (ownerID !== undefined && id !== undefined) {
+      const player = Players.GetPlayerByUserId(ownerID);
+      if (player) {
+        const model = this.instance;
+        this.building.structureDestroyed.Fire({ player, id, model });
+      }
+    }
 
     const { drops, xp, noRespawn = false, respawnTime = DEFAULT_RESPAWN_TIME } = this.config;
     this.createDrops(drops);

@@ -3,45 +3,93 @@ import { Teams } from "@rbxts/services";
 import { Trash } from "@rbxts/trash";
 
 import { Message, messaging } from "shared/messaging";
-import { TRIBE_COLORS, TribeColorName } from "shared/constants";
 import { stopHacking } from "server/utility";
+import { TRIBE_COLORS, type TribeColorName } from "shared/constants";
+
+import type { BuildingService } from "./building";
+import { StructureID } from "shared/structure-id";
 
 const teams = Teams.GetChildren() as Team[];
+let cumulativeID = 0;
 
 interface Tribe {
   readonly team: Team;
   readonly trash: Trash;
   readonly chief: Player;
   readonly members: Set<Player>;
+  totemID?: number;
+}
+
+function hasTotem(tribe: Tribe): tribe is Tribe & { totemID: number } {
+  return "totemID" in tribe;
 }
 
 @Service()
 export class TribesService {
   private readonly tribes = new Set<Tribe>;
 
-  public constructor() {
+  public constructor(building: BuildingService) {
     messaging.server.on(Message.CreateTribe, (player, color) => this.create(player, color));
     messaging.server.on(Message.KickTribeMember, (player, member) => this.kickMember(player, member));
     messaging.server.on(Message.JoinTribe, (player, chief) => this.join(player, chief));
     messaging.server.on(Message.LeaveTribe, player => this.leave(player));
     messaging.server.setCallback(Message.GetTribeChief, Message.ReturnTribeChief, player => this.getPlayerTribe(player)?.chief);
+
+    building.structurePlaced.Connect(info => {
+      if (info.id !== StructureID.TribeTotem) return;
+      this.registerTotem(info.player, info.model);
+    });
+    building.structureDestroyed.Connect(info => {
+      if (info.id !== StructureID.TribeTotem) return;
+      this.removeTotem(info.model);
+    });
   }
 
-  public getTribeByChief(player: Player): Maybe<Tribe> {
-    return [...this.tribes].find(tribe => tribe.chief === player);
+  public getTribeBy<K extends keyof Tribe>(prop: K, value: Tribe[K]): Maybe<Tribe> {
+    return [...this.tribes].find(tribe => tribe[prop] === value);
   }
 
   public getPlayerTribe(player: Player): Maybe<Tribe> {
     return [...this.tribes].find(tribe => tribe.chief === player || tribe.members.has(player));
   }
 
+  private registerTotem(player: Player, totem: Model): void {
+    const tribe = this.getPlayerTribe(player);
+    if (!tribe)
+      return stopHacking(player, "cannot place totem when not in tribe");
+
+    if (hasTotem(tribe))
+      return stopHacking(player, "tribe already has totem");
+
+    const totemID = cumulativeID++;
+    totem.SetAttribute("TotemID", totemID);
+    for (const part of totem.QueryDescendants<BasePart>("BasePart#Color")) {
+      part.BrickColor = tribe.team.TeamColor;
+    }
+
+    tribe.totemID = totemID;
+    messaging.client.emit(tribe.chief, Message.TribeTotemExists, true);
+  }
+
+  private removeTotem(totem: Model): void {
+    const totemID = totem.GetAttribute<number>("TotemID");
+    if (totemID === undefined) return;
+
+    const tribe = this.getTribeBy("totemID", totemID);
+    if (!tribe) return;
+
+    tribe.totemID = undefined;
+    messaging.client.emit(tribe.chief, Message.TribeTotemExists, false);
+  }
+
   private join(player: Player, chief: Player): void {
-    const tribe = this.getTribeByChief(chief);
+    const tribe = this.getTribeBy("chief", chief);
     if (!tribe) return;
 
     player.Team = tribe.team;
     tribe.members.add(player);
     tribe.trash.add(() => this.leave(player, tribe));
+    messaging.client.emit(tribe.chief, Message.TribeTotemExists, hasTotem(tribe));
   }
 
   private leave(player: Player, tribe = this.getPlayerTribe(player)): void {
@@ -51,6 +99,7 @@ export class TribesService {
 
     player.Team = Teams.NoTribe;
     tribe.members.delete(player);
+    messaging.client.emit(tribe.chief, Message.TribeTotemExists, false);
   }
 
   private disband(tribe: Tribe): void {
@@ -78,11 +127,12 @@ export class TribesService {
     chief.Team = team;
     trash.add(chief.Destroying.Once(() => this.leave(chief, tribe)));
     this.tribes.add(tribe);
+    messaging.client.emit(tribe.chief, Message.TribeTotemExists, false);
     messaging.client.emitAll(Message.TribeCreated, chief);
   }
 
   private kickMember(requester: Player, member: Player): void {
-    const tribe = this.getTribeByChief(requester);
+    const tribe = this.getTribeBy("chief", requester);
     if (!tribe) return;
 
     tribe.members.delete(member);

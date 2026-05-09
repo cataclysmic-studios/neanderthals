@@ -50,6 +50,7 @@ export const enum Message {
   LeaveTribe,
   GetTribeChief,
   ReturnTribeChief,
+  TribeTotemExists,
   PlayAudio,
   ReplicateAudio,
   SyncContent,
@@ -85,6 +86,7 @@ export interface MessageData {
   [Message.LeaveTribe]: undefined;
   [Message.GetTribeChief]: undefined;
   [Message.ReturnTribeChief]: Maybe<Player>;
+  [Message.TribeTotemExists]: boolean;
   [Message.PlayAudio]: AudioPacket;
   [Message.ReplicateAudio]: AudioPacket;
   [Message.SyncContent]: Packed<List<CraftingRecipe, u8>>;

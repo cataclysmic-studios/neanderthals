@@ -16,6 +16,7 @@ import type { BuildingController } from "../building";
 import type { InventoryUIController } from "./inventory";
 import type { ContentController } from "../content";
 import { TweenBuilder } from "@rbxts/twin";
+import { StructureID } from "shared/structure-id";
 
 const DEFAULT_TEXT_COLOR = new Color3(1, 1, 1);
 const NOT_ENOUGH_TEXT_COLOR = new Color3(0.7, 0, 0);
@@ -59,6 +60,8 @@ export class CraftingUIController {
       frame.Destroy();
     }
     for (const recipe of RecipeRegistry.getAll()) {
+      if (recipe.yield === StructureID.TribeTotem) continue; // no visible totem recipe
+
       const frame = this.createRecipeFrame(recipe);
       if (!frame) continue;
 

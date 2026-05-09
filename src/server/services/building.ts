@@ -15,7 +15,7 @@ import type { InventoryService } from "./inventory";
 import { RecipeRegistry } from "shared/registry/recipe-registry";
 import { StructureConfig } from "shared/structs/structure-config";
 
-export interface PlayerStructurePlacedInfo {
+export interface PlayerStructureInfo {
   readonly player: Player;
   readonly id: string;
   readonly model: Model;
@@ -23,7 +23,8 @@ export interface PlayerStructurePlacedInfo {
 
 @Service()
 export class BuildingService implements OnPlayerAdd, OnPlayerRemove {
-  public readonly structurePlaced = new Signal<(info: PlayerStructurePlacedInfo) => void>;
+  public readonly structurePlaced = new Signal<(info: PlayerStructureInfo) => void>;
+  public readonly structureDestroyed = new Signal<(info: PlayerStructureInfo) => void>;
 
   private readonly placedStructures = new Map<Player, Set<Model>>;
 

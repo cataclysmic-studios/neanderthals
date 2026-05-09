@@ -13,7 +13,7 @@
   "devDependencies": {
     "@rbxts/ast-macros": "^1.0.2",
     "@rbxts/compiler-types": "^3.0.0-types.0",
-    "@rbxts/types": "^1.0.861",
+    "@rbxts/types": "^1.0.868",
     "@runicly/rbxts-transformer-flamework": "^1.3.3",
     "rbxts-transform-debug": "github:roblox-aurora/rbxts-transform-debug",
     "roblox-ts": "^3.0.0",

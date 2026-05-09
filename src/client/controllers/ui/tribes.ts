@@ -20,7 +20,7 @@ export class TribesUIController {
   public readonly toggled = new Signal<(on: boolean) => void>;
 
   private readonly frame = mainScreen.Tribes;
-  private readonly defaultCreateTribeButtonColor = this.frame.NoTribe.Create.BackgroundColor3;
+  private readonly defaultButtonColor = this.frame.NoTribe.Create.BackgroundColor3;
   private readonly visibleTrash = new Trash;
 
   public constructor(
@@ -29,8 +29,13 @@ export class TribesUIController {
     private readonly tribes: TribesController,
     private readonly building: BuildingController
   ) {
+    const { visibleTrash, frame } = this;
+    const tribeFrame = frame.Tribe;
     input.onKeyDown(Enum.KeyCode.T, () => this.toggle());
     subscribe(tribes.tribeTeam, () => this.update());
+    subscribe(tribes.totemExists, exists =>
+      tribeFrame.Chief.PlaceTotem.BackgroundColor3 = exists ? GRAYED_BUTTON_COLOR : this.defaultButtonColor
+    );
     messaging.client.on(Message.TribeCreated, chief => {
       // TODO: notify of tribe creation
 
@@ -38,7 +43,6 @@ export class TribesUIController {
       this.update(chief);
     });
 
-    const { visibleTrash, frame } = this;
     const visibilityUpdate = () => {
       visibleTrash.purge();
       this.update();
@@ -48,8 +52,8 @@ export class TribesUIController {
       if (frame.Visible) return;
       visibilityUpdate();
     });
-    frame.Tribe.GetPropertyChangedSignal("Visible").Connect(() => {
-      if (frame.Tribe.Visible) return;
+    tribeFrame.GetPropertyChangedSignal("Visible").Connect(() => {
+      if (tribeFrame.Visible) return;
       visibilityUpdate();
     });
     frame.NoTribe.GetPropertyChangedSignal("Visible").Connect(() => {
@@ -121,7 +125,9 @@ export class TribesUIController {
 
       }));
       visibleTrash.add(chiefFrame.PlaceTotem.MouseButton1Click.Connect(() => {
-
+        if (this.tribes.totemExists()) return;
+        this.frame.Visible = false;
+        this.building.enterBuildMode(assets.Structures.TribeTotem);
       }));
     }
 
@@ -140,7 +146,7 @@ export class TribesUIController {
     const selectedColor = atom<Maybe<BrickColor>>(undefined);
     noTribe.Create.BackgroundColor3 = GRAYED_BUTTON_COLOR;
     visibleTrash.add(subscribe(selectedColor, color =>
-      noTribe.Create.BackgroundColor3 = color !== undefined ? this.defaultCreateTribeButtonColor : GRAYED_BUTTON_COLOR
+      noTribe.Create.BackgroundColor3 = color !== undefined ? this.defaultButtonColor : GRAYED_BUTTON_COLOR
     ));
 
     visibleTrash.add(noTribe.Create.MouseButton1Click.Connect(() => {

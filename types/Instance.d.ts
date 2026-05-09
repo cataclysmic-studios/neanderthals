@@ -8,4 +8,5 @@ interface Instance extends RBXObject {
   FindFirstAncestor<T extends Instance = Instance>(name: string | number): Maybe<T>;
   FindFirstDescendant<T extends Instance = Instance>(name: string | number): Maybe<T>;
   GetAttribute<T extends AttributeValue = AttributeValue>(attribute: string): Maybe<T>;
+  QueryDescendants<T extends Instance = Instance>(selector: string): Array<T>;
 }
