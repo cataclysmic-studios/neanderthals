@@ -48,7 +48,7 @@ export class CreatureAnimator extends DestroyableComponent<{ ID: number }, Creat
     const idleLength = getNextIdleTime();
     task.delay(idleLength, () => this.idle = false);
 
-    this.audio.play(this.config.idleSound, undefined, false);
+    this.audio.playRandomSpeed(this.config.idleSound, undefined, undefined, false);
     this.playAnimation(idleAnimation, { fadeTime: 0, priority: Enum.AnimationPriority.Idle });
     this.lastIdle = clock();
     this.nextIdleTime = getNextIdleTime();

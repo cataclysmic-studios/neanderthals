@@ -30,7 +30,8 @@ export class ModLoaderService implements OnStart {
   ) { }
 
   public onStart(): void {
-    this.loadMods(["R-unic/create-mod"]);
+    // "R-unic/create-mod"
+    this.loadMods([]);
   }
 
   public async loadMods(modList: ModList): Promise<void> {

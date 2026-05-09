@@ -16,6 +16,7 @@ import { ActionButtonsUIController } from "./action-buttons";
 import { InventoryUIController } from "./inventory";
 import { TribesUIController } from "./tribes";
 import { getDisplayName } from "shared/utility/items";
+import { TweenBuilder } from "@rbxts/twin";
 
 const { floor } = math;
 const { delay } = task;
@@ -28,6 +29,7 @@ export class MainUIController implements OnCharacterAdd {
   private readonly stats = mainScreen.Stats;
   private readonly levelStats = mainScreen.LevelStats;
   private readonly damageTrash = new Trash;
+  private lastHumanoidDamaged?: Humanoid;
   private hunger = 100;
 
   public constructor(
@@ -85,30 +87,34 @@ export class MainUIController implements OnCharacterAdd {
     this.actionButtonsUI.toggle(on);
   }
 
-  public showDamageDisplay(humanoid: Humanoid): void;
-  public showDamageDisplay(name: string, health: number, maxHealth: number): void;
-  public showDamageDisplay(humanoid: Humanoid | string, health?: number, maxHealth?: number): void {
+  public showDamageDisplay(humanoid: Humanoid): void {
     const { damageTrash, damageDisplay } = this;
     damageTrash.purge();
 
     const healthBar = damageDisplay.Health;
-    if (!typeIs(humanoid, "string")) {
-      health = humanoid.Health;
-      maxHealth = humanoid.MaxHealth;
+    const health = humanoid.Health;
+    const maxHealth = humanoid.MaxHealth;
+    healthBar.Amount.Text = tostring(floor(health)); // TODO: comma format
+
+    const goalSize = UDim2.fromScale(health / maxHealth, 1);
+    if (this.lastHumanoidDamaged !== humanoid) {
+      healthBar.Bar.Size = goalSize;
+    } else {
+      TweenBuilder.for(healthBar.Bar)
+        .time(0.2)
+        .style(Enum.EasingStyle.Sine)
+        .property("Size", goalSize)
+        .play();
     }
 
-    health = health!;
-    maxHealth = maxHealth!;
-    healthBar.Amount.Text = tostring(floor(health)); // TODO: comma format
-    healthBar.Bar.Size = UDim2.fromScale(health / maxHealth, 1);
-
-    const name = typeIs(humanoid, "string") ? humanoid : getDisplayName(humanoid.Parent!);
+    const name = getDisplayName(humanoid.Parent!);
     damageDisplay.Title.Text = name;
     damageDisplay.Visible = true;
 
     const isAlive = health > 0;
     const lifetime = DAMAGE_DISPLAY_LIFETIME * (isAlive ? 1 : 0.5);
     damageTrash.add(delay(lifetime, () => this.damageDisplay.Visible = false));
+    this.lastHumanoidDamaged = humanoid;
   }
 
   private updateLevelStats(): void {

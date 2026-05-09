@@ -69,8 +69,8 @@ export class CreatureController implements OnTick, OnFixed {
     const config = require<CreatureConfig>(creature.Config);
     const humanoid = creature.Humanoid;
     humanoid.Health = newHealth;
-    this.audio.playRandomSpeed(config.damageSound, { parent: creature });
-    this.mainUI.showDamageDisplay(creature.Name, newHealth, humanoid.MaxHealth);
+    this.audio.playRandomSpeed(config.damageSound, { parent: creature }, 0.15);
+    this.mainUI.showDamageDisplay(humanoid);
 
     if (newHealth > 0) return;
     this.despawn(id);
