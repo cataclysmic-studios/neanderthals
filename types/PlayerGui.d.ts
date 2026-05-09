@@ -1,4 +1,7 @@
 interface PlayerGui extends BasePlayerGui {
+  Underlay: ScreenGui & {
+    Blood: ImageLabel;
+  };
   Main: ScreenGui & {
     Tribes: Frame & {
       Tribe: Frame & {
