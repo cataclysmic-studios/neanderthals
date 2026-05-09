@@ -15,7 +15,9 @@ interface IngredientFrame extends Frame {
 interface RecipeFrame extends Frame {
   Title: TextLabel;
   Viewport: ViewportFrame;
-  Craft: GuiButton;
+  Craft: TextButton & {
+    Border: UIStroke;
+  };
   Ingredients: Frame;
 }
 

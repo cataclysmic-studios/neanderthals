@@ -15,6 +15,7 @@ import type { ReplicaController } from "../replica";
 import type { BuildingController } from "../building";
 import type { InventoryUIController } from "./inventory";
 import type { ContentController } from "../content";
+import { TweenBuilder } from "@rbxts/twin";
 
 const DEFAULT_TEXT_COLOR = new Color3(1, 1, 1);
 const NOT_ENOUGH_TEXT_COLOR = new Color3(0.7, 0, 0);
@@ -81,13 +82,29 @@ export class CraftingUIController {
     frame.Title.Text = getDisplayName(model);
 
     const color = this.getCraftButtonColor(ingredients);
-    frame.Craft.BackgroundColor3 = color;
-    frame.Craft.MouseButton1Click.Connect(() => {
+    const craftButton = frame.Craft;
+    craftButton.BackgroundColor3 = color;
+    craftButton.MouseButton1Click.Connect(() => {
       if (!this.canCraft(ingredients)) return;
       if (kind === RecipeKind.Tool)
         messaging.server.emit(Message.Craft, RecipeRegistry.getIndex(recipe));
       else if (kind === RecipeKind.Structure)
         this.building.enterBuildMode(model as StructureModel);
+    });
+    craftButton.MouseEnter.Connect(() => {
+      if (!this.canCraft(ingredients)) return;
+      TweenBuilder.for(craftButton.Border)
+        .time(0.1)
+        .style(Enum.EasingStyle.Sine)
+        .property("Color", new Color3(1, 1, 1))
+        .play();
+    });
+    craftButton.MouseLeave.Connect(() => {
+      TweenBuilder.for(craftButton.Border)
+        .time(0.1)
+        .style(Enum.EasingStyle.Sine)
+        .property("Color", new Color3(0, 0, 0))
+        .play();
     });
     frame.Parent = this.storage;
 
