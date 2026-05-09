@@ -18,12 +18,12 @@ export class TribesUIController {
   public readonly toggled = new Signal<(on: boolean) => void>;
 
   private readonly frame = mainScreen.Tribes;
+  private readonly defaultCreateTribeButtonColor = this.frame.NoTribe.Create.BackgroundColor3;
   private readonly visibleTrash = new Trash;
 
   public constructor(
     character: CharacterController,
     private readonly tribes: TribesController
-
   ) {
     subscribe(tribes.tribeTeam, () => this.update());
     messaging.client.on(Message.TribeCreated, chief => {
@@ -33,12 +33,11 @@ export class TribesUIController {
       this.update(chief);
     });
 
-
     const { visibleTrash, frame } = this;
     const visibilityUpdate = () => {
       visibleTrash.purge();
       this.update();
-    }
+    };
 
     frame.GetPropertyChangedSignal("Visible").Connect(() => {
       if (frame.Visible) return;
@@ -65,7 +64,8 @@ export class TribesUIController {
       this.handleTribe(tribeTeam, chief);
   }
 
-  private async handleTribe(tribeTeam: Team, chief = this.tribes.getChief().await()[1] as Player): Promise<void> {
+  private async handleTribe(tribeTeam: Team, chief?: Player): Promise<void> {
+    chief ??= await this.tribes.getChief();
     if (!chief) return;
     this.frame.NoTribe.Visible = false;
 
@@ -80,8 +80,9 @@ export class TribesUIController {
     const is4K = mainScreen.AbsoluteSize.X >= 3840 - 1;
     const size = Enum.ThumbnailSize[is4K ? "Size352x352" : "Size150x150"];
     const [image, success] = Players.GetUserThumbnailAsync(chief.UserId, Enum.ThumbnailType.AvatarBust, size);
-    if (success)
+    if (success) {
       tribe.ChiefAvatar.Image = image;
+    }
 
     const { tribes } = this;
     const membersTrash = visibleTrash.add(new Trash);
@@ -128,13 +129,12 @@ export class TribesUIController {
     this.frame.Tribe.Visible = false;
 
     const noTribe = this.frame.NoTribe;
-    const defaultButtonColor = noTribe.Create.BackgroundColor3;
     noTribe.Visible = true;
 
     const selectedColor = atom<Maybe<BrickColor>>(undefined);
     noTribe.Create.BackgroundColor3 = GRAYED_BUTTON_COLOR;
     visibleTrash.add(subscribe(selectedColor, color =>
-      noTribe.Create.BackgroundColor3 = color !== undefined ? defaultButtonColor : GRAYED_BUTTON_COLOR
+      noTribe.Create.BackgroundColor3 = color !== undefined ? this.defaultCreateTribeButtonColor : GRAYED_BUTTON_COLOR
     ));
 
     visibleTrash.add(noTribe.Create.MouseButton1Click.Connect(() => {
