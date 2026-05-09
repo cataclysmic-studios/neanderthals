@@ -95,22 +95,30 @@ export class HotbarUIController {
   public selectButton(hotbarButton: HotbarButton): void
   public selectButton(hotbarSlot: HotbarKeyName): void
   public selectButton(hotbarButton: HotbarButton | HotbarKeyName): void {
-    if (typeIs(hotbarButton, "string"))
+    if (typeIs(hotbarButton, "string")) {
       hotbarButton = this.frame[hotbarButton];
+    }
 
     const tool = this.getViewportItem(hotbarButton);
-    const currentlyEquippedButNotThisSlot = this.selectedButton !== hotbarButton && this.tool.hasEquipped(tool); // lol
+    const otherEquipped = this.selectedButton !== hotbarButton && this.tool.hasEquipped(tool); // lol
     if (!tool) return;
 
     const slot = hotbarButton.Name as HotbarKeyName;
-    const equipped = currentlyEquippedButNotThisSlot
-      ? this.tool.equip(tool, slot) ?? true
+    const equipped = otherEquipped
+      ? this.tool.equip(tool, slot)
       : this.tool.toggleEquipped(tool, slot);
 
     this.selectedButton = equipped ? hotbarButton : undefined;
     this.updateSelectionColors();
-    if (equipped)
+    if (equipped) {
       this.showItemLabel(tool);
+      TweenBuilder.for(hotbarButton.Viewport)
+        .time(0.08)
+        .style(Enum.EasingStyle.Quad)
+        .reverse()
+        .property("Size", UDim2.fromScale(1.35, 1.35))
+        .play();
+    }
   }
 
   private showItemLabel(item: Model): void {
