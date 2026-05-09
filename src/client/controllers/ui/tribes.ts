@@ -9,7 +9,9 @@ import { assets, TRIBE_COLORS } from "shared/constants";
 import { mainScreen, player } from "client/constants";
 
 import type { CharacterController } from "../character";
+import type { InputController } from "../input";
 import type { TribesController } from "../replication/tribes";
+import type { BuildingController } from "../building";
 
 const GRAYED_BUTTON_COLOR = new Color3(0.3, 0.3, 0.3);
 
@@ -23,8 +25,11 @@ export class TribesUIController {
 
   public constructor(
     character: CharacterController,
-    private readonly tribes: TribesController
+    input: InputController,
+    private readonly tribes: TribesController,
+    private readonly building: BuildingController
   ) {
+    input.onKeyDown(Enum.KeyCode.T, () => this.toggle());
     subscribe(tribes.tribeTeam, () => this.update());
     messaging.client.on(Message.TribeCreated, chief => {
       // TODO: notify of tribe creation
@@ -58,10 +63,11 @@ export class TribesUIController {
 
   private update(chief?: Player): void {
     const tribeTeam = this.tribes.tribeTeam();
-    if (tribeTeam === Teams.NoTribe)
+    if (tribeTeam === Teams.NoTribe) {
       this.handleNoTribe();
-    else
+    } else {
       this.handleTribe(tribeTeam, chief);
+    }
   }
 
   private async handleTribe(tribeTeam: Team, chief?: Player): Promise<void> {

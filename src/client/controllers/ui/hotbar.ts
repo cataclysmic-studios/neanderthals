@@ -12,6 +12,7 @@ import type { ItemID } from "shared/item-id";
 import type { PlayerData } from "shared/structs/player-data";
 
 import type { CharacterController } from "../character";
+import type { InputController } from "../input";
 import type { ToolController } from "../tool";
 
 const WHITE = new Color3(1, 1, 1);
@@ -34,8 +35,17 @@ export class HotbarUIController {
 
   public constructor(
     character: CharacterController,
+    input: InputController,
     private readonly tool: ToolController
   ) {
+    input.onKeysDown([
+      Enum.KeyCode.One,
+      Enum.KeyCode.Two,
+      Enum.KeyCode.Three,
+      Enum.KeyCode.Four,
+      Enum.KeyCode.Five,
+      Enum.KeyCode.Six
+    ], key => this.selectButton(key.Name));
     character.died.Connect(() => {
       if (!this.selectedButton) return;
       this.onButtonClick(this.selectedButton);

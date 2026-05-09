@@ -40,6 +40,8 @@ interface ReplicatedStorage extends Instance {
       ["Flux Cluster"]: StructureModel;
     }
     Structures: Folder & {
+      TribeTotem: StructureModel;
+
       WoodWall: StructureModel;
       WoodGate: StructureModel;
       Campfire: StructureModel;

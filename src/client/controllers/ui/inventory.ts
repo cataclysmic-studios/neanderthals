@@ -1,5 +1,6 @@
 import { Controller } from "@flamework/core";
 import { Trash } from "@rbxts/trash";
+import { TweenBuilder } from "@rbxts/twin";
 import Signal from "@rbxts/lemon-signal";
 
 import { Message, messaging } from "shared/messaging";
@@ -9,13 +10,13 @@ import { recordDiff } from "shared/utility";
 import { getDisplayName, isItemStackable } from "shared/utility/items";
 import { addViewportItem } from "client/utility";
 import { INITIAL_DATA } from "shared/structs/player-data";
-import { EXCLUSIVE_IDS, type ItemID } from "shared/item-id";
+import { EXCLUSIVE_IDS } from "shared/item-id";
+import { ItemRegistry } from "shared/registry/item-registry";
 
 import type { ReplicaController } from "../replica";
+import type { InputController } from "../input";
 import type { CharacterController } from "../character";
 import type { HotbarUIController } from "./hotbar";
-import { ItemRegistry } from "shared/registry/item-registry";
-import { TweenBuilder } from "@rbxts/twin";
 
 interface ItemFrameInfo {
   readonly button: ItemButton;
@@ -23,8 +24,8 @@ interface ItemFrameInfo {
 }
 
 const DROP_OFFSET = vector.create(0, 1.5, 0);
-
 const HOVER_INFO_FADE_DURATION = 0.1;
+
 @Controller()
 export class InventoryUIController {
   public readonly toggled = new Signal<(on: boolean) => void>;
@@ -38,12 +39,14 @@ export class InventoryUIController {
 
   public constructor(
     replica: ReplicaController,
+    input: InputController,
     private readonly character: CharacterController,
     private readonly hotbar: HotbarUIController
   ) {
     const frame = this.frame = mainScreen.Inventory;
     this.itemContainer = frame.Content;
 
+    input.onKeyDown(Enum.KeyCode.B, () => this.toggle());
     replica.updated.Connect(data => {
       const last = this.lastInventory;
       let changes = recordDiff(data.inventory, last);
