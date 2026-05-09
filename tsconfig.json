@@ -25,7 +25,7 @@
 		"tsBuildInfoFile": "out/tsconfig.tsbuildinfo",
     "plugins": [
       {
-        "transform": "@runicly/rbxts-transformer-flamework"
+        "transform": "rbxts-transformer-flamework"
       },
       {
         "transform": "rbxts-transform-debug"

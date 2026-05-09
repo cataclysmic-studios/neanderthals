@@ -106,7 +106,7 @@ export class CreatureSync extends DestroyableComponent<{ ID: number }, CreatureM
 
     let first: Maybe<Snapshot>;
     while (
-      (first = buffer.first()) !== undefined
+      ([first] = buffer) !== undefined
       && buffer.size() > 1
       && first.time < minTime
     ) {
@@ -128,7 +128,7 @@ export class CreatureSync extends DestroyableComponent<{ ID: number }, CreatureM
     if (size < 2)
       return this.latestCFrame; // not enough data
 
-    const first = buffer.first()!;
+    const [first] = buffer;
     if (time <= first.time)
       return first.cframe;
 
