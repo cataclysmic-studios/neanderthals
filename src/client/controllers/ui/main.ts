@@ -22,6 +22,7 @@ const { floor } = math;
 const { delay } = task;
 
 const DAMAGE_DISPLAY_LIFETIME = 1;
+const TWEEN_INFO = new TweenInfo(0.15, Enum.EasingStyle.Sine);
 
 @Controller({ loadOrder: -1 })
 export class MainUIController implements OnCharacterAdd {
@@ -101,8 +102,7 @@ export class MainUIController implements OnCharacterAdd {
       healthBar.Bar.Size = goalSize;
     } else {
       TweenBuilder.for(healthBar.Bar)
-        .time(0.2)
-        .style(Enum.EasingStyle.Sine)
+        .info(TWEEN_INFO)
         .property("Size", goalSize)
         .play();
     }
@@ -122,9 +122,12 @@ export class MainUIController implements OnCharacterAdd {
     const { xp, level } = this.replica.data;
     const xpToLevelUp = getXPToLevelUp(level);
     const xpFrame = levelStats.XP;
-    xpFrame.Bar.Size = UDim2.fromScale(xp / xpToLevelUp, 1);
-    xpFrame.Amount.Text = xp + " xp";
     levelStats.Level.Text = tostring(level);
+    xpFrame.Amount.Text = xp + " xp";
+    TweenBuilder.for(xpFrame.Bar)
+      .info(TWEEN_INFO)
+      .property("Size", UDim2.fromScale(xp / xpToLevelUp, 1))
+      .play();
   }
 
   private updateStats(hunger = this.hunger): void {
@@ -134,8 +137,17 @@ export class MainUIController implements OnCharacterAdd {
     const { replica: { data }, stats } = this;
     const maxBagSpace = getMaxBagSpace(data.equippedGear);
     const bagSpace = calculateBagSpace(data.hotbar, data.inventory);
-    stats.BagSpace.Bar.Size = UDim2.fromScale(bagSpace / maxBagSpace, 1);
-    stats.Hunger.Bar.Size = UDim2.fromScale(hunger / 100, 1);
-    stats.Health.Bar.Size = UDim2.fromScale(humanoid.Health / humanoid.MaxHealth, 1);
+    TweenBuilder.for(stats.BagSpace.Bar)
+      .info(TWEEN_INFO)
+      .property("Size", UDim2.fromScale(bagSpace / maxBagSpace, 1))
+      .play();
+    TweenBuilder.for(stats.Hunger.Bar)
+      .info(TWEEN_INFO)
+      .property("Size", UDim2.fromScale(hunger / 100, 1))
+      .play();
+    TweenBuilder.for(stats.Health.Bar)
+      .info(TWEEN_INFO)
+      .property("Size", UDim2.fromScale(humanoid.Health / humanoid.MaxHealth, 1))
+      .play();
   }
 }
