@@ -6,7 +6,7 @@ import { Message, messaging } from "shared/messaging";
 import { assets } from "shared/constants";
 import { mainScreen } from "client/constants";
 import { recordDiff } from "shared/utility";
-import { isItemStackable } from "shared/utility/items";
+import { getDisplayName, isItemStackable } from "shared/utility/items";
 import { addViewportItem } from "client/utility";
 import { INITIAL_DATA } from "shared/structs/player-data";
 import { EXCLUSIVE_IDS, type ItemID } from "shared/item-id";
@@ -15,6 +15,7 @@ import type { ReplicaController } from "../replica";
 import type { CharacterController } from "../character";
 import type { HotbarUIController } from "./hotbar";
 import { ItemRegistry } from "shared/registry/item-registry";
+import { TweenBuilder } from "@rbxts/twin";
 
 interface ItemFrameInfo {
   readonly button: ItemButton;
@@ -23,10 +24,13 @@ interface ItemFrameInfo {
 
 const DROP_OFFSET = vector.create(0, 1.5, 0);
 
+const HOVER_INFO_FADE_DURATION = 0.1;
 @Controller()
 export class InventoryUIController {
   public readonly toggled = new Signal<(on: boolean) => void>;
 
+  private readonly hoverInfo = mainScreen.HoverInfo;
+  private readonly baseHoverInfoPosition = this.hoverInfo.Position;
   private readonly frame: PlayerGui["Main"]["Inventory"];
   private readonly itemContainer: ScrollingFrame;
   private readonly buttonInfos = new Map<string, ItemFrameInfo>;
@@ -122,9 +126,41 @@ export class InventoryUIController {
 
       messaging.server.emit(Message.DropItem, { id, position });
     }));
+    trash.add(button.MouseEnter.Connect((x, y) => {
+      this.updateHoverInfo(x, y);
+      this.enableHoverInfo(itemTemplate);
+    }));
+    trash.add(button.MouseLeave.Connect(() => this.disableHoverInfo()));
+    trash.add(button.MouseMoved.Connect((x, y) => this.updateHoverInfo(x, y)));
     button.Parent = this.itemContainer;
 
     this.buttonInfos.set(id, { button, trash });
     return button;
+  }
+
+  private enableHoverInfo(item: Model): void {
+    const { hoverInfo } = this;
+    hoverInfo.Title.Text = getDisplayName(item);
+    hoverInfo.ID.Text = item.GetAttribute<string>("ID")!;
+    this.tweenHoverInfoTransparency(0);
+  }
+
+  private disableHoverInfo(): void {
+    this.tweenHoverInfoTransparency(1);
+  }
+
+  private tweenHoverInfoTransparency(transparency: number): void {
+    TweenBuilder.for(this.hoverInfo)
+      .time(HOVER_INFO_FADE_DURATION)
+      .property("GroupTransparency", transparency)
+      .play();
+    TweenBuilder.for(this.hoverInfo.UIStroke)
+      .time(HOVER_INFO_FADE_DURATION)
+      .property("Transparency", math.max(transparency, 0.6))
+      .play();
+  }
+
+  private updateHoverInfo(x: number, y: number): void {
+    this.hoverInfo.Position = this.baseHoverInfoPosition.add(UDim2.fromOffset(x, y));
   }
 }

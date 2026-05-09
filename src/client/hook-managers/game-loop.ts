@@ -28,6 +28,6 @@ export class GameLoopController implements OnStart {
 
         elapsedMap.set(obj, newElapsed);
       }
-    })
+    });
   }
 }

@@ -41,6 +41,12 @@ interface PlayerGui extends BasePlayerGui {
         };
       };
     } & Record<HotbarKeyName, HotbarButton>;
+    HoverInfo: CanvasGroup & {
+      UIStroke: UIStroke;
+      Title: TextLabel;
+      Line: Frame;
+      ID: TextLabel;
+    };
     Inventory: Frame & {
       Content: ScrollingFrame;
       Separator: Frame;
