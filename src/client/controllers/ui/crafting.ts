@@ -89,7 +89,7 @@ export class CraftingUIController {
     craftButton.BackgroundColor3 = color;
     craftButton.MouseButton1Click.Connect(() => {
       if (!this.canCraft(ingredients)) return;
-      if (kind === RecipeKind.Tool)
+      if (kind === RecipeKind.Item)
         messaging.server.emit(Message.Craft, RecipeRegistry.getIndex(recipe));
       else if (kind === RecipeKind.Structure)
         this.building.enterBuildMode(model as StructureModel);

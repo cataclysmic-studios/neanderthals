@@ -3,7 +3,7 @@ import type { u8 } from "@rbxts/serio";
 import type { GameID } from "./packets";
 
 export const enum RecipeKind {
-  Tool = "tool",
+  Item = "item",
   Structure = "structure"
 }
 
@@ -13,7 +13,7 @@ interface BaseCraftingRecipe {
 }
 
 export type CraftingRecipe = BaseCraftingRecipe & ({
-  readonly kind: RecipeKind.Tool;
+  readonly kind: RecipeKind.Item;
   readonly yield: GameID | [id: GameID, count: u8];
 } | {
   readonly kind: RecipeKind.Structure;
