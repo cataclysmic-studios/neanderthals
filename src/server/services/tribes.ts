@@ -89,7 +89,8 @@ export class TribesService {
     player.Team = tribe.team;
     tribe.members.add(player);
     tribe.trash.add(() => this.leave(player, tribe));
-    messaging.client.emit(tribe.chief, Message.TribeTotemExists, hasTotem(tribe));
+
+    this.registerTribePlayer(tribe, player);
   }
 
   private leave(player: Player, tribe = this.getPlayerTribe(player)): void {
@@ -99,7 +100,6 @@ export class TribesService {
 
     player.Team = Teams.NoTribe;
     tribe.members.delete(player);
-    messaging.client.emit(tribe.chief, Message.TribeTotemExists, false);
   }
 
   private disband(tribe: Tribe): void {
@@ -127,8 +127,8 @@ export class TribesService {
     chief.Team = team;
     trash.add(chief.Destroying.Once(() => this.leave(chief, tribe)));
     this.tribes.add(tribe);
-    messaging.client.emit(tribe.chief, Message.TribeTotemExists, false);
     messaging.client.emitAll(Message.TribeCreated, chief);
+    this.registerTribePlayer(tribe, chief);
   }
 
   private kickMember(requester: Player, member: Player): void {
@@ -136,5 +136,20 @@ export class TribesService {
     if (!tribe) return;
 
     tribe.members.delete(member);
+  }
+
+  private registerTribePlayer(tribe: Tribe, player: Player): void {
+    messaging.client.emit(player, Message.TribeTotemExists, hasTotem(tribe));
+
+    const character = player.Character;
+    if (!character) return;
+
+    const bodyColors = character.BodyColors;
+    if (!bodyColors) return;
+
+    const color = tribe.team.TeamColor;
+    bodyColors.TorsoColor = color;
+    bodyColors.RightLegColor = color;
+    bodyColors.LeftLegColor = color;
   }
 }

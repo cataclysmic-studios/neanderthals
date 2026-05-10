@@ -73,8 +73,9 @@ function getGroundYAndNormal(origin: Vector3, rootHeight: number, agentRadius: n
 
   let [highestResult] = results;
   for (let i = 1; i < results.size(); i++) {
-    if (results[i].Position.Y <= highestResult.Position.Y) continue;
-    highestResult = results[i];
+    const result = results[i];
+    if (result.Position.Y <= highestResult.Position.Y) continue;
+    highestResult = result;
   }
 
   return $tuple(highestResult.Position.Y + rootHeight, highestResult.Normal);

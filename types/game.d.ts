@@ -71,6 +71,7 @@ interface CreatureModel extends Model {
 }
 
 interface CharacterModel extends Model {
+  BodyColors: BodyColors;
   Head: BasePart;
   Humanoid: Humanoid & {
     Animator: Animator;
