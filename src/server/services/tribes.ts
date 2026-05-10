@@ -24,6 +24,10 @@ function hasTotem(tribe: Tribe): tribe is Tribe & { totemID: number } {
   return "totemID" in tribe;
 }
 
+function getPlayers(tribe: Tribe): Player[] {
+  return [tribe.chief, ...tribe.members];
+}
+
 @Service()
 export class TribesService {
   private readonly tribes = new Set<Tribe>;
@@ -68,7 +72,7 @@ export class TribesService {
     }
 
     tribe.totemID = totemID;
-    messaging.client.emit(tribe.chief, Message.TribeTotemExists, true);
+    messaging.client.emit(getPlayers(tribe), Message.TribeTotemExists, true);
   }
 
   private removeTotem(totem: Model): void {
@@ -79,7 +83,7 @@ export class TribesService {
     if (!tribe) return;
 
     tribe.totemID = undefined;
-    messaging.client.emit(tribe.chief, Message.TribeTotemExists, false);
+    messaging.client.emit(getPlayers(tribe), Message.TribeTotemExists, false);
   }
 
   private join(player: Player, chief: Player): void {
