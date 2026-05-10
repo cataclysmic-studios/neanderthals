@@ -50,7 +50,7 @@ export class Campfire extends BaseComponent<{}, CampfireModel> implements OnFixe
   }
 
   public onFixed(dt: number): void {
-    const { fuelUI, fuel, cookProgress } = this;
+    const { fuelUI, fuel } = this;
     const hasFuel = fuel > 0;
     this.toggleFX(hasFuel);
     if (!hasFuel) return;
@@ -61,39 +61,7 @@ export class Campfire extends BaseComponent<{}, CampfireModel> implements OnFixe
 
     const droppedItems = this.components.getAllComponents<DroppedItem>();
     for (const droppedItem of droppedItems) {
-      if (!droppedItem.attributes.CanCook) continue;
-
-      const itemPosition = droppedItem.instance.PrimaryPart!.Position;
-      const campfirePosition = this.instance.Hitbox.Position;
-      const distance = distanceBetween(campfirePosition, itemPosition);
-      if (distance > RANGE) {
-        cookProgress.delete(droppedItem);
-        droppedItem.instance.FindFirstChild("CookProgressUI")?.Destroy();
-        continue;
-      }
-
-      const progress = cookProgress.get(droppedItem);
-      if (progress === undefined) {
-        const progressUI = assets.UI.CookProgressUI.Clone();
-        progressUI.Progress.Bar.Size = UDim2.fromScale(0, 1);
-        progressUI.Parent = droppedItem.instance;
-
-        cookProgress.set(droppedItem, 0);
-        continue;
-      }
-
-      const progressUI = droppedItem.instance.FindFirstChild<typeof assets.UI.CookProgressUI>("CookProgressUI")!;
-      const speed = droppedItem.attributes.CookSpeed ?? 0; // dumb
-      const amount = dt * speed * (1 / clamp(distance - 6 / RANGE, 0, RANGE));
-      const newProgress = progress + amount;
-      progressUI.Progress.Bar.Size = UDim2.fromScale(newProgress / 100, 1);
-      if (newProgress < 100) {
-        cookProgress.set(droppedItem, newProgress);
-        continue;
-      }
-
-      this.cookedItems.add(droppedItem);
-      cookProgress.delete(droppedItem);
+      this.cookItem(droppedItem, dt);
     }
 
     const info: { cookedID: GameID, cframe: CFrame }[] = [];
@@ -113,6 +81,40 @@ export class Campfire extends BaseComponent<{}, CampfireModel> implements OnFixe
 
   public addFuel(amount: number): void {
     this.fuel = clamp(this.fuel + amount, 0, 100);
+  }
+
+  private cookItem(item: DroppedItem, dt: number): void {
+    if (!item.attributes.CanCook) return;
+    const { cookProgress } = this;
+
+    const itemPosition = item.instance.PrimaryPart!.Position;
+    const campfirePosition = this.instance.Hitbox.Position;
+    const distance = distanceBetween(campfirePosition, itemPosition);
+    if (distance > RANGE) {
+      cookProgress.delete(item);
+      return item.instance.FindFirstChild("CookProgressUI")?.Destroy();
+    }
+
+    const progress = cookProgress.get(item);
+    if (progress === undefined) {
+      const progressUI = assets.UI.CookProgressUI.Clone();
+      progressUI.Progress.Bar.Size = UDim2.fromScale(0, 1);
+      progressUI.Parent = item.instance;
+
+      return void cookProgress.set(item, 0);
+    }
+
+    const progressUI = item.instance.FindFirstChild<typeof assets.UI.CookProgressUI>("CookProgressUI")!;
+    const speed = item.attributes.CookSpeed ?? 0; // dumb
+    const amount = dt * speed * (1 / clamp(distance - 6 / RANGE, 0, RANGE));
+    const newProgress = progress + amount;
+    progressUI.Progress.Bar.Size = UDim2.fromScale(newProgress / 100, 1);
+    if (newProgress < 100) {
+      return void cookProgress.set(item, newProgress);
+    }
+
+    this.cookedItems.add(item);
+    cookProgress.delete(item);
   }
 
   private toggleFX(on: boolean): void {
