@@ -104,6 +104,7 @@ export class TribesService {
 
     player.Team = Teams.NoTribe;
     tribe.members.delete(player);
+    this.updateTribeColors(player, Teams.NoTribe.TeamColor);
   }
 
   private disband(tribe: Tribe): void {
@@ -144,14 +145,16 @@ export class TribesService {
 
   private registerTribePlayer(tribe: Tribe, player: Player): void {
     messaging.client.emit(player, Message.TribeTotemExists, hasTotem(tribe));
+    this.updateTribeColors(player, tribe.team.TeamColor);
+  }
 
+  private updateTribeColors(player: Player, color: BrickColor): void {
     const character = player.Character;
     if (!character) return;
 
     const bodyColors = character.BodyColors;
     if (!bodyColors) return;
 
-    const color = tribe.team.TeamColor;
     bodyColors.TorsoColor = color;
     bodyColors.RightLegColor = color;
     bodyColors.LeftLegColor = color;
