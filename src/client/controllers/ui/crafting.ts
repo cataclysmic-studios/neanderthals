@@ -147,7 +147,7 @@ export class CraftingUIController {
   }
 
   private hasEnough(id: string, requiredCount: number): boolean {
-    const itemCount = this.replica.data.inventory.get(id);
+    const itemCount = this.replica.data.inventory[id];
     return itemCount !== undefined && itemCount >= requiredCount;
   }
 }

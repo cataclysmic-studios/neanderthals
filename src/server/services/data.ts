@@ -1,13 +1,14 @@
 import { Flamework, Service, type OnStart } from "@flamework/core";
 import { Players } from "@rbxts/services";
 import { createPlayerStore } from "@rbxts/lyra";
+import { createDiff } from "@rbxts/diff";
 import { $nameof } from "rbxts-transform-debug";
 import Signal from "@rbxts/lemon-signal";
 
 import type { OnPlayerAdd, OnPlayerRemove } from "../hooks";
 import { Message, messaging } from "shared/messaging";
 import { INITIAL_DATA, type PlayerData } from "shared/structs/player-data";
-import { createDiff } from "@rbxts/diff";
+import { StripMeta } from "@rbxts/serio";
 
 const enum Scope {
   Proto = "PROTO10"

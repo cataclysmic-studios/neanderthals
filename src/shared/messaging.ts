@@ -1,5 +1,5 @@
 import { MessageEmitter } from "@rbxts/tether";
-import type { List, Packed, u8 } from "@rbxts/serio";
+import type { List, Packed, SerializerMetadata, u8 } from "@rbxts/serio";
 import type { Diff } from "@rbxts/diff";
 
 import type {
@@ -68,7 +68,7 @@ export interface MessageData {
   [Message.ReplicateUnequipTool]: Player;
   [Message.UpdateHunger]: u8;
   [Message.InitializeData]: undefined;
-  [Message.DataUpdated]: Diff<PlayerData>;
+  [Message.DataUpdated]: Packed<Diff<PlayerData>>;
   [Message.DropItem]: DropItemPacket;
   [Message.PickUpDrop]: DropID;
   [Message.EatDrop]: DropID;

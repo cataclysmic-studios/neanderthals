@@ -14,7 +14,7 @@ export class ToolReplicationService implements OnStart {
   public onStart(): void {
     messaging.server.on(Message.EquipTool, async (player, slot) => {
       const data = await this.data.get(player);
-      const toolID = data.hotbar.get(slot);
+      const toolID = data.hotbar[slot];
       if (toolID === undefined) return;
 
       const tool = ItemRegistry.get<ToolItem>(toolID);

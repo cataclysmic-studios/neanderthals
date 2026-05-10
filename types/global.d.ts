@@ -15,9 +15,12 @@ type DeepReadonlyObject<T> = {
   readonly [P in keyof T]: DeepReadonly<T[P]>;
 };
 
+type Primitive = string | number | boolean | undefined;
+
 type DeepWritable<T> =
   T extends (infer R)[] ? DeepWritableArray<R> :
   T extends Callback ? T :
+  T extends Primitive ? T :
   T extends object ? DeepWritableObject<T> :
   T;
 

@@ -4,7 +4,7 @@ import { Message, messaging } from "shared/messaging";
 import { dropItem, stopHacking } from "server/utility";
 import { inventoryHasSpace } from "shared/utility/data";
 import { ItemRegistry } from "shared/registry/item-registry";
-import { EXCLUSIVE_IDS, type ItemID } from "shared/item-id";
+import { EXCLUSIVE_IDS } from "shared/item-id";
 import type { PlayerData } from "shared/structs/player-data";
 
 import type { DataService } from "./data";
@@ -42,23 +42,20 @@ export class InventoryService {
     return await this.data.update(player, data => {
       const { inventory } = data;
       for (let [id, count] of add) {
-        const itemCount = inventory.get(id);
+        const itemCount = inventory[id];
         if (itemCount !== undefined && EXCLUSIVE_IDS.has(id)) continue;
         if (!inventoryHasSpace(data))
           return false;
 
-        inventory.set(id, itemCount !== undefined ? itemCount + count : count);
+        inventory[id] = itemCount !== undefined ? itemCount + count : count;
       }
 
       for (let [id, count] of remove) {
-        const itemCount = inventory.get(id);
+        const itemCount = inventory[id];
         if (itemCount === undefined || EXCLUSIVE_IDS.has(id)) continue;
 
         const newCount = itemCount - count;
-        if (newCount <= 0)
-          inventory.delete(id);
-        else
-          inventory.set(id, newCount);
+        inventory[id] = newCount > 0 ? newCount : undefined;
       }
 
       return true;
@@ -67,15 +64,15 @@ export class InventoryService {
 
   public async addItem(player: Player, id: string, count = 1): Promise<boolean> {
     const data = await this.data.get(player);
-    if (data.inventory.has(id) && EXCLUSIVE_IDS.has(id))
+    if (id in data.inventory && EXCLUSIVE_IDS.has(id))
       return false;
 
     if (!inventoryHasSpace(data))
       return false;
 
     return await this.data.update(player, data => {
-      const itemCount = data.inventory.get(id);
-      data.inventory.set(id, itemCount !== undefined ? itemCount + count : count);
+      const itemCount = data.inventory[id];
+      data.inventory[id] = itemCount !== undefined ? itemCount + count : count;
       return true;
     });
   }
@@ -85,12 +82,9 @@ export class InventoryService {
       return false;
 
     return await this.data.update(player, data => {
-      const itemCount = data.inventory.get(id)!;
+      const itemCount = data.inventory[id]!;
       const newCount = itemCount - count;
-      if (newCount <= 0)
-        data.inventory.delete(id);
-      else
-        data.inventory.set(id, newCount);
+      data.inventory[id] = newCount > 0 ? newCount : undefined;
 
       if (after) {
         const success = after(data);
@@ -104,15 +98,15 @@ export class InventoryService {
 
   public async getItemCount(player: Player, id: string): Promise<number> {
     const { inventory } = await this.data.get(player);
-    return inventory.get(id) ?? 0;
+    return inventory[id] ?? 0;
   }
 
   public async has(player: Player, id: string, count?: number): Promise<boolean> {
     const { inventory } = await this.data.get(player);
 
-    const hasItem = inventory.has(id);
+    const hasItem = id in inventory;
     return count !== undefined
-      ? hasItem && inventory.get(id)! >= count
+      ? hasItem && inventory[id]! >= count
       : hasItem;
   }
 
@@ -129,24 +123,24 @@ export class InventoryService {
 
   private addHotbarItem(data: DeepWritable<PlayerData>, id: string, slot: HotbarKeyName): boolean {
     const { hotbar } = data;
-    data.inventory.delete(id);
+    data.inventory[id] = undefined;
 
-    if (data.hotbar.has(slot)) {
+    if (slot in data.hotbar) {
       const success = this.removeHotbarItem(data, slot);
       if (!success) return true;
     }
 
-    hotbar.set(slot, id);
+    hotbar[slot] = id;
     return true;
   }
 
   private removeHotbarItem(data: DeepWritable<PlayerData>, slot: HotbarKeyName): boolean {
-    const id = data.hotbar.get(slot);
+    const id = data.hotbar[slot];
     if (id === undefined)
       return false;
 
-    data.hotbar.delete(slot);
-    data.inventory.set(id, 1);
+    data.hotbar[slot] = undefined;
+    data.inventory[id] = 1;
     return true;
   }
 }
