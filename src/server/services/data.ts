@@ -7,6 +7,7 @@ import Signal from "@rbxts/lemon-signal";
 import type { OnPlayerAdd, OnPlayerRemove } from "../hooks";
 import { Message, messaging } from "shared/messaging";
 import { INITIAL_DATA, type PlayerData } from "shared/structs/player-data";
+import { createDiff } from "@rbxts/diff";
 
 const enum Scope {
   Proto = "PROTO10"
@@ -44,7 +45,8 @@ export class DataService implements OnStart, OnPlayerAdd, OnPlayerRemove {
     const data = this.store.get(player).expect() as Writable<PlayerData>;
     player.SetAttribute("IsDataLoaded", true);
     this.loaded.Fire(player, data);
-    messaging.client.emit(player, Message.DataUpdated, data);
+    const diff = createDiff({} as never, data);
+    messaging.client.emit(player, Message.DataUpdated, diff);
   }
 
   public async get(player: Player): Promise<PlayerData> {
@@ -52,10 +54,11 @@ export class DataService implements OnStart, OnPlayerAdd, OnPlayerRemove {
   }
 
   public async update(player: Player, transform: (data: DeepWritable<PlayerData>) => boolean): Promise<boolean> {
+    const original = await this.get(player);
     return await this.store.update(player, data => {
       const success = transform(data);
       if (success)
-        task.spawn(() => this.sendUpdate(player, data));
+        task.spawn(() => this.sendUpdate(player, original, data));
 
       return success;
     });
@@ -75,8 +78,9 @@ export class DataService implements OnStart, OnPlayerAdd, OnPlayerRemove {
     return void await Promise.all(promises);
   }
 
-  private sendUpdate(player: Player, data: Writable<PlayerData>): void {
+  private sendUpdate(player: Player, before: PlayerData, data: PlayerData): void {
+    const diff = createDiff(before as never, data as never);
     this.updated.Fire(player, data);
-    messaging.client.emit(player, Message.DataUpdated, data);
+    messaging.client.emit(player, Message.DataUpdated, diff);
   }
 }
