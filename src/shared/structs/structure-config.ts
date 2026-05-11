@@ -6,6 +6,7 @@ export interface StructureConfig {
   readonly xp?: number;
   readonly respawnTime?: number;
   readonly noRespawn?: boolean;
+  readonly noAnchor?: boolean;
   readonly drops?: Map<GameID, number>;
   readonly destroyedStructure?: GameID;
   /** Minimum tool tier required to destroy the structure */
