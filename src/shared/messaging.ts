@@ -9,8 +9,6 @@ import type {
   DamagePacket,
   ToolEquipReplicationPacket,
   CreatureHealthChangePacket,
-  DropItemPacket,
-  DropID,
   AddHotbarItemPacket,
   PlaceStructurePacket,
   AudioPacket,
@@ -25,7 +23,7 @@ export const messaging = MessageEmitter.create<MessageData>();
 messaging.middleware
   .useServer(Message.CreateTribe, BuiltinMiddlewares.rateLimit(1))
   .useSharedGlobal(BuiltinMiddlewares.debug())
-  .useSharedGlobal(BuiltinMiddlewares.maxPacketSize(512));
+  .useSharedGlobal(BuiltinMiddlewares.maxPacketSize(1024));
 
 export const enum Message {
   Damage,
@@ -40,7 +38,6 @@ export const enum Message {
   DataUpdated,
   DropItem,
   InteractWithDrop,
-  EatDrop,
   SpawnCreature,
   UpdateCreatures,
   CreatureHealthChange,
@@ -74,11 +71,11 @@ export interface MessageData {
   [Message.UpdateHunger]: u8;
   [Message.InitializeData]: undefined;
   [Message.DataUpdated]: Packed<Diff<PlayerData>>;
-  [Message.DropItem]: DropItemPacket;
+  [Message.DropItem]: GameID;
   [Message.InteractWithDrop]: Packed<DropInteractPacket>;
   [Message.SpawnCreature]: Packed<CreatureSpawnPacket>;
-  [Message.CreatureHealthChange]: Packed<CreatureHealthChangePacket>;
   [Message.UpdateCreatures]: CreatureUpdatePacket;
+  [Message.CreatureHealthChange]: Packed<CreatureHealthChangePacket>;
   [Message.Consume]: GameID;
   [Message.AddHotbarItem]: AddHotbarItemPacket;
   [Message.RemoveHotbarItem]: HotbarKeyName;
@@ -92,8 +89,8 @@ export interface MessageData {
   [Message.GetTribeChief]: undefined;
   [Message.ReturnTribeChief]: Maybe<Player>;
   [Message.TribeTotemExists]: boolean;
-  [Message.PlayAudio]: AudioPacket;
-  [Message.ReplicateAudio]: AudioPacket;
+  [Message.PlayAudio]: Packed<AudioPacket>;
+  [Message.ReplicateAudio]: Packed<AudioPacket>;
   [Message.SyncContent]: Packed<List<CraftingRecipe, u8>>;
   [Message.ReadyForContent]: undefined;
 }

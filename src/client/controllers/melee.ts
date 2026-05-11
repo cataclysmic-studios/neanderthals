@@ -96,6 +96,6 @@ export class MeleeController implements OnFixed {
     const hitModel = result.Instance.FindFirstAncestorOfClass("Model");
     if (!hitModel) return;
 
-    this.damage.deal(hitModel, result.Position);
+    this.damage.deal(hitModel);
   }
 }

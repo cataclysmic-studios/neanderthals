@@ -13,7 +13,7 @@ export class DamageController {
     private readonly tool: ToolController
   ) { }
 
-  public deal(model: Model, hitPosition: Vector3): void {
+  public deal(model: Model): void {
     const humanoid = model.FindFirstChildOfClass("Humanoid");
     if (!humanoid) return;
 
@@ -21,7 +21,7 @@ export class DamageController {
     const toolID = this.tool.getID();
     if (isCreature) {
       const id = model.GetAttribute<number>("ID")!;
-      messaging.server.emit(Message.DamageCreature, { id, toolID, hitPosition });
+      messaging.server.emit(Message.DamageCreature, { id, toolID });
     } else {
       const isStructure = model.HasTag("Structure");
       if (isStructure) {
@@ -30,7 +30,7 @@ export class DamageController {
         this.audio.playRandomSpeed(config.hitSound, { parent: model });
       }
 
-      messaging.server.emit(Message.Damage, { humanoid, toolID, hitPosition });
+      messaging.server.emit(Message.Damage, { humanoid, toolID });
     }
   }
 }

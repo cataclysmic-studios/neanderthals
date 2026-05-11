@@ -4,7 +4,6 @@ import type { Components } from "@flamework/components";
 import { FixedUpdateRate, type OnFixed } from "shared/hooks";
 import { Message, messaging } from "shared/messaging";
 import { CREATURE_UPDATE_RATE } from "shared/constants";
-import type { CreatureUpdatePacket } from "shared/structs/packets";
 
 import type { CreaturePathfinding } from "server/components/creature-pathfinding";
 
@@ -18,16 +17,7 @@ export class CreaturePathfindingService implements OnFixed {
   public onFixed(): void {
     const creatures = this.components.getAllComponents<CreaturePathfinding>();
     if (creatures.isEmpty()) return;
-
-    const packet: CreatureUpdatePacket = [];
-    for (const creature of creatures)
-      packet.push({
-        id: creature.id,
-        cframe: creature.cframe
-      });
-
-    if (packet.isEmpty()) return;
-    messaging.client.emitAll(Message.UpdateCreatures, packet);
+    messaging.client.emitAll(Message.UpdateCreatures, creatures);
   }
 
   public registerCreature(creature: CreatureServerModel, speed: number, size: Vector3): void {

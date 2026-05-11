@@ -29,21 +29,21 @@ export class DamageService implements OnStart {
   ) { }
 
   public onStart(): void {
-    messaging.server.on(Message.Damage, (player, { humanoid, toolID, hitPosition }) =>
-      this.damage(player, humanoid, hitPosition, toolID)
+    messaging.server.on(Message.Damage, (player, { humanoid, toolID }) =>
+      this.damage(player, humanoid, toolID)
     );
-    messaging.server.on(Message.DamageCreature, (player, { id, toolID, hitPosition }) =>
-      this.damageCreature(player, id, hitPosition, toolID)
+    messaging.server.on(Message.DamageCreature, (player, { id, toolID }) =>
+      this.damageCreature(player, id, toolID)
     );
   }
 
-  private damageCreature(player: Player, id: number, hitPosition: Vector3, toolID: string): void {
+  private damageCreature(player: Player, id: number, toolID: string): void {
     const creature = findCreatureByID(id);
     if (!creature)
       return warn(`Failed to damage creature with ID ${id}: creature not found`);
 
     const humanoid = creature.Humanoid;
-    this.damage(player, humanoid, hitPosition, toolID, true);
+    this.damage(player, humanoid, toolID, true);
     messaging.client.emitAll(Message.CreatureHealthChange, {
       id,
       health: humanoid.Health,
@@ -51,7 +51,7 @@ export class DamageService implements OnStart {
     });
   }
 
-  private damage(player: Player, humanoid: Humanoid, hitPosition: Vector3, toolID: string, isCreature = false): void {
+  private damage(player: Player, humanoid: Humanoid, toolID: string, isCreature = false): void {
     const targetModel = humanoid.Parent;
     if (!targetModel || !targetModel.IsA("Model")) return;
 
@@ -93,6 +93,8 @@ export class DamageService implements OnStart {
     if (currentHealth !== newHealth)
       humanoid.Health = newHealth;
 
+    const characterPivot = character.GetPivot();
+    const hitPosition = characterPivot.Position.add(characterPivot.LookVector.mul(2));
     this.createIndicator(floor(damage), hitPosition);
 
     if (isCreature) return;
@@ -105,7 +107,7 @@ export class DamageService implements OnStart {
     const randomMagnitude = randomSign * RNG.NextNumber(1.25, 2.5);
     const randomOffset = randomDirection.mul(randomMagnitude);
     const indicator = assets.UI.DamageIndicator.Clone();
-    indicator.UI.Amount.Text = tostring(damage)
+    indicator.UI.Amount.Text = tostring(damage);
     indicator.Position = hitPosition;
     indicator.Parent = World;
 

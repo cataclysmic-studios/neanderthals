@@ -9,6 +9,8 @@ import type { PlayerData } from "shared/structs/player-data";
 
 import type { DataService } from "./data";
 
+const DROP_OFFSET = vector.create(0, 1.5, 0);
+
 interface TransactionInfo {
   readonly add: [id: string, count: number][];
   readonly remove: [id: string, count: number][];
@@ -19,7 +21,7 @@ export class InventoryService {
   public constructor(
     private readonly data: DataService
   ) {
-    messaging.server.on(Message.DropItem, (player, { id, position }) => this.dropItem(player, id, position));
+    messaging.server.on(Message.DropItem, (player, id) => this.dropItem(player, id));
     messaging.server.on(Message.AddHotbarItem, (player, { id, slot }) =>
       data.update(player, data => this.addHotbarItem(data, id, slot))
     );
@@ -110,15 +112,23 @@ export class InventoryService {
       : hasItem;
   }
 
-  private async dropItem(player: Player, id: string, position: Vector3): Promise<void> {
+  private async dropItem(player: Player, id: string): Promise<void> {
     const item = ItemRegistry.get(id);
     if (!item)
       return stopHacking(player, "invalid item ID (no corresponding item) when dropping item");
     if (EXCLUSIVE_IDS.has(id))
-      return stopHacking(player, "the client checks for undroppable items before sending this message you dummy");
+      return stopHacking(player, "unable to drop exclusive item");
+
+    const character = player.Character;
+    if (!character) return;
+
+    const characterPivot = character.GetPivot();
+    const cframe = characterPivot
+      .add(characterPivot.LookVector.mul(2))
+      .add(DROP_OFFSET);
 
     await this.removeItem(player, id, 1, () => {
-      dropItem(item, new CFrame(position));
+      dropItem(item, cframe);
       return true;
     });
   }

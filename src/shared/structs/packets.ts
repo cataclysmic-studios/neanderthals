@@ -34,13 +34,7 @@ export interface AddHotbarItemPacket {
   readonly slot: HotbarKeyName;
 }
 
-export interface DropItemPacket {
-  readonly id: GameID;
-  readonly position: IntegralPosition;
-}
-
 interface BaseDamagePacket {
-  readonly hitPosition: IntegralPosition;
   readonly toolID: GameID;
 }
 

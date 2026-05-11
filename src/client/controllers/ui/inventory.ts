@@ -15,7 +15,6 @@ import { ItemRegistry } from "shared/registry/item-registry";
 
 import type { ReplicaController } from "../replica";
 import type { InputController } from "../input";
-import type { CharacterController } from "../character";
 import type { HotbarUIController } from "./hotbar";
 
 interface ItemFrameInfo {
@@ -23,7 +22,6 @@ interface ItemFrameInfo {
   readonly trash: Trash;
 }
 
-const DROP_OFFSET = vector.create(0, 1.5, 0);
 const HOVER_INFO_FADE_DURATION = 0.1;
 
 @Controller()
@@ -40,7 +38,6 @@ export class InventoryUIController {
   public constructor(
     replica: ReplicaController,
     input: InputController,
-    private readonly character: CharacterController,
     private readonly hotbar: HotbarUIController
   ) {
     const frame = this.frame = mainScreen.Inventory;
@@ -120,15 +117,7 @@ export class InventoryUIController {
     }));
     trash.add(button.MouseButton2Click.Connect(() => {
       if (!canDrop) return;
-
-      const characterPivot = this.character.getPivot();
-      if (!characterPivot) return;
-
-      const position = characterPivot.Position
-        .add(characterPivot.LookVector.mul(2))
-        .add(DROP_OFFSET);
-
-      messaging.server.emit(Message.DropItem, { id, position });
+      messaging.server.emit(Message.DropItem, id);
     }));
     trash.add(button.MouseEnter.Connect((x, y) => {
       this.updateHoverInfo(x, y);

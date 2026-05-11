@@ -78,7 +78,7 @@ export class HotbarUIController {
     if (this.hasViewportItem(button)) return;
 
     slot ??= button.Name as never;
-    messaging.server.emit(Message.AddHotbarItem, { id, slot });
+    messaging.server.emit(Message.AddHotbarItem, { id: id as never, slot });
     this.addViewportItem(button, id);
   }
 
