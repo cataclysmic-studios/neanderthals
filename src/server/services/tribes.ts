@@ -1,5 +1,5 @@
 import { Service } from "@flamework/core";
-import { Teams } from "@rbxts/services";
+import { Teams, Workspace as World } from "@rbxts/services";
 import { Trash } from "@rbxts/trash";
 
 import { Message, messaging } from "shared/messaging";
@@ -20,7 +20,7 @@ interface Tribe {
   totemID?: number;
 }
 
-function hasTotem(tribe: Tribe): tribe is Tribe & { totemID: number } {
+function hasTotem(tribe: Tribe): tribe is Tribe & { totemID: number; } {
   return "totemID" in tribe;
 }
 
@@ -110,6 +110,12 @@ export class TribesService {
   private disband(tribe: Tribe): void {
     tribe.trash.destroy();
     this.tribes.delete(tribe);
+
+    const [totem] = World.PlacedStructures.QueryDescendants<Model>("Model[$TotemID]");
+    if (totem) {
+      this.removeTotem(totem);
+      totem.Destroy();
+    }
   }
 
   private create(chief: Player, colorName: TribeColorName): void {
