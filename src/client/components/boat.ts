@@ -22,7 +22,6 @@ export class Boat extends DestroyableComponent<{}, BoatModel> implements OnTick 
     if (direction.FuzzyEq(Vector3.zero)) return;
 
     const velocity = direction.mul(SPEED).mul(50 * dt);
-    print(velocity);
     this.root.ApplyImpulse(velocity);
   }
 }

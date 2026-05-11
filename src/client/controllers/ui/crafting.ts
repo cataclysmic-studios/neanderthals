@@ -24,8 +24,8 @@ const DEFAULT_CRAFT_BUTTON_COLOR = assets.UI.CraftingRecipeFrame.Craft.Backgroun
 const GRAYED_CRAFT_BUTTON_COLOR = new Color3(0.3, 0.3, 0.3);
 
 function updateLevelLock(frame: RecipeFrame, requiredLevel: number | undefined, level: number): void {
-  if (requiredLevel === undefined || requiredLevel <= level) return;
-  frame.LevelLocked.Visible = true;
+  const locked = requiredLevel !== undefined && requiredLevel > level;
+  frame.LevelLocked.Visible = locked;
   frame.LevelLocked.RequiredLevel.Text = `Required: Level ${requiredLevel}`;
 }
 
@@ -70,7 +70,7 @@ export class CraftingUIController {
 
     const sortedRecipes = RecipeRegistry.getAll().sort((a, b) => (a.requiredLevel ?? 0) < (b.requiredLevel ?? 0));
     for (const recipe of sortedRecipes) {
-      if (recipe.yield === StructureID.TribeTotem) continue; // no visible totem recipe
+      if (recipe.yield === StructureID.TribeTotem) continue; // dont show totem recipe
 
       const frame = this.createRecipeFrame(recipe);
       if (!frame) continue;

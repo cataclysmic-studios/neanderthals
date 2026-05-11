@@ -28,7 +28,7 @@ export class ReplicaController implements OnStart {
 
   private onDataUpdate(diff: Diff<PlayerData>): void {
     const data = applyDiff(this.data, diff);
-    (this as { data: PlayerData }).data = freeze(data);
-    this.updated.Fire(data);
+    (this as { data: PlayerData; }).data = freeze(data);
+    this.updated.Fire(this.data);
   }
 }
