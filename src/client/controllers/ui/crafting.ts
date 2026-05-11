@@ -23,6 +23,12 @@ const NOT_ENOUGH_TEXT_COLOR = new Color3(0.7, 0, 0);
 const DEFAULT_CRAFT_BUTTON_COLOR = assets.UI.CraftingRecipeFrame.Craft.BackgroundColor3;
 const GRAYED_CRAFT_BUTTON_COLOR = new Color3(0.3, 0.3, 0.3);
 
+function updateLevelLock(frame: RecipeFrame, requiredLevel: number | undefined, level: number): void {
+  if (requiredLevel === undefined || requiredLevel <= level) return;
+  frame.LevelLocked.Visible = true;
+  frame.LevelLocked.RequiredLevel.Text = `Required: Level ${requiredLevel}`;
+}
+
 @Controller()
 export class CraftingUIController {
   private readonly frame = mainScreen.Crafting;
@@ -36,8 +42,8 @@ export class CraftingUIController {
     inventoryUI: InventoryUIController
   ) {
     inventoryUI.toggled.Connect(on => this.frame.Visible = on);
-    replica.updated.Connect(() => {
-      for (const [{ ingredients }, frame] of this.frames) {
+    replica.updated.Connect(({ level }) => {
+      for (const [{ ingredients, requiredLevel }, frame] of this.frames) {
         const color = this.getCraftButtonColor(ingredients);
         frame.Craft.BackgroundColor3 = color;
 
@@ -47,6 +53,8 @@ export class CraftingUIController {
           const [id, count] = ingredients[i++];
           ingredientFrame.Title.TextColor3 = this.getTextColor(id, count);
         }
+
+        updateLevelLock(frame, requiredLevel, level);
       }
     });
 
@@ -70,17 +78,18 @@ export class CraftingUIController {
   }
 
   private createRecipeFrame(recipe: CraftingRecipe): Maybe<RecipeFrame> {
+    const { level } = this.replica.data;
     const { kind, yield: yieldItem, ingredients, requiredLevel } = recipe;
     const yieldID = typeIs(yieldItem, "string") ? yieldItem : yieldItem[0];
     const model = recipe.kind === RecipeKind.Structure
       ? StructureRegistry.get(yieldID)
       : ItemRegistry.get(yieldID);
 
-    // TODO: required level UI
     const frame = assets.UI.CraftingRecipeFrame.Clone();
     for (const ingredient of ingredients)
       this.createIngredientFrame(frame.Ingredients, ingredient);
 
+    updateLevelLock(frame, requiredLevel, level);
     addViewportItem(frame.Viewport, model);
     frame.Title.Text = getDisplayName(model);
 

@@ -19,6 +19,9 @@ interface RecipeFrame extends Frame {
     Border: UIStroke;
   };
   Ingredients: Frame;
+  LevelLocked: ImageLabel & {
+    RequiredLevel: TextLabel;
+  };
 }
 
 interface ItemButton extends ImageButton {
