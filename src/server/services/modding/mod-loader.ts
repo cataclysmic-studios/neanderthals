@@ -22,7 +22,6 @@ const manifestGuard = Flamework.createGuard<ModManifest>();
 @Service()
 export class ModLoaderService implements OnStart {
   private readonly loadedMods = new Map<string, Mod>;
-  private readonly loadedPlayers = new Set<Player>;
 
   public constructor(
     private readonly content: ModContentService,
@@ -37,9 +36,10 @@ export class ModLoaderService implements OnStart {
   public async loadMods(modList: ModList): Promise<void> {
     print("Loading mods...");
     print("Mod list:", modList);
-    const loaded = new Signal<(player: Player) => void>();
+    const loadedPlayers = new Set<Player>;
+    const loaded = new Signal<(player: Player) => void>;
     messaging.server.on(Message.ReadyForContent, player => {
-      this.loadedPlayers.add(player);
+      loadedPlayers.add(player);
       loaded.Fire(player);
     });
     for (const mod of modList) {
@@ -50,8 +50,11 @@ export class ModLoaderService implements OnStart {
 
     // sync modded content for players
     const recipes = RecipeRegistry.getSorted();
-    messaging.client.emit([...this.loadedPlayers], Message.SyncContent, recipes);
-    loaded.Connect(player => messaging.client.emit(player, Message.SyncContent, recipes));
+    messaging.client.emit([...loadedPlayers], Message.SyncContent, recipes);
+    loaded.Connect(player => {
+      if (loadedPlayers.has(player)) return;
+      messaging.client.emit(player, Message.SyncContent, recipes);
+    });
     print(`Finished loading ${modList.size()} mod(s)!`);
   }
 
