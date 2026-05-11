@@ -22,26 +22,29 @@ class RecipeRegistryClass extends Registry {
   }
 
   public sync(recipes: CraftingRecipe[]): void {
-    this.allRecipes = recipes;
+    this.sort(recipes);
     this.structureRecipes.clear();
     this.itemRecipes.clear();
     for (const recipe of recipes)
       this.categorize(recipe);
   }
 
-  public getSorted(): CraftingRecipe[] {
-    return this.allRecipes
-      .sort((a, b) => {
-        const aLevel = a.requiredLevel ?? 0;
-        const bLevel = b.requiredLevel ?? 0;
-        if (aLevel !== bLevel) {
-          return aLevel < bLevel;
-        }
+  public sort(recipes: CraftingRecipe[] = this.allRecipes): void {
+    this.allRecipes = recipes.sort((a, b) => {
+      const aLevel = a.requiredLevel ?? 0;
+      const bLevel = b.requiredLevel ?? 0;
+      if (aLevel !== bLevel) {
+        return aLevel < bLevel;
+      }
 
-        const aID = typeIs(a.yield, "string") ? a.yield : a.yield[0];
-        const bID = typeIs(b.yield, "string") ? b.yield : b.yield[0];
-        return aID < bID;
-      });
+      const aID = typeIs(a.yield, "string") ? a.yield : a.yield[0];
+      const bID = typeIs(b.yield, "string") ? b.yield : b.yield[0];
+      return aID < bID;
+    });
+  }
+
+  public getAll(): CraftingRecipe[] {
+    return this.allRecipes;
   }
 
   public get(index: number): Maybe<CraftingRecipe> {

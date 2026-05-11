@@ -50,7 +50,7 @@ export class ModLoaderService implements OnStart {
     }
 
     // sync modded content for players
-    const recipes = RecipeRegistry.getSorted();
+    const recipes = RecipeRegistry.getAll();
     messaging.client.emit([...loadedPlayers], Message.SyncContent, recipes);
     loaded.Connect(player => {
       if (loadedPlayers.has(player)) return;
@@ -132,6 +132,7 @@ export class ModLoaderService implements OnStart {
       RecipeRegistry.register(recipe);
       print("Registered recipe:", recipe);
     }
+    RecipeRegistry.sort();
   }
 
   private registerItem(model: Model, descriptor: ItemDescriptor): void {
