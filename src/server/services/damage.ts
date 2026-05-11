@@ -79,11 +79,12 @@ export class DamageService implements OnStart {
       damage = structure.getDamage(damage, toolTier, toolKind);
 
     const modelPosition = targetModel.PrimaryPart!.Position;
-    const playerPosition = character.GetPivot().Position;
+    const playerPosition = character.PrimaryPart!.Position;
     const hitboxSize = tool.GetAttribute<Vector3>("HitboxSize") ?? DEFAULT_HITBOX_SIZE;
     const [_, targetSize] = targetModel.GetBoundingBox();
     const maxRange = (magnitude(hitboxSize) * 2 + magnitude(targetSize.mul(XZ)));
-    if (distanceBetween(modelPosition, playerPosition) > maxRange)
+    const distance = distanceBetween(modelPosition, playerPosition);
+    if (distance > maxRange)
       return stopHacking(player, "out of melee range");
 
     const currentHealth = humanoid.Health;

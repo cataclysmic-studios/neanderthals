@@ -73,7 +73,7 @@ export class BuildingService implements OnPlayerAdd, OnPlayerRemove {
     structure.PivotTo(cframe);
     structure.SetAttribute("Structure_OwnerID", player.UserId);
     if (!noAnchor) {
-      for (const part of structure.QueryDescendants<BasePart>("#BasePart")) {
+      for (const part of structure.QueryDescendants<BasePart>("BasePart[Anchored = false]")) {
         part.Anchored = true;
       }
     }

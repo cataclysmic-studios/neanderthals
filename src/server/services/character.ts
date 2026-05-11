@@ -16,7 +16,7 @@ export class CharacterService implements OnPlayerAdd {
     character.Parent = World.PlayerCharacterStorage;
 
     this.added.Fire(player, character);
-    for (const part of character.QueryDescendants<BasePart>("#BasePart"))
+    for (const part of character.QueryDescendants<BasePart>("BasePart"))
       part.CollisionGroup = "Players";
   }
 }

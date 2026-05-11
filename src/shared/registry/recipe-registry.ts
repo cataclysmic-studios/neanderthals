@@ -65,7 +65,7 @@ class RecipeRegistryClass extends Registry {
 
   public load(): void {
     const recipes = getInstanceAtPath("src/shared/crafting-recipes")!
-      .QueryDescendants<ModuleScript>("#ModuleScript")
+      .QueryDescendants<ModuleScript>("ModuleScript")
       .sort((a, b) => a.Name < b.Name)
       .map(require<CraftingRecipe>);
 

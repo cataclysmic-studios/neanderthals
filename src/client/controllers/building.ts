@@ -65,7 +65,7 @@ export class BuildingController implements OnTick {
     const normal = rayResult.Normal;
     const material = rayResult.Material;
     const canPlace = this.canPlaceHologram(material);
-    const parts = hologram.QueryDescendants<BasePart>("#BasePart");
+    const parts = hologram.QueryDescendants<BasePart>("BasePart");
     for (const part of parts)
       part.BrickColor = canPlace ? PASTEL_BLUE : BRIGHT_RED;
 
@@ -101,7 +101,7 @@ export class BuildingController implements OnTick {
     if (this.isInBuildMode()) return;
 
     const hologram = structure.Clone();
-    const parts = hologram.QueryDescendants<BasePart>("#BasePart");
+    const parts = hologram.QueryDescendants<BasePart>("BasePart");
     for (const part of parts) {
       part.CanCollide = false;
       part.CastShadow = false;

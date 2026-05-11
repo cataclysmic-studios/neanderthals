@@ -38,7 +38,7 @@ export class Structure extends CreatesDropsComponent<Attributes, StructureModel>
   private readonly aliveTrash = new Trash;
   private readonly root = this.instance.PrimaryPart!;
   private shakeTween?: Tween;
-  private parts = this.instance.QueryDescendants<BasePart>("#BasePart");
+  private parts = this.instance.QueryDescendants<BasePart>("BasePart");
   private originalPartInfo = new Map<BasePart, PartInfo>;
   private alive = false;
 
@@ -156,7 +156,7 @@ export class Structure extends CreatesDropsComponent<Attributes, StructureModel>
       part.CanQuery = on;
       part.CanTouch = on;
 
-      for (const fx of part.QueryDescendants<ParticleEmitter | Light>("#ParticleEmitter, #Light"))
+      for (const fx of part.QueryDescendants<ParticleEmitter | Light>("ParticleEmitter, Light"))
         fx.Enabled = on;
     }
   }

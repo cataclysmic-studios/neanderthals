@@ -14,6 +14,7 @@ import type { PlayerData } from "shared/structs/player-data";
 import type { CharacterController } from "../character";
 import type { InputController } from "../input";
 import type { ToolController } from "../tool";
+import { IDRegistry } from "shared/registry/id-registry";
 
 const WHITE = new Color3(1, 1, 1);
 const DEFAULT_VIEWPORT_COLOR = Color3.fromRGB(30, 30, 30);
@@ -78,7 +79,7 @@ export class HotbarUIController {
     if (this.hasViewportItem(button)) return;
 
     slot ??= button.Name as never;
-    messaging.server.emit(Message.AddHotbarItem, { id: id as never, slot });
+    messaging.server.emit(Message.AddHotbarItem, { id: IDRegistry.getIndex(id), slot });
     this.addViewportItem(button, id);
   }
 

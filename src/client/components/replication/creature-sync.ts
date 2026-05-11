@@ -43,7 +43,7 @@ export class CreatureSync extends DestroyableComponent<{ ID: number; }, Creature
   ) {
     super();
     this.animator = components.getComponent(this.instance)!;
-    for (const part of this.instance.QueryDescendants<BasePart>("#BasePart"))
+    for (const part of this.instance.QueryDescendants<BasePart>("BasePart[Anchored = true]"))
       part.Anchored = false;
 
     this.trash.linkToInstance(this.instance);

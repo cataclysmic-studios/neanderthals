@@ -38,7 +38,7 @@ export function dropItem(itemTemplate: PVInstance, origin: CFrame, radius: Vecto
       drop.SetAttribute("DropID", id);
       drop.PivotTo(origin.add(offset));
       drop.Destroying.Once(() => cumulativeDropID = clamp(id - 1, 0, 255));
-      for (const part of drop.QueryDescendants<BasePart>("#BasePart:not([$UseDefaultDroppedCollisions = true])")) {
+      for (const part of drop.QueryDescendants<BasePart>("BasePart:not([$UseDefaultDroppedCollisions = true])")) {
         part.CanCollide = true;
         part.CollisionGroup = "DroppedItems";
       }

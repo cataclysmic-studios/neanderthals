@@ -101,7 +101,7 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
     this.prompt.destroy();
 
     return new Promise(resolve => {
-      for (const part of instance.QueryDescendants<BasePart>("#BasePart")) {
+      for (const part of instance.QueryDescendants<BasePart>("BasePart")) {
         part.CanCollide = false;
         part.CastShadow = false;
         TweenBuilder.for(part)
