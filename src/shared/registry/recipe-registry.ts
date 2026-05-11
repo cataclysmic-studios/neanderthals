@@ -35,8 +35,8 @@ class RecipeRegistryClass extends Registry {
       this.categorize(recipe);
   }
 
-  public getAll(): CraftingRecipe[] {
-    return this.allRecipes;
+  public getSorted(): CraftingRecipe[] {
+    return this.allRecipes.sort((a, b) => (a.requiredLevel ?? 0) < (b.requiredLevel ?? 0));
   }
 
   public get(index: number): Maybe<CraftingRecipe> {

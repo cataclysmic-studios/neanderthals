@@ -49,7 +49,7 @@ export class ModLoaderService implements OnStart {
     }
 
     // sync modded content for players
-    const recipes = RecipeRegistry.getAll();
+    const recipes = RecipeRegistry.getSorted();
     messaging.client.emit([...this.loadedPlayers], Message.SyncContent, recipes);
     loaded.Connect(player => messaging.client.emit(player, Message.SyncContent, recipes));
     print(`Finished loading ${modList.size()} mod(s)!`);
@@ -64,7 +64,7 @@ export class ModLoaderService implements OnStart {
     }
 
     print(`Loading mod ${manifest.metadata.id}@${manifest.metadata.version}`);
-    print("Manifest:", manifest)
+    print("Manifest:", manifest);
 
     const folder = this.content.createFolder(manifest);
     const mod: Mod = { repo, branch, folder, manifest };
@@ -122,7 +122,7 @@ export class ModLoaderService implements OnStart {
       const isCircular = recipe.ingredients.some(ingredient => {
         return typeIs(recipe.yield, "string") ?
           recipe.yield === ingredient[0] && 1 === ingredient[1]
-          : recipe.yield[0] === ingredient[0] && recipe.yield[1] === ingredient[1]
+          : recipe.yield[0] === ingredient[0] && recipe.yield[1] === ingredient[1];
       });
 
       if (this.rules.current.noCircularRecipes && isCircular) {

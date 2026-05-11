@@ -68,8 +68,7 @@ export class CraftingUIController {
       frame.Destroy();
     }
 
-    const sortedRecipes = RecipeRegistry.getAll().sort((a, b) => (a.requiredLevel ?? 0) < (b.requiredLevel ?? 0));
-    for (const recipe of sortedRecipes) {
+    for (const recipe of RecipeRegistry.getSorted()) {
       if (recipe.yield === StructureID.TribeTotem) continue; // dont show totem recipe
 
       const frame = this.createRecipeFrame(recipe);
