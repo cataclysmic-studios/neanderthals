@@ -26,7 +26,7 @@ interface Snapshot {
 
 const OUT_OF_BOUNDS_CFRAME = new CFrame(0, 1e8, 0);
 @Component({ tag: $nameof<CreatureSync>() })
-export class CreatureSync extends DestroyableComponent<{ ID: number }, CreatureModel> implements OnTick {
+export class CreatureSync extends DestroyableComponent<{ ID: number; }, CreatureModel> implements OnTick {
   public readonly id = this.attributes.ID;
   public readonly root = this.instance.PrimaryPart!;
   public cframe = this.root.CFrame;

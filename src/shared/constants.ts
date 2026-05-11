@@ -9,6 +9,8 @@ export const CREATURE_DRAW_DISTANCE = 150;
 export const PLAYER_SPEED = 16;
 export const PLAYER_WATER_SPEED = 8;
 
+export const IRON_REQUIRED_LEVEL = 8;
+
 export type TribeColorName = typeof TRIBE_COLORS[number]["Name"];
 export const TRIBE_COLORS = [
   new BrickColor("Bright red"),

@@ -9,28 +9,8 @@ export default class SmoothValue {
     private target = 0
   ) { }
 
-  public zeroize(): void {
-    this.setTarget(0);
-  }
-
-  public incrementTarget(amount = 1): void {
-    this.target += amount;
-  }
-
-  public decrementTarget(amount = 1): void {
-    this.target -= amount;
-  }
-
-  public getTarget(): number {
-    return this.target;
-  }
-
   public setTarget(target: number): void {
     this.target = target;
-  }
-
-  public setSpeed(speed: number): void {
-    this.speed = speed;
   }
 
   public update(dt: number): number {
