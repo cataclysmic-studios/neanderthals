@@ -61,7 +61,7 @@ export class Structure extends CreatesDropsComponent<Attributes, StructureModel>
   public getDamage(current: number, toolTier: number, toolKind: Maybe<ToolKind>): number {
     const { toolKind: requiredToolKind, minimumToolTier = 0 } = this.config;
     let damage = current;
-    if (toolTier < minimumToolTier || (toolKind !== undefined && toolKind !== requiredToolKind)) {
+    if (toolTier < minimumToolTier || (requiredToolKind !== undefined && toolKind !== requiredToolKind)) {
       damage = 0;
       this.shake(); // dumbest hack lol
     }
@@ -151,7 +151,7 @@ export class Structure extends CreatesDropsComponent<Attributes, StructureModel>
 
   private toggleVisibility(on: boolean): void {
     for (const part of this.parts) {
-      const { collisions, transparency } = this.originalPartInfo.get(part)!
+      const { collisions, transparency } = this.originalPartInfo.get(part)!;
       part.Transparency = on ? transparency : 1;
       part.CanCollide = on ? collisions : false;
       part.CanQuery = on;
