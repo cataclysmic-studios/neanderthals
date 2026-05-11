@@ -2,11 +2,11 @@ import { Controller } from "@flamework/core";
 import { Trash } from "@rbxts/trash";
 
 import { Message, messaging } from "shared/messaging";
-import { DEFAULT_HITBOX_SIZE } from "shared/constants";
 import { weldTool } from "shared/utility";
+import { DEFAULT_HITBOX_SIZE } from "shared/constants";
+import type { ItemID } from "shared/item-id";
 
 import type { CharacterController } from "./character";
-import { ItemID } from "shared/item-id";
 
 @Controller()
 export class ToolController {
@@ -43,6 +43,8 @@ export class ToolController {
 
   public unequip(): void {
     this.trash.purge();
+
+    if (!this.equipped) return;
     this.equipped = undefined;
     messaging.server.emit(Message.UnequipTool);
   }
