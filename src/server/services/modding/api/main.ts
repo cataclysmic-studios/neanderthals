@@ -3,7 +3,6 @@ import Signal from "@rbxts/lemon-signal";
 
 import { dropItem } from "server/utility";
 import { ItemRegistry } from "shared/registry/item-registry";
-import type { GameID } from "shared/structs/packets";
 
 import type { AudioService } from "server/services/audio";
 import type { ConsumableModdingAPIService } from "./consumable";

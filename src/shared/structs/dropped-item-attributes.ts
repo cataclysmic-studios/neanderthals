@@ -1,5 +1,3 @@
-import type { GameID } from "./packets";
-
 interface BaseDroppedItemAttributes {
   readonly DisplayName?: string;
   readonly Consumable?: boolean;

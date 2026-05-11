@@ -1,10 +1,11 @@
 import { Service, type OnTick } from "@flamework/core";
 import Signal from "@rbxts/lemon-signal";
 
-import type { OnPlayerRemove } from "server/hooks";
 import { Message, messaging } from "shared/messaging";
 import { stopHacking } from "server/utility";
 import { ItemRegistry } from "shared/registry/item-registry";
+import { IDRegistry } from "shared/registry/id-registry";
+import type { OnPlayerRemove } from "server/hooks";
 
 import type { CharacterService } from "./character";
 import type { InventoryService } from "./inventory";
@@ -28,7 +29,8 @@ export class HungerService implements OnTick, OnPlayerRemove {
   private elapsed = 0;
 
   public constructor(character: CharacterService, inventory: InventoryService) {
-    messaging.server.on(Message.Consume, async (player, id) => {
+    messaging.server.on(Message.Consume, async (player, index) => {
+      const id = IDRegistry.getID(index);
       const item = ItemRegistry.get(id);
       if (!item)
         return stopHacking(player, "invalid item ID (no corresponding item) when consuming item");

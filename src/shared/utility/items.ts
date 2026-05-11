@@ -1,6 +1,5 @@
 import { ItemRegistry } from "shared/registry/item-registry";
 import type { CraftingRecipe } from "shared/structs/crafting-recipe";
-import type { GameID } from "shared/structs/packets";
 
 interface DisplayNameOptions {
   readonly uppercase?: boolean;

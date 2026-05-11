@@ -1,5 +1,5 @@
 import { MessageEmitter, BuiltinMiddlewares } from "@rbxts/tether";
-import type { List, Packed, u8 } from "@rbxts/serio";
+import type { List, Packed, u16, u8 } from "@rbxts/serio";
 import type { Diff } from "@rbxts/diff";
 
 import type {
@@ -12,17 +12,17 @@ import type {
   AddHotbarItemPacket,
   PlaceStructurePacket,
   AudioPacket,
-  GameID,
-  DropInteractPacket
+  DropInteractPacket,
+  IDIndex
 } from "./structs/packets";
-import type { PlayerData } from "./structs/player-data";
 import type { TribeColorName } from "./constants";
+import type { PlayerData } from "./structs/player-data";
 import type { CraftingRecipe } from "./structs/crafting-recipe";
 
 export const messaging = MessageEmitter.create<MessageData>();
 messaging.middleware
   .useServer(Message.CreateTribe, BuiltinMiddlewares.rateLimit(1))
-  .useSharedGlobal(BuiltinMiddlewares.debug())
+  // .useSharedGlobal(BuiltinMiddlewares.debug())
   .useSharedGlobal(BuiltinMiddlewares.maxPacketSize(1024));
 
 export const enum Message {
@@ -61,7 +61,7 @@ export const enum Message {
 }
 
 export interface MessageData {
-  [Message.Damage]: DamagePacket;
+  [Message.Damage]: Packed<DamagePacket>;
   [Message.DamageCreature]: Packed<CreatureDamagePacket>;
   [Message.ShowDamageDisplay]: Humanoid;
   [Message.EquipTool]: HotbarKeyName;
@@ -71,13 +71,13 @@ export interface MessageData {
   [Message.UpdateHunger]: u8;
   [Message.InitializeData]: undefined;
   [Message.DataUpdated]: Packed<Diff<PlayerData>>;
-  [Message.DropItem]: GameID;
+  [Message.DropItem]: u16; // would use IDIndex, but no packing
   [Message.InteractWithDrop]: Packed<DropInteractPacket>;
   [Message.SpawnCreature]: Packed<CreatureSpawnPacket>;
   [Message.UpdateCreatures]: CreatureUpdatePacket;
   [Message.CreatureHealthChange]: Packed<CreatureHealthChangePacket>;
-  [Message.Consume]: GameID;
-  [Message.AddHotbarItem]: AddHotbarItemPacket;
+  [Message.Consume]: u16; // would use IDIndex, but no packing
+  [Message.AddHotbarItem]: Packed<AddHotbarItemPacket>;
   [Message.RemoveHotbarItem]: HotbarKeyName;
   [Message.Craft]: u8;
   [Message.PlaceStructure]: Packed<PlaceStructurePacket>;

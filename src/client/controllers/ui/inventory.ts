@@ -9,11 +9,12 @@ import { mainScreen } from "client/constants";
 import { recordDiff } from "shared/utility";
 import { getDisplayName, isItemStackable } from "shared/utility/items";
 import { addViewportItem } from "client/utility";
+import { IDRegistry } from "shared/registry/id-registry";
+import { ItemRegistry } from "shared/registry/item-registry";
 import { INITIAL_DATA } from "shared/structs/player-data";
 import { EXCLUSIVE_IDS } from "shared/item-id";
-import { ItemRegistry } from "shared/registry/item-registry";
 
-import type { ReplicaController } from "../replica";
+import type { ReplicaController } from "../replication/replica";
 import type { InputController } from "../input";
 import type { HotbarUIController } from "./hotbar";
 
@@ -109,15 +110,17 @@ export class InventoryUIController {
     const canDrop = !EXCLUSIVE_IDS.has(id);
     button.Name = itemTemplate.Name;
     button.Count.Text = tostring(count);
+
+    const idIndex = IDRegistry.getIndex(id);
     trash.add(button.MouseButton1Click.Connect(() => {
       if (isConsumable)
-        messaging.server.emit(Message.Consume, id);
+        messaging.server.emit(Message.Consume, idIndex);
       else if (isTool)
         this.hotbar.addItem(id);
     }));
     trash.add(button.MouseButton2Click.Connect(() => {
       if (!canDrop) return;
-      messaging.server.emit(Message.DropItem, id);
+      messaging.server.emit(Message.DropItem, idIndex);
     }));
     trash.add(button.MouseEnter.Connect((x, y) => {
       this.updateHoverInfo(x, y);

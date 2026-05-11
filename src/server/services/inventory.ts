@@ -8,6 +8,7 @@ import { EXCLUSIVE_IDS } from "shared/item-id";
 import type { PlayerData } from "shared/structs/player-data";
 
 import type { DataService } from "./data";
+import { IDRegistry } from "shared/registry/id-registry";
 
 const DROP_OFFSET = vector.create(0, 1.5, 0);
 
@@ -21,9 +22,9 @@ export class InventoryService {
   public constructor(
     private readonly data: DataService
   ) {
-    messaging.server.on(Message.DropItem, (player, id) => this.dropItem(player, id));
+    messaging.server.on(Message.DropItem, (player, id) => this.dropItem(player, IDRegistry.getID(id)));
     messaging.server.on(Message.AddHotbarItem, (player, { id, slot }) =>
-      data.update(player, data => this.addHotbarItem(data, id, slot))
+      data.update(player, data => this.addHotbarItem(data, IDRegistry.getID(id), slot))
     );
     messaging.server.on(Message.RemoveHotbarItem, (player, slot) =>
       data.update(player, data => this.removeHotbarItem(data, slot))
@@ -64,7 +65,7 @@ export class InventoryService {
     });
   }
 
-  public async addItem(player: Player, id: string, count = 1): Promise<boolean> {
+  public async addItem(player: Player, id: GameID, count = 1): Promise<boolean> {
     const data = await this.data.get(player);
     if (id in data.inventory && EXCLUSIVE_IDS.has(id))
       return false;
@@ -79,7 +80,7 @@ export class InventoryService {
     });
   }
 
-  public async removeItem(player: Player, id: string, count = 1, after?: (data: DeepWritable<PlayerData>) => boolean): Promise<boolean> {
+  public async removeItem(player: Player, id: GameID, count = 1, after?: (data: DeepWritable<PlayerData>) => boolean): Promise<boolean> {
     if (!await this.has(player, id) || EXCLUSIVE_IDS.has(id))
       return false;
 
@@ -98,12 +99,12 @@ export class InventoryService {
     });
   }
 
-  public async getItemCount(player: Player, id: string): Promise<number> {
+  public async getItemCount(player: Player, id: GameID): Promise<number> {
     const { inventory } = await this.data.get(player);
     return inventory[id] ?? 0;
   }
 
-  public async has(player: Player, id: string, count?: number): Promise<boolean> {
+  public async has(player: Player, id: GameID, count?: number): Promise<boolean> {
     const { inventory } = await this.data.get(player);
 
     const hasItem = id in inventory;
@@ -112,7 +113,7 @@ export class InventoryService {
       : hasItem;
   }
 
-  private async dropItem(player: Player, id: string): Promise<void> {
+  private async dropItem(player: Player, id: GameID): Promise<void> {
     const item = ItemRegistry.get(id);
     if (!item)
       return stopHacking(player, "invalid item ID (no corresponding item) when dropping item");

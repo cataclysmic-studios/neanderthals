@@ -2,7 +2,6 @@ import type { OnStart } from "@flamework/core";
 import { Component, type Components } from "@flamework/components";
 import { Workspace as World } from "@rbxts/services";
 import { TweenBuilder } from "@rbxts/twin";
-import { getDescendantsOfType } from "@rbxts/instance-utility";
 import { $nameof } from "rbxts-transform-debug";
 
 import type { OnFixed } from "shared/hooks";
@@ -15,7 +14,7 @@ import { DEFAULT_DROPPED_ITEM_ATTRIBUTES, type DroppedItemAttributes } from "sha
 
 import DestroyableComponent from "shared/base-components/destroyable";
 import type { DroppedItemPrompt } from "./dropped-item-prompt";
-import type { ReplicaController } from "client/controllers/replica";
+import type { ReplicaController } from "client/controllers/replication/replica";
 import type { InputController } from "client/controllers/input";
 import type { CharacterController } from "client/controllers/character";
 
@@ -102,7 +101,7 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
     this.prompt.destroy();
 
     return new Promise(resolve => {
-      for (const part of getDescendantsOfType(instance, "BasePart")) {
+      for (const part of instance.QueryDescendants<BasePart>("#BasePart")) {
         part.CanCollide = false;
         part.CastShadow = false;
         TweenBuilder.for(part)

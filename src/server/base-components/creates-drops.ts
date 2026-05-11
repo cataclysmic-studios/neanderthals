@@ -2,7 +2,6 @@ import { BaseComponent } from "@flamework/components";
 
 import { dropItem } from "server/utility";
 import { ItemRegistry } from "shared/registry/item-registry";
-import type { GameID } from "shared/structs/packets";
 
 export abstract class CreatesDropsComponent<A extends {} = {}, I extends PVInstance = PVInstance> extends BaseComponent<A, I> {
   private readonly radius = this.instance.IsA("Model") ? this.instance.GetBoundingBox()[1] : undefined;

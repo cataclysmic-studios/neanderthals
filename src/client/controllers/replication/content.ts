@@ -5,6 +5,7 @@ import { Message, messaging } from "shared/messaging";
 import { ItemRegistry } from "shared/registry/item-registry";
 import { StructureRegistry } from "shared/registry/structure-registry";
 import { RecipeRegistry } from "shared/registry/recipe-registry";
+import { IDRegistry } from "shared/registry/id-registry";
 
 @Controller()
 export class ContentController implements OnStart {
@@ -15,8 +16,9 @@ export class ContentController implements OnStart {
   public onStart(): void {
     messaging.client.on(Message.SyncContent, recipes => {
       RecipeRegistry.sync(recipes);
-      ItemRegistry.loadVanilla(); // silly hack lol
-      StructureRegistry.loadVanilla();
+      ItemRegistry.load();
+      StructureRegistry.load();
+      IDRegistry.load();
       this.isSynced = true;
       this.synced.Fire();
     });

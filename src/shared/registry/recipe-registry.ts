@@ -1,4 +1,3 @@
-import { getDescendantsOfType } from "@rbxts/instance-utility";
 import { getInstanceAtPath } from "@rbxts/flamework-meta-utils";
 
 import { Registry } from "./registry";
@@ -64,8 +63,9 @@ class RecipeRegistryClass extends Registry {
     return this.allRecipes.findIndex(r => recipeEquals(r, recipe));
   }
 
-  public loadVanilla(): void {
-    const recipes = getDescendantsOfType(getInstanceAtPath("src/shared/crafting-recipes")!, "ModuleScript")
+  public load(): void {
+    const recipes = getInstanceAtPath("src/shared/crafting-recipes")!
+      .QueryDescendants<ModuleScript>("#ModuleScript")
       .sort((a, b) => a.Name < b.Name)
       .map(require<CraftingRecipe>);
 
@@ -83,4 +83,4 @@ class RecipeRegistryClass extends Registry {
 }
 
 export const RecipeRegistry = new RecipeRegistryClass;
-RecipeRegistry.loadVanilla();
+RecipeRegistry.load();

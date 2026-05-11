@@ -1,11 +1,11 @@
 import { Controller, type OnTick } from "@flamework/core";
 import { UserInputService, Workspace as World } from "@rbxts/services";
-import { getDescendantsOfType } from "@rbxts/instance-utility";
 
 import { Message, messaging } from "shared/messaging";
 import { player } from "client/constants";
 import { isValidStructureDistance } from "shared/utility";
 import { RecipeRegistry } from "shared/registry/recipe-registry";
+import { IDRegistry } from "shared/registry/id-registry";
 import { STRUCTURE_OVERLAP_PARAMS } from "shared/constants";
 import type { StructureConfig } from "shared/structs/structure-config";
 
@@ -65,7 +65,7 @@ export class BuildingController implements OnTick {
     const normal = rayResult.Normal;
     const material = rayResult.Material;
     const canPlace = this.canPlaceHologram(material);
-    const parts = getDescendantsOfType(hologram, "BasePart");
+    const parts = hologram.QueryDescendants<BasePart>("#BasePart");
     for (const part of parts)
       part.BrickColor = canPlace ? PASTEL_BLUE : BRIGHT_RED;
 
@@ -101,7 +101,7 @@ export class BuildingController implements OnTick {
     if (this.isInBuildMode()) return;
 
     const hologram = structure.Clone();
-    const parts = getDescendantsOfType(hologram, "BasePart");
+    const parts = hologram.QueryDescendants<BasePart>("#BasePart");
     for (const part of parts) {
       part.CanCollide = false;
       part.CastShadow = false;
@@ -150,7 +150,7 @@ export class BuildingController implements OnTick {
     const cframe = this.hologram!.GetPivot();
     const recipeIndex = RecipeRegistry.getIndex(recipe);
     this.leaveBuildMode();
-    messaging.server.emit(Message.PlaceStructure, { id, recipeIndex, cframe, material: material.Value });
+    messaging.server.emit(Message.PlaceStructure, { id: IDRegistry.getIndex(id), recipeIndex, cframe, material: material.Value });
   }
 
   private canPlaceHologram(material: Enum.Material): boolean {

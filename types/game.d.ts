@@ -1,3 +1,4 @@
+type GameID = string;
 type AudioName = ExtractKeys<ReplicatedStorage["Assets"]["Audio"], Sound>;
 
 interface HotbarButton extends ImageButton {

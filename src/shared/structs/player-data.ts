@@ -1,21 +1,22 @@
 import type { u8, u12, u16 } from "@rbxts/serio";
 
 import { ItemID } from "shared/item-id";
-import type { GameID } from "./packets";
+import type { SerializedGameID } from "./packets";
 
 export interface EquippedGear {
-  readonly head?: GameID;
-  readonly chest?: GameID;
-  readonly legs?: GameID;
-  readonly pouch?: GameID;
-  readonly bag?: GameID;
+  readonly head?: SerializedGameID;
+  readonly chest?: SerializedGameID;
+  readonly legs?: SerializedGameID;
+  readonly pouch?: SerializedGameID;
+  readonly bag?: SerializedGameID;
 }
 
 // TODO: sort inventories by unique server IDs
 // server data should be persistent even when the actual roblox server closes
+// maybe some expiration or way to delete old data
 export interface PlayerData {
-  readonly hotbar: { [K in HotbarKeyName]?: GameID };
-  readonly inventory: { [K in GameID]?: u12 };
+  readonly hotbar: { [K in HotbarKeyName]?: SerializedGameID };
+  readonly inventory: { [K in SerializedGameID]?: u12 };
   readonly equippedGear: EquippedGear;
   readonly level: u8;
   readonly xp: u16;

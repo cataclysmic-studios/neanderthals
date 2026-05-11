@@ -9,10 +9,9 @@ import { findCreatureByID, stopHacking } from "server/utility";
 import { distanceBetween } from "shared/utility";
 import { ToolKind } from "shared/structs/tool-kind";
 import { ItemRegistry } from "shared/registry/item-registry";
-import type { ItemID } from "shared/item-id";
+import { IDRegistry } from "shared/registry/id-registry";
 
 import type { Structure } from "server/components/structure";
-import { CreatureConfig } from "shared/structs/creature-config";
 
 const { clamp, floor } = math;
 const { magnitude } = vector;
@@ -30,10 +29,10 @@ export class DamageService implements OnStart {
 
   public onStart(): void {
     messaging.server.on(Message.Damage, (player, { humanoid, toolID }) =>
-      this.damage(player, humanoid, toolID)
+      this.damage(player, humanoid, IDRegistry.getID(toolID))
     );
     messaging.server.on(Message.DamageCreature, (player, { id, toolID }) =>
-      this.damageCreature(player, id, toolID)
+      this.damageCreature(player, id, IDRegistry.getID(toolID))
     );
   }
 

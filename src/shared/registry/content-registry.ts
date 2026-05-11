@@ -8,6 +8,10 @@ export abstract class ContentRegistry extends Registry {
     return [...this.content].map(([_, content]) => content);
   }
 
+  public getAllIDs(): string[] {
+    return [...this.content].map(([id]) => id);
+  }
+
   public register(content: Model): void {
     const id = content.GetAttribute<string>("ID")!;
     this.content.set(id, content);

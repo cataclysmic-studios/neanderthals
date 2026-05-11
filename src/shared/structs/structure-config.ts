@@ -1,5 +1,4 @@
 import type { ToolKind } from "./tool-kind";
-import type { GameID } from "./packets";
 
 export interface StructureConfig {
   readonly hitSound: AudioName;

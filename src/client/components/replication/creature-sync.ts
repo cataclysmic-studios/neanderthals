@@ -1,7 +1,6 @@
 import type { OnTick } from "@flamework/core";
 import { Component, type Components } from "@flamework/components";
 import { Workspace as World } from "@rbxts/services";
-import { getDescendantsOfType } from "@rbxts/instance-utility";
 import { $nameof } from "rbxts-transform-debug";
 
 import { CREATURE_DRAW_DISTANCE } from "shared/constants";
@@ -44,7 +43,7 @@ export class CreatureSync extends DestroyableComponent<{ ID: number; }, Creature
   ) {
     super();
     this.animator = components.getComponent(this.instance)!;
-    for (const part of getDescendantsOfType(this.instance, "BasePart"))
+    for (const part of this.instance.QueryDescendants<BasePart>("#BasePart"))
       part.Anchored = false;
 
     this.trash.linkToInstance(this.instance);

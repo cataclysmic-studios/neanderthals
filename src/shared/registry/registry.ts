@@ -1,3 +1,3 @@
 export abstract class Registry {
-  public abstract loadVanilla(): void;
+  public abstract load(): void;
 }

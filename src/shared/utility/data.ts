@@ -30,7 +30,7 @@ export function calculateBagSpace(hotbar: PlayerData["hotbar"], inventory: Playe
     items.push([id, 1]);
   }
   for (const [id, count] of pairs(inventory)) {
-    items.push([id, count]);
+    items.push([id, count as number]);
   }
 
   return items.reduce((sum, [id, count]) => {

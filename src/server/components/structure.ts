@@ -3,7 +3,6 @@ import { Component } from "@flamework/components";
 import { Players, Workspace as World } from "@rbxts/services";
 import { TweenBuilder } from "@rbxts/twin";
 import { Trash } from "@rbxts/trash";
-import { getDescendantsOfType } from "@rbxts/instance-utility";
 import { $nameof } from "rbxts-transform-debug";
 
 import { ToolKind } from "shared/structs/tool-kind";
@@ -14,8 +13,8 @@ import type { BuildingService } from "server/services/building";
 import type { LevelsService } from "server/services/levels";
 
 const DEFAULT_RESPAWN_TIME = 60;
-const SHAKE_TWEEN_INFO = new TweenInfo(0.04, Enum.EasingStyle.Sine, Enum.EasingDirection.In, 0, true);
 const SHAKE_MAGNITUDE = 0.2;
+const SHAKE_TWEEN_INFO = new TweenInfo(0.04, Enum.EasingStyle.Sine, Enum.EasingDirection.In, 0, true);
 const SHAKE_LEFT_OFFSET = new Vector3(-SHAKE_MAGNITUDE, 0, -SHAKE_MAGNITUDE);
 const SHAKE_RIGHT_OFFSET = new Vector3(SHAKE_MAGNITUDE, 0, SHAKE_MAGNITUDE);
 
@@ -39,7 +38,7 @@ export class Structure extends CreatesDropsComponent<Attributes, StructureModel>
   private readonly aliveTrash = new Trash;
   private readonly root = this.instance.PrimaryPart!;
   private shakeTween?: Tween;
-  private parts = getDescendantsOfType(this.instance, "BasePart");
+  private parts = this.instance.QueryDescendants<BasePart>("#BasePart");
   private originalPartInfo = new Map<BasePart, PartInfo>;
   private alive = false;
 
@@ -157,7 +156,7 @@ export class Structure extends CreatesDropsComponent<Attributes, StructureModel>
       part.CanQuery = on;
       part.CanTouch = on;
 
-      for (const fx of getDescendantsOfType(part, "ParticleEmitter", "Light"))
+      for (const fx of part.QueryDescendants<ParticleEmitter | Light>("#ParticleEmitter, #Light"))
         fx.Enabled = on;
     }
   }

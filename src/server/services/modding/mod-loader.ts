@@ -15,6 +15,7 @@ import type { ContentDescriptor, DisplayableDescriptor, ItemDescriptor, ModManif
 import type { ModContentService } from "./content";
 import type { ModRulesService } from "./rules";
 import { getRecipeYieldID } from "shared/utility/items";
+import { IDRegistry } from "shared/registry/id-registry";
 
 type ModList = readonly (ModRepo | [repo: ModRepo, branch: string])[];
 
@@ -40,8 +41,8 @@ export class ModLoaderService implements OnStart {
     const loadedPlayers = new Set<Player>;
     const loaded = new Signal<(player: Player) => void>;
     messaging.server.on(Message.ReadyForContent, player => {
-      loadedPlayers.add(player);
       loaded.Fire(player);
+      loadedPlayers.add(player);
     });
     for (const mod of modList) {
       const repo = typeIs(mod, "string") ? mod : mod[0];
@@ -51,11 +52,12 @@ export class ModLoaderService implements OnStart {
 
     // sync modded content for players
     const recipes = RecipeRegistry.getAll();
-    messaging.client.emit([...loadedPlayers], Message.SyncContent, recipes);
     loaded.Connect(player => {
       if (loadedPlayers.has(player)) return;
       messaging.client.emit(player, Message.SyncContent, recipes);
     });
+    messaging.client.emit([...loadedPlayers], Message.SyncContent, recipes);
+    IDRegistry.load();
     print(`Finished loading ${modList.size()} mod(s)!`);
   }
 

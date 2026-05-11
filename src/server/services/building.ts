@@ -1,6 +1,5 @@
 import { Service } from "@flamework/core";
 import { Workspace as World } from "@rbxts/services";
-import { getDescendantsOfType } from "@rbxts/instance-utility";
 import Signal from "@rbxts/lemon-signal";
 
 import type { OnPlayerAdd, OnPlayerRemove } from "server/hooks";
@@ -8,12 +7,13 @@ import { Message, messaging } from "shared/messaging";
 import { stopHacking } from "server/utility";
 import { isValidStructureDistance } from "shared/utility";
 import { StructureRegistry } from "shared/registry/structure-registry";
+import { RecipeRegistry } from "shared/registry/recipe-registry";
+import { IDRegistry } from "shared/registry/id-registry";
 import { STRUCTURE_OVERLAP_PARAMS } from "shared/constants";
+import type { StructureConfig } from "shared/structs/structure-config";
 import type { PlaceStructurePacket } from "shared/structs/packets";
 
 import type { InventoryService } from "./inventory";
-import { RecipeRegistry } from "shared/registry/recipe-registry";
-import { StructureConfig } from "shared/structs/structure-config";
 
 export interface PlayerStructureInfo {
   readonly player: Player;
@@ -50,12 +50,13 @@ export class BuildingService implements OnPlayerAdd, OnPlayerRemove {
     if (!recipe)
       return stopHacking(player, "recipe index does not exist");
 
-    if (recipe.yield !== id)
+    const structureID = IDRegistry.getID(id);
+    if (recipe.yield !== structureID)
       return stopHacking(player, "recipe yield does not match structure ID");
 
-    const structureTemplate = StructureRegistry.get<StructureModel>(id);
+    const structureTemplate = StructureRegistry.get<StructureModel>(structureID);
     if (!structureTemplate)
-      return stopHacking(player, "no structure with ID " + id);
+      return stopHacking(player, "no structure with ID " + structureID);
 
     const success = await this.inventory.transaction(player, {
       add: [],
@@ -79,7 +80,7 @@ export class BuildingService implements OnPlayerAdd, OnPlayerRemove {
 
     structure.Parent = stackable ? World.StackableStructures : World.PlacedStructures;
     this.placedStructures.get(player)!.add(structure);
-    this.structurePlaced.Fire({ player, id, model: structure });
+    this.structurePlaced.Fire({ player, id: structureID, model: structure });
   }
 
   private canPlaceStructure(structureTemplate: Model, cframe: CFrame): boolean {

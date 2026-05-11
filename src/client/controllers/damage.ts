@@ -5,6 +5,7 @@ import type { StructureConfig } from "shared/structs/structure-config";
 
 import type { AudioController } from "./audio";
 import type { ToolController } from "./tool";
+import { IDRegistry } from "shared/registry/id-registry";
 
 @Controller()
 export class DamageController {
@@ -19,9 +20,10 @@ export class DamageController {
 
     const isCreature = model.HasTag("CreatureSync");
     const toolID = this.tool.getID();
+    const idIndex = IDRegistry.getIndex(toolID);
     if (isCreature) {
       const id = model.GetAttribute<number>("ID")!;
-      messaging.server.emit(Message.DamageCreature, { id, toolID });
+      messaging.server.emit(Message.DamageCreature, { id, toolID: idIndex });
     } else {
       const isStructure = model.HasTag("Structure");
       if (isStructure) {
@@ -30,7 +32,7 @@ export class DamageController {
         this.audio.playRandomSpeed(config.hitSound, { parent: model });
       }
 
-      messaging.server.emit(Message.Damage, { humanoid, toolID });
+      messaging.server.emit(Message.Damage, { humanoid, toolID: idIndex });
     }
   }
 }

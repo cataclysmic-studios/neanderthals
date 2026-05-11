@@ -1,22 +1,21 @@
 import { Controller } from "@flamework/core";
 import { StarterGui } from "@rbxts/services";
 import { Trash } from "@rbxts/trash";
-import Signal from "@rbxts/lemon-signal";
+import { TweenBuilder } from "@rbxts/twin";
 
-import type { OnCharacterAdd } from "client/hooks";
 import { Message, messaging } from "shared/messaging";
 import { mainScreen } from "client/constants";
 import { getXPToLevelUp } from "shared/utility";
-import { calculateBagSpace, getMaxBagSpace } from "shared/utility/data";
-
-import type { ReplicaController } from "../replica";
-import type { CharacterController } from "../character";
-import type { HotbarUIController } from "./hotbar";
-import { ActionButtonsUIController } from "./action-buttons";
-import { InventoryUIController } from "./inventory";
-import { TribesUIController } from "./tribes";
 import { getDisplayName } from "shared/utility/items";
-import { TweenBuilder } from "@rbxts/twin";
+import { calculateBagSpace, getMaxBagSpace } from "shared/utility/data";
+import type { OnCharacterAdd } from "client/hooks";
+
+import type { ReplicaController } from "../replication/replica";
+import type { CharacterController } from "../character";
+import type { ActionButtonsUIController } from "./action-buttons";
+import type { HotbarUIController } from "./hotbar";
+import type { InventoryUIController } from "./inventory";
+import type { TribesUIController } from "./tribes";
 
 const { floor } = math;
 const { delay } = task;
@@ -61,7 +60,7 @@ export class MainUIController implements OnCharacterAdd {
       if (!on)
         return tryEnableMain();
 
-      this.toggle(false)
+      this.toggle(false);
       inventoryUI.toggle(false);
     });
     replica.updated.Connect(data => {
