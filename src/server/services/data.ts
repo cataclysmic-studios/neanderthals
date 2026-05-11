@@ -1,4 +1,4 @@
-import { Flamework, Service, type OnStart } from "@flamework/core";
+import { Service, type OnStart } from "@flamework/core";
 import { Players } from "@rbxts/services";
 import { createPlayerStore } from "@rbxts/lyra";
 import { createDiff } from "@rbxts/diff";
@@ -8,7 +8,6 @@ import Signal from "@rbxts/lemon-signal";
 import type { OnPlayerAdd, OnPlayerRemove } from "../hooks";
 import { Message, messaging } from "shared/messaging";
 import { INITIAL_DATA, type PlayerData } from "shared/structs/player-data";
-import { StripMeta } from "@rbxts/serio";
 
 const enum Scope {
   Proto = "PROTO10"
@@ -22,7 +21,7 @@ export class DataService implements OnStart, OnPlayerAdd, OnPlayerRemove {
   private readonly store = createPlayerStore({
     name: $nameof<PlayerData>() + "_" + Scope.Proto,
     template: INITIAL_DATA,
-    schema: Flamework.createGuard<Writable<PlayerData>>(),
+    schema: (v => true) as (v: unknown) => v is Writable<PlayerData>
   });
 
   public async onStart(): Promise<void> {
@@ -31,9 +30,7 @@ export class DataService implements OnStart, OnPlayerAdd, OnPlayerRemove {
   }
 
   public onPlayerAdd(player: Player): void {
-    const t = this.store as unknown as { _store: { _ctx: { schema: (value: unknown) => boolean } } };
-    t._store._ctx.schema = () => true; // poopy hack
-
+    const t = this.store as unknown as { _store: { _ctx: { schema: (value: unknown) => boolean; }; }; };
     this.store.loadAsync(player);
   }
 

@@ -1,4 +1,4 @@
-import type { u8, u12, u16, StripMeta } from "@rbxts/serio";
+import type { u8, u12, u16 } from "@rbxts/serio";
 
 import { ItemID } from "shared/item-id";
 import type { GameID } from "./packets";

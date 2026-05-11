@@ -102,8 +102,8 @@ export class HotbarUIController {
     }
   }
 
-  public selectButton(hotbarButton: HotbarButton): void
-  public selectButton(hotbarSlot: HotbarKeyName): void
+  public selectButton(hotbarButton: HotbarButton): void;
+  public selectButton(hotbarSlot: HotbarKeyName): void;
   public selectButton(hotbarButton: HotbarButton | HotbarKeyName): void {
     if (typeIs(hotbarButton, "string")) {
       hotbarButton = this.frame[hotbarButton];
@@ -141,8 +141,8 @@ export class HotbarUIController {
     itemNameLabel.TextTransparency = 0;
 
     itemLabelTrash.add(task.delay(1.5, () => {
-      itemLabelTrash.add(this.itemLabelFadeOut.build()).Play()
-      itemLabelTrash.add(this.itemLabelStrokeFadeOut.build()).Play()
+      itemLabelTrash.add(this.itemLabelFadeOut.build()).Play();
+      itemLabelTrash.add(this.itemLabelStrokeFadeOut.build()).Play();
     }));
   }
 
@@ -153,7 +153,7 @@ export class HotbarUIController {
 
   private removeViewportItem(hotbarButton: HotbarButton): void {
     hotbarButton.SetAttribute("CurrentItem", undefined);
-    removeViewportItem(hotbarButton.Viewport)
+    removeViewportItem(hotbarButton.Viewport);
   }
 
   private getNextEmptyHotbarButton(): Maybe<HotbarButton> {

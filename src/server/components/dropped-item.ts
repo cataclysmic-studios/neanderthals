@@ -58,14 +58,14 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
     let freezeThread: Maybe<thread> = trash.add(queueFreeze());
     trash.add(task.delay(DECAY_TIME, () => this.destroy()));
 
-    trash.add(messaging.server.on(Message.PickUpDrop, (player, dropID) => {
-      if (dropID !== this.dropID) return;
+    trash.add(messaging.server.on(Message.InteractWithDrop, (player, { id, eat }) => {
+      if (id !== this.dropID) return;
+      if (eat) {
+        if (!this.attributes.Consumable) return;
+        return this.consume(player);
+      }
+
       this.pickUp(player);
-    }));
-    trash.add(messaging.server.on(Message.EatDrop, (player, dropID) => {
-      if (dropID !== this.dropID) return;
-      if (!this.attributes.Consumable) return;
-      this.consume(player);
     }));
 
     trash.add(dragDetector.DragStart.Connect(() => {

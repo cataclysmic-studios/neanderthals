@@ -1,8 +1,11 @@
-import type { u8, u16, i16, f24, f32, Vector, List, Transform, String } from "@rbxts/serio";
+import type { u8, u12, u16, i16, f16, f24, f32, Vector, List, Transform, String, Packed } from "@rbxts/serio";
 
 export type GameID = String<u8>;
-export type DropID = u16;
-export type CreatureID = u16;
+export type DropID = u12;
+export type CreatureID = u12;
+
+type IntegralPosition = Vector<i16>;
+type DecimalTransform = Transform<f16>;
 
 export interface PlayAudioOptions {
   readonly parent?: Instance;
@@ -14,11 +17,16 @@ export interface AudioPacket extends PlayAudioOptions {
   readonly name: AudioName;
 }
 
+export interface DropInteractPacket {
+  readonly id: DropID;
+  readonly eat: boolean;
+}
+
 export interface PlaceStructurePacket {
   readonly id: GameID;
   readonly recipeIndex: u8;
-  readonly cframe: Transform<f24>;
-  readonly material: u16;
+  readonly cframe: DecimalTransform;
+  readonly material: u12;
 }
 
 export interface AddHotbarItemPacket {
@@ -28,11 +36,11 @@ export interface AddHotbarItemPacket {
 
 export interface DropItemPacket {
   readonly id: GameID;
-  readonly position: Vector<i16>;
+  readonly position: IntegralPosition;
 }
 
 interface BaseDamagePacket {
-  readonly hitPosition: Vector<i16>;
+  readonly hitPosition: IntegralPosition;
   readonly toolID: GameID;
 }
 
@@ -46,7 +54,7 @@ export interface CreatureDamagePacket extends BaseDamagePacket {
 
 export interface CreatureHealthChangePacket {
   readonly id: CreatureID;
-  readonly health: u16;
+  readonly health: u12;
   readonly attacker: Player;
 }
 
@@ -58,13 +66,13 @@ export interface ToolEquipReplicationPacket {
 export interface CreatureSpawnPacket {
   readonly name: CreatureName;
   readonly id: CreatureID;
-  readonly position: Vector<i16>;
+  readonly position: IntegralPosition;
   readonly health: u16;
 }
 
 export interface SyncedCreatureData {
   readonly id: CreatureID;
-  readonly cframe: Transform<f24>;
+  readonly cframe: DecimalTransform;
 }
 
-export type CreatureUpdatePacket = List<SyncedCreatureData, u16>;
+export type CreatureUpdatePacket = Packed<List<SyncedCreatureData, u12>>;

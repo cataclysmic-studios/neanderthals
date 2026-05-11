@@ -4,8 +4,6 @@ import { UserInputService, Workspace as World } from "@rbxts/services";
 import { $nameof } from "rbxts-transform-debug";
 import Signal from "@rbxts/lemon-signal";
 
-import { Message } from "shared/messaging";
-
 import DestroyableComponent from "shared/base-components/destroyable";
 
 @Component({
@@ -15,7 +13,7 @@ import DestroyableComponent from "shared/base-components/destroyable";
 export class DroppedItemPrompt extends DestroyableComponent<{}, BillboardGui> implements OnStart {
   public static canConsume = true;
 
-  public readonly consumed = this.trash.add(new Signal<(message: Message.PickUpDrop | Message.EatDrop) => void>);
+  public readonly consumed = this.trash.add(new Signal<(eat: boolean) => void>);
 
   public onStart(): void {
     this.trash.add(UserInputService.InputBegan.Connect(input => {
@@ -23,10 +21,10 @@ export class DroppedItemPrompt extends DestroyableComponent<{}, BillboardGui> im
 
       switch (input.KeyCode) {
         case Enum.KeyCode.F:
-          this.consume(Message.PickUpDrop);
+          this.consume(false);
           break;
         case Enum.KeyCode.E:
-          this.consume(Message.EatDrop);
+          this.consume(true);
           break;
       }
     }));
@@ -34,17 +32,17 @@ export class DroppedItemPrompt extends DestroyableComponent<{}, BillboardGui> im
       if (!this.instance.Enabled) return;
 
       if (UserInputService.IsKeyDown("F"))
-        this.consume(Message.PickUpDrop);
+        this.consume(false);
       else if (UserInputService.IsKeyDown("E"))
-        this.consume(Message.EatDrop);
+        this.consume(true);
     }));
   }
 
-  private consume(message: Message.PickUpDrop | Message.EatDrop): void {
+  private consume(eat: boolean): void {
     if (!DroppedItemPrompt.canConsume) return;
     DroppedItemPrompt.canConsume = false;
     task.delay(0.025, () => DroppedItemPrompt.canConsume = true);
 
-    this.consumed.Fire(message);
+    this.consumed.Fire(eat);
   }
 }

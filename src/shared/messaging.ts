@@ -14,7 +14,8 @@ import type {
   AddHotbarItemPacket,
   PlaceStructurePacket,
   AudioPacket,
-  GameID
+  GameID,
+  DropInteractPacket
 } from "./structs/packets";
 import type { PlayerData } from "./structs/player-data";
 import type { TribeColorName } from "./constants";
@@ -34,7 +35,7 @@ export const enum Message {
   InitializeData,
   DataUpdated,
   DropItem,
-  PickUpDrop,
+  InteractWithDrop,
   EatDrop,
   SpawnCreature,
   UpdateCreatures,
@@ -60,7 +61,7 @@ export const enum Message {
 
 export interface MessageData {
   [Message.Damage]: DamagePacket;
-  [Message.DamageCreature]: CreatureDamagePacket;
+  [Message.DamageCreature]: Packed<CreatureDamagePacket>;
   [Message.ShowDamageDisplay]: Humanoid;
   [Message.EquipTool]: HotbarKeyName;
   [Message.UnequipTool]: undefined;
@@ -70,16 +71,15 @@ export interface MessageData {
   [Message.InitializeData]: undefined;
   [Message.DataUpdated]: Packed<Diff<PlayerData>>;
   [Message.DropItem]: DropItemPacket;
-  [Message.PickUpDrop]: DropID;
-  [Message.EatDrop]: DropID;
-  [Message.SpawnCreature]: CreatureSpawnPacket;
-  [Message.CreatureHealthChange]: CreatureHealthChangePacket;
+  [Message.InteractWithDrop]: Packed<DropInteractPacket>;
+  [Message.SpawnCreature]: Packed<CreatureSpawnPacket>;
+  [Message.CreatureHealthChange]: Packed<CreatureHealthChangePacket>;
   [Message.UpdateCreatures]: CreatureUpdatePacket;
   [Message.Consume]: GameID;
   [Message.AddHotbarItem]: AddHotbarItemPacket;
   [Message.RemoveHotbarItem]: HotbarKeyName;
   [Message.Craft]: u8;
-  [Message.PlaceStructure]: PlaceStructurePacket;
+  [Message.PlaceStructure]: Packed<PlaceStructurePacket>;
   [Message.CreateTribe]: TribeColorName;
   [Message.TribeCreated]: Player;
   [Message.KickTribeMember]: Player;

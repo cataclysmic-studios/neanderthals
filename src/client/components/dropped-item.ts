@@ -60,13 +60,13 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
     promptUI.Adornee = instance;
     promptUI.Parent = instance;
 
-    const dropID = this.attributes.DropID;
+    const id = this.attributes.DropID;
     const prompt = this.prompt = this.components.addComponent<DroppedItemPrompt>(promptUI);
-    trash.add(prompt.consumed.Connect(async message => {
-      if (message === Message.EatDrop && !this.attributes.Consumable) return;
-      if (message === Message.PickUpDrop && !inventoryHasSpace(this.replica.data)) return;
+    trash.add(prompt.consumed.Connect(async eat => {
+      if (eat && !this.attributes.Consumable) return;
+      if (!eat && !inventoryHasSpace(this.replica.data)) return;
       await this.pickUpAnimation();
-      messaging.server.emit(message, dropID);
+      messaging.server.emit(Message.InteractWithDrop, { id, eat });
     }));
   }
 
@@ -116,7 +116,7 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
         .property("Value", characterPivot)
         .onCompleted(resolve)
         .play();
-    })
+    });
   }
 
   private toggleHover(on: boolean): void {
