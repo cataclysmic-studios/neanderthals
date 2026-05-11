@@ -36,6 +36,7 @@ export class ModRulesService {
   }
 
   private hasPermission(permission: Permissions): boolean {
-    return hasFlag(this.current.permissions, Permissions.All) || hasFlag(this.current.permissions, permission);
+    return hasFlag(this.current.permissions, Permissions.All)
+      || hasFlag(this.current.permissions, permission);
   }
 }

@@ -5,7 +5,7 @@ import { Message, messaging } from "shared/messaging";
 import { assets } from "shared/constants";
 import { mainScreen } from "client/constants";
 import { addViewportItem } from "client/utility";
-import { getDisplayName } from "shared/utility/items";
+import { getDisplayName, getRecipeYieldID } from "shared/utility/items";
 import { ItemRegistry } from "shared/registry/item-registry";
 import { StructureRegistry } from "shared/registry/structure-registry";
 import { RecipeRegistry } from "shared/registry/recipe-registry";
@@ -80,15 +80,16 @@ export class CraftingUIController {
 
   private createRecipeFrame(recipe: CraftingRecipe): Maybe<RecipeFrame> {
     const { level } = this.replica.data;
-    const { kind, yield: yieldItem, ingredients, requiredLevel } = recipe;
-    const yieldID = typeIs(yieldItem, "string") ? yieldItem : yieldItem[0];
-    const model = recipe.kind === RecipeKind.Structure
+    const { kind, ingredients, requiredLevel } = recipe;
+    const yieldID = getRecipeYieldID(recipe);
+    const model = kind === RecipeKind.Structure
       ? StructureRegistry.get(yieldID)
       : ItemRegistry.get(yieldID);
 
     const frame = assets.UI.CraftingRecipeFrame.Clone();
-    for (const ingredient of ingredients)
+    for (const ingredient of ingredients) {
       this.createIngredientFrame(frame.Ingredients, ingredient);
+    }
 
     updateLevelLock(frame, requiredLevel, level);
     addViewportItem(frame.Viewport, model);

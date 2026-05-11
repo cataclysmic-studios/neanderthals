@@ -6,6 +6,7 @@ import { RecipeRegistry } from "shared/registry/recipe-registry";
 import type { CraftingRecipe } from "shared/structs/crafting-recipe";
 
 import type { InventoryService } from "./inventory";
+import { getRecipeYieldCount, getRecipeYieldID } from "shared/utility/items";
 
 @Service()
 export class CraftingService {
@@ -21,17 +22,17 @@ export class CraftingService {
     });
   }
 
-  public async craft(player: Player, { yield: yieldItem, ingredients }: CraftingRecipe): Promise<boolean> {
+  public async craft(player: Player, recipe: CraftingRecipe): Promise<boolean> {
     const { inventory } = this;
-    const canCraft = ingredients.every(([id, count]) => inventory.has(player, id, count).await()[1] as boolean);
+    const canCraft = recipe.ingredients.every(([id, count]) => inventory.has(player, id, count).await()[1] as boolean);
     if (!canCraft)
       return false;
 
-    const yieldID = typeIs(yieldItem, "string") ? yieldItem : yieldItem[0];
-    const yieldCount = typeIs(yieldItem, "string") ? 1 : yieldItem[1];
+    const yieldID = getRecipeYieldID(recipe);
+    const yieldCount = getRecipeYieldCount(recipe);
     return await inventory.transaction(player, {
       add: [[yieldID, yieldCount]],
-      remove: ingredients
+      remove: recipe.ingredients
     });
   }
 }

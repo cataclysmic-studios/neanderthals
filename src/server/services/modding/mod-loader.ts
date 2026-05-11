@@ -14,6 +14,7 @@ import type { ContentDescriptor, DisplayableDescriptor, ItemDescriptor, ModManif
 
 import type { ModContentService } from "./content";
 import type { ModRulesService } from "./rules";
+import { getRecipeYieldID } from "shared/utility/items";
 
 type ModList = readonly (ModRepo | [repo: ModRepo, branch: string])[];
 
@@ -122,14 +123,9 @@ export class ModLoaderService implements OnStart {
   private registerRecipes(mod: Mod): void {
     if (!mod.manifest.recipes) return;
     for (const recipe of mod.manifest.recipes) {
-      const isCircular = recipe.ingredients.some(ingredient => {
-        return typeIs(recipe.yield, "string") ?
-          recipe.yield === ingredient[0] && 1 === ingredient[1]
-          : recipe.yield[0] === ingredient[0] && recipe.yield[1] === ingredient[1];
-      });
-
+      const isCircular = recipe.ingredients.some(([id]) => id === getRecipeYieldID(recipe));
       if (this.rules.current.noCircularRecipes && isCircular) {
-        warn("Recipe is circular and rules do not allow for circular recipes:", recipe);
+        warn("Recipe is circular and current mod rules do not allow for circular recipes:", recipe);
         continue;
       }
 

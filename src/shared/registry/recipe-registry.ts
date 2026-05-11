@@ -3,18 +3,12 @@ import { getInstanceAtPath } from "@rbxts/flamework-meta-utils";
 
 import { Registry } from "./registry";
 import { RecipeKind, type CraftingRecipe } from "shared/structs/crafting-recipe";
+import { getRecipeYieldCount, getRecipeYieldID } from "shared/utility/items";
 
 function recipeEquals(a: CraftingRecipe, b: CraftingRecipe): boolean {
-  let match = true;
-  if (typeIs(a.yield, "string")) {
-    match &&= a.yield === b.yield;
-  } else {
-    assert(!typeIs(b.yield, "string"));
-    match &&= a.yield[0] === b.yield[0];
-    match &&= a.yield[1] === b.yield[1];
-  }
-
-  return a.kind === b.kind && match;
+  return a.kind === b.kind
+    && getRecipeYieldID(a) === getRecipeYieldID(b)
+    && getRecipeYieldCount(a) === getRecipeYieldCount(b);
 }
 
 class RecipeRegistryClass extends Registry {
@@ -67,14 +61,6 @@ class RecipeRegistryClass extends Registry {
     return this.allRecipes.findIndex(r => recipeEquals(r, recipe));
   }
 
-  public getYieldCount(id: string): number {
-    const recipe = this.getStructure(id) ?? this.getItem(id);
-    if (recipe.kind === RecipeKind.Structure || typeIs(recipe.yield, "string"))
-      return 1;
-
-    return recipe.yield[1];
-  }
-
   public loadVanilla(): void {
     const recipes = getDescendantsOfType(getInstanceAtPath("src/shared/crafting-recipes")!, "ModuleScript")
       .sort((a, b) => a.Name < b.Name)
@@ -87,7 +73,7 @@ class RecipeRegistryClass extends Registry {
     if (recipe.kind === RecipeKind.Structure) {
       this.structureRecipes.set(recipe.yield, recipe);
     } else {
-      const id = typeIs(recipe.yield, "string") ? recipe.yield : recipe.yield[0];
+      const id = getRecipeYieldID(recipe);
       this.itemRecipes.set(id, recipe);
     }
   }
