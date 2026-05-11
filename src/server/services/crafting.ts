@@ -23,7 +23,7 @@ export class CraftingService {
 
   public async craft(player: Player, { yield: yieldItem, ingredients }: CraftingRecipe): Promise<boolean> {
     const { inventory } = this;
-    const canCraft = ingredients.every(([id, count]) => inventory.has(player, id, count).await()[0]);
+    const canCraft = ingredients.every(([id, count]) => inventory.has(player, id, count).await()[1] as boolean);
     if (!canCraft)
       return false;
 

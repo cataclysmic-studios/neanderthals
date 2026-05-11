@@ -36,7 +36,18 @@ class RecipeRegistryClass extends Registry {
   }
 
   public getSorted(): CraftingRecipe[] {
-    return this.allRecipes.sort((a, b) => (a.requiredLevel ?? 0) < (b.requiredLevel ?? 0));
+    return this.allRecipes
+      .sort((a, b) => {
+        const aLevel = a.requiredLevel ?? 0;
+        const bLevel = b.requiredLevel ?? 0;
+        if (aLevel !== bLevel) {
+          return aLevel < bLevel;
+        }
+
+        const aID = typeIs(a.yield, "string") ? a.yield : a.yield[0];
+        const bID = typeIs(b.yield, "string") ? b.yield : b.yield[0];
+        return aID < bID;
+      });
   }
 
   public get(index: number): Maybe<CraftingRecipe> {

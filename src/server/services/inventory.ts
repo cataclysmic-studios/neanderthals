@@ -117,8 +117,10 @@ export class InventoryService {
     if (EXCLUSIVE_IDS.has(id))
       return stopHacking(player, "the client checks for undroppable items before sending this message you dummy");
 
-    await this.removeItem(player, id);
-    dropItem(item, new CFrame(position));
+    await this.removeItem(player, id, 1, () => {
+      dropItem(item, new CFrame(position));
+      return true;
+    });
   }
 
   private addHotbarItem(data: DeepWritable<PlayerData>, id: string, slot: HotbarKeyName): boolean {
