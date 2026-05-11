@@ -17,6 +17,8 @@ export class CreaturePathfindingService implements OnFixed {
 
   public onFixed(): void {
     const creatures = this.components.getAllComponents<CreaturePathfinding>();
+    if (creatures.isEmpty()) return;
+
     const packet: CreatureUpdatePacket = [];
     for (const creature of creatures)
       packet.push({
@@ -24,6 +26,7 @@ export class CreaturePathfindingService implements OnFixed {
         cframe: creature.cframe
       });
 
+    if (packet.isEmpty()) return;
     messaging.client.emitAll(Message.UpdateCreatures, packet);
   }
 

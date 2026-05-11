@@ -1,5 +1,5 @@
-import { MessageEmitter } from "@rbxts/tether";
-import type { List, Packed, SerializerMetadata, u8 } from "@rbxts/serio";
+import { MessageEmitter, BuiltinMiddlewares } from "@rbxts/tether";
+import type { List, Packed, u8 } from "@rbxts/serio";
 import type { Diff } from "@rbxts/diff";
 
 import type {
@@ -22,6 +22,10 @@ import type { TribeColorName } from "./constants";
 import type { CraftingRecipe } from "./structs/crafting-recipe";
 
 export const messaging = MessageEmitter.create<MessageData>();
+messaging.middleware
+  .useServer(Message.CreateTribe, BuiltinMiddlewares.rateLimit(1))
+  .useSharedGlobal(BuiltinMiddlewares.debug())
+  .useSharedGlobal(BuiltinMiddlewares.maxPacketSize(512));
 
 export const enum Message {
   Damage,
