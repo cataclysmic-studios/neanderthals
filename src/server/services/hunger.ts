@@ -9,7 +9,7 @@ import { ItemRegistry } from "shared/registry/item-registry";
 import type { CharacterService } from "./character";
 import type { InventoryService } from "./inventory";
 
-const { clamp } = math;
+const { clamp, floor } = math;
 
 const HUNGER_TICK_INTERVAL = 4;
 
@@ -49,7 +49,9 @@ export class HungerService implements OnTick, OnPlayerRemove {
       for (const [player, hunger] of this.playerHunger) {
         const newHunger = clamp(hunger - 0.25, 0, 100);
         this.playerHunger.set(player, newHunger);
-        messaging.client.emit(player, Message.UpdateHunger, newHunger);
+        if (floor(newHunger) !== floor(newHunger)) {
+          messaging.client.emit(player, Message.UpdateHunger, newHunger);
+        }
 
         if (newHunger === 0) {
           const character = player.Character as CharacterModel;
