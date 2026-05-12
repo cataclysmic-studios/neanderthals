@@ -9,9 +9,9 @@ import { mainScreen } from "client/constants";
 import { recordDiff } from "shared/utility";
 import { getDisplayName, isItemStackable } from "shared/utility/items";
 import { addViewportItem } from "client/utility";
+import { getInitialData, PlayerData } from "shared/structs/player-data";
 import { IDRegistry } from "shared/registry/id-registry";
 import { ItemRegistry } from "shared/registry/item-registry";
-import { INITIAL_DATA } from "shared/structs/player-data";
 import { EXCLUSIVE_IDS } from "shared/item-id";
 
 import type { ReplicaController } from "../replication/replica";
@@ -34,7 +34,7 @@ export class InventoryUIController {
   private readonly frame: PlayerGui["Main"]["Inventory"];
   private readonly itemContainer: ScrollingFrame;
   private readonly buttonInfos = new Map<string, ItemFrameInfo>;
-  private lastInventory = INITIAL_DATA.inventory;
+  private lastInventory?: PlayerData["inventory"];
 
   public constructor(
     replica: ReplicaController,
@@ -46,18 +46,18 @@ export class InventoryUIController {
 
     input.onKeyDown(Enum.KeyCode.B, () => this.toggle());
     replica.updated.Connect(data => {
-      const last = this.lastInventory;
-      let changes = recordDiff(data.inventory, last);
-      for (const [id, count] of pairs(changes)) {
-        const lastCount = last.get(id) ?? 0;
+      const last = this.lastInventory ?? getInitialData().inventory;
+      let changes = recordDiff(data.inventory as unknown as Map<number, number>, last);
+      for (const [index, count] of pairs(changes)) {
+        const lastCount = last[index] ?? 0;
         const countDiff = count - lastCount;
-        changes[id] = countDiff;
+        changes[index] = countDiff;
       }
 
-      const deletionsRecord = recordDiff(last, data.inventory, false);
-      const deletions = new Set<string>;
-      for (const [id] of pairs(deletionsRecord))
-        deletions.add(id);
+      const deletionsRecord = recordDiff(last as unknown as Map<number, number>, data.inventory, false);
+      const deletions = new Set<number>;
+      for (const [index] of pairs(deletionsRecord))
+        deletions.add(index);
 
       this.update(changes, deletions);
       this.lastInventory = data.inventory;
@@ -74,9 +74,10 @@ export class InventoryUIController {
     return this.frame.Visible;
   }
 
-  private update(changes: Record<string, Maybe<number>>, deletions: Set<string>): void {
+  private update(changes: Record<string, Maybe<number>>, deletions: Set<number>): void {
     task.spawn(() => {
-      for (const id of deletions) {
+      for (const index of deletions) {
+        const id = IDRegistry.getID(index);
         if (!this.buttonInfos.has(id)) continue;
         this.deleteItemButton(id);
       }
@@ -84,7 +85,9 @@ export class InventoryUIController {
     for (const [id, diff] of pairs(changes)) {
       const info = this.buttonInfos.get(id);
       if (info && isItemStackable(id)) {
-        const currentCount = this.lastInventory.get(id) ?? 0;
+        const last = this.lastInventory ?? getInitialData().inventory;
+        const index = IDRegistry.getIndex(id);
+        const currentCount = last[index] ?? 0;
         info.button.Count.Text = tostring(currentCount + (diff as number));
         continue;
       }

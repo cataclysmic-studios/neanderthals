@@ -2,6 +2,7 @@ import { Service, type OnStart } from "@flamework/core";
 
 import { Message, messaging } from "shared/messaging";
 import { ItemRegistry } from "shared/registry/item-registry";
+import { IDRegistry } from "shared/registry/id-registry";
 
 import type { DataService } from "./data";
 
@@ -14,9 +15,10 @@ export class ToolReplicationService implements OnStart {
   public onStart(): void {
     messaging.server.on(Message.EquipTool, async (player, slot) => {
       const data = await this.data.get(player);
-      const toolID = data.hotbar[slot];
-      if (toolID === undefined) return;
+      const index = data.hotbar[slot];
+      if (index === undefined) return;
 
+      const toolID = IDRegistry.getID(index);
       const tool = ItemRegistry.get<ToolItem>(toolID);
       messaging.client.emitExcept(player, Message.ReplicateEquipTool, { player, tool });
     });

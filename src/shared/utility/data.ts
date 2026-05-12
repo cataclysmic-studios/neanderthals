@@ -1,4 +1,5 @@
 import { ItemRegistry } from "shared/registry/item-registry";
+import { IDRegistry } from "shared/registry/id-registry";
 import type { EquippedGear, PlayerData } from "shared/structs/player-data";
 
 export function inventoryHasSpace({ equippedGear, hotbar, inventory }: PlayerData | DeepWritable<PlayerData>) {
@@ -12,7 +13,7 @@ export function getMaxBagSpace(equippedGear: EquippedGear): number {
   if (!equippedGear.bag)
     return DEFAULT_BAG_SPACE;
 
-  const bagID = equippedGear.bag;
+  const bagID = IDRegistry.getID(equippedGear.bag);
   const bagItem = ItemRegistry.get(bagID);
   const attributeName = "BagSpaceGiven";
   const bagSpace = bagItem.GetAttribute<number>(attributeName);
@@ -25,7 +26,7 @@ export function getMaxBagSpace(equippedGear: EquippedGear): number {
 }
 
 export function calculateBagSpace(hotbar: PlayerData["hotbar"], inventory: PlayerData["inventory"]): number {
-  const items: [id: string, count: number][] = [];
+  const items: [idIndex: number, count: number][] = [];
   for (const [_, id] of pairs(hotbar)) {
     items.push([id, 1]);
   }
@@ -33,7 +34,8 @@ export function calculateBagSpace(hotbar: PlayerData["hotbar"], inventory: Playe
     items.push([id, count as number]);
   }
 
-  return items.reduce((sum, [id, count]) => {
+  return items.reduce((sum, [index, count]) => {
+    const id = IDRegistry.getID(index);
     const item = ItemRegistry.get(id);
     const attributeName = "BagSpace";
     const bagSpaceUsed = item.GetAttribute<number>("BagSpace");

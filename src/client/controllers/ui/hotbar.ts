@@ -99,7 +99,7 @@ export class HotbarUIController {
         this.removeViewportItem(button);
 
       if (id === undefined) continue;
-      this.addViewportItem(button, id);
+      this.addViewportItem(button, IDRegistry.getID(id));
     }
   }
 

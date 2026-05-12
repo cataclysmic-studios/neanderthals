@@ -26,3 +26,4 @@ export class IDRegistryClass extends Registry {
 }
 
 export const IDRegistry = new IDRegistryClass;
+IDRegistry.load();

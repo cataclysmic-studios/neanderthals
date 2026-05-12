@@ -3,7 +3,7 @@ import { applyDiff, type Diff } from "@rbxts/diff";
 import Signal from "@rbxts/lemon-signal";
 
 import { Message, messaging } from "shared/messaging";
-import { type PlayerData, INITIAL_DATA } from "shared/structs/player-data";
+import { getInitialData, type PlayerData } from "shared/structs/player-data";
 
 import type { ContentController } from "./content";
 
@@ -11,7 +11,7 @@ const { freeze } = table;
 
 @Controller()
 export class ReplicaController implements OnStart {
-  public readonly data = INITIAL_DATA;
+  public readonly data = getInitialData();
   public readonly updated = new Signal<(data: PlayerData) => void>;
 
   public constructor(

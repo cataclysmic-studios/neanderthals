@@ -7,10 +7,10 @@ import Signal from "@rbxts/lemon-signal";
 
 import type { OnPlayerAdd, OnPlayerRemove } from "../hooks";
 import { Message, messaging } from "shared/messaging";
-import { INITIAL_DATA, type PlayerData } from "shared/structs/player-data";
+import { getInitialData, type PlayerData } from "shared/structs/player-data";
 
 const enum Scope {
-  Proto = "PROTO10"
+  Proto = "PROTO11"
 }
 
 @Service()
@@ -20,7 +20,7 @@ export class DataService implements OnStart, OnPlayerAdd, OnPlayerRemove {
 
   private readonly store = createPlayerStore({
     name: $nameof<PlayerData>() + "_" + Scope.Proto,
-    template: INITIAL_DATA,
+    template: getInitialData(),
     schema: (v => true) as (v: unknown) => v is Writable<PlayerData>
   });
 
@@ -30,7 +30,6 @@ export class DataService implements OnStart, OnPlayerAdd, OnPlayerRemove {
   }
 
   public onPlayerAdd(player: Player): void {
-    const t = this.store as unknown as { _store: { _ctx: { schema: (value: unknown) => boolean; }; }; };
     this.store.loadAsync(player);
   }
 
@@ -66,7 +65,7 @@ export class DataService implements OnStart, OnPlayerAdd, OnPlayerRemove {
     const promises: Promise<boolean>[] = [];
     for (const player of Players.GetPlayers()) {
       promises.push(this.store.update(player, data => {
-        for (const [key, value] of pairs(INITIAL_DATA))
+        for (const [key, value] of pairs(getInitialData()))
           data[key] = value as never;
 
         return true;
