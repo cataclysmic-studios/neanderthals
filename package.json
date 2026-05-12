@@ -29,9 +29,9 @@
     "@rbxts/instance-utility": "^1.0.3",
     "@rbxts/lemon-signal": "^1.2.0",
     "@rbxts/lyra": "^0.6.1",
-    "@rbxts/serio": "^1.2.6",
+    "@rbxts/serio": "^1.2.7",
     "@rbxts/services": "^1.6.0",
-    "@rbxts/tether": "^1.4.20",
+    "@rbxts/tether": "^1.4.21",
     "@rbxts/trash": "^1.0.8",
     "@rbxts/twin": "^0.1.0",
     "@rbxts/viewportmodel": "^1.0.2"

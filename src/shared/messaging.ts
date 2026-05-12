@@ -21,8 +21,8 @@ import type { CraftingRecipe } from "./structs/crafting-recipe";
 export const messaging = MessageEmitter.create<MessageData>();
 messaging.middleware
   .useServer(Message.CreateTribe, BuiltinMiddlewares.rateLimit(1))
-  // .useSharedGlobal(BuiltinMiddlewares.debug())
-  .useSharedGlobal(BuiltinMiddlewares.maxPacketSize(1024));
+  .useSharedGlobal(BuiltinMiddlewares.debug())
+  .useSharedGlobal(BuiltinMiddlewares.maxPacketSize(768));
 
 export const enum Message {
   Damage,

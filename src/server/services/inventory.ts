@@ -45,20 +45,20 @@ export class InventoryService {
     return await this.data.update(player, data => {
       const { inventory } = data;
       for (let [id, count] of add) {
-        const itemCount = inventory[id];
+        const itemCount = inventory.get(id);
         if (itemCount !== undefined && EXCLUSIVE_IDS.has(id)) continue;
         if (!inventoryHasSpace(data))
           return false;
 
-        inventory[id] = itemCount !== undefined ? itemCount + count : count;
+        inventory.set(id, itemCount !== undefined ? itemCount + count : count);
       }
 
       for (let [id, count] of remove) {
-        const itemCount = inventory[id];
+        const itemCount = inventory.get(id);
         if (itemCount === undefined || EXCLUSIVE_IDS.has(id)) continue;
 
         const newCount = itemCount - count;
-        inventory[id] = newCount > 0 ? newCount : undefined;
+        inventory.set(id, newCount > 0 ? newCount : undefined);
       }
 
       return true;
@@ -67,15 +67,15 @@ export class InventoryService {
 
   public async addItem(player: Player, id: GameID, count = 1): Promise<boolean> {
     const data = await this.data.get(player);
-    if (id in data.inventory && EXCLUSIVE_IDS.has(id))
+    if (data.inventory.has(id) && EXCLUSIVE_IDS.has(id))
       return false;
 
     if (!inventoryHasSpace(data))
       return false;
 
-    return await this.data.update(player, data => {
-      const itemCount = data.inventory[id];
-      data.inventory[id] = itemCount !== undefined ? itemCount + count : count;
+    return await this.data.update(player, ({ inventory }) => {
+      const itemCount = inventory.get(id);
+      inventory.set(id, itemCount !== undefined ? itemCount + count : count);
       return true;
     });
   }
@@ -85,9 +85,9 @@ export class InventoryService {
       return false;
 
     return await this.data.update(player, data => {
-      const itemCount = data.inventory[id]!;
+      const itemCount = data.inventory.get(id)!;
       const newCount = itemCount - count;
-      data.inventory[id] = newCount > 0 ? newCount : undefined;
+      data.inventory.set(id, newCount > 0 ? newCount : undefined);
 
       if (after) {
         const success = after(data);
@@ -101,15 +101,15 @@ export class InventoryService {
 
   public async getItemCount(player: Player, id: GameID): Promise<number> {
     const { inventory } = await this.data.get(player);
-    return inventory[id] ?? 0;
+    return inventory.get(id) ?? 0;
   }
 
   public async has(player: Player, id: GameID, count?: number): Promise<boolean> {
     const { inventory } = await this.data.get(player);
 
-    const hasItem = id in inventory;
+    const hasItem = inventory.has(id);
     return count !== undefined
-      ? hasItem && inventory[id]! >= count
+      ? hasItem && inventory.get(id)! >= count
       : hasItem;
   }
 
@@ -136,7 +136,7 @@ export class InventoryService {
 
   private addHotbarItem(data: DeepWritable<PlayerData>, id: string, slot: HotbarKeyName): boolean {
     const { hotbar } = data;
-    data.inventory[id] = undefined;
+    data.inventory.delete(id);
 
     if (slot in data.hotbar) {
       const success = this.removeHotbarItem(data, slot);
@@ -153,7 +153,7 @@ export class InventoryService {
       return false;
 
     data.hotbar[slot] = undefined;
-    data.inventory[id] = 1;
+    data.inventory.set(id, 1);
     return true;
   }
 }

@@ -49,7 +49,7 @@ export class InventoryUIController {
       const last = this.lastInventory;
       let changes = recordDiff(data.inventory, last);
       for (const [id, count] of pairs(changes)) {
-        const lastCount = last[id] ?? 0;
+        const lastCount = last.get(id) ?? 0;
         const countDiff = count - lastCount;
         changes[id] = countDiff;
       }
@@ -84,7 +84,7 @@ export class InventoryUIController {
     for (const [id, diff] of pairs(changes)) {
       const info = this.buttonInfos.get(id);
       if (info && isItemStackable(id)) {
-        const currentCount = this.lastInventory[id] ?? 0;
+        const currentCount = this.lastInventory.get(id) ?? 0;
         info.button.Count.Text = tostring(currentCount + (diff as number));
         continue;
       }
