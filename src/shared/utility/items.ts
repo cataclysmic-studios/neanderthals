@@ -5,6 +5,10 @@ interface DisplayNameOptions {
   readonly uppercase?: boolean;
 }
 
+export function isVanillaID(id: string): boolean {
+  return id.sub(1, 13) === "neanderthals:";
+}
+
 export function getDisplayName(item: Instance, { uppercase = true }: DisplayNameOptions = {}): string {
   const name = item.GetAttribute<string>("DisplayName") ?? item.Name;
   return uppercase ? name.upper() : name;

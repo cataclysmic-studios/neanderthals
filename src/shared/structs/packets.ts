@@ -24,8 +24,7 @@ export interface DropInteractPacket {
 }
 
 export interface PlaceStructurePacket {
-  readonly id: IDIndex;
-  readonly recipeIndex: u8;
+  readonly recipeID: IDIndex;
   readonly cframe: DecimalTransform;
   readonly material: u12;
 }

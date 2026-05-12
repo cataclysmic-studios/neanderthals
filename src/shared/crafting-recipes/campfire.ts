@@ -3,6 +3,7 @@ import { StructureID } from "shared/structure-id";
 import { RecipeKind, type CraftingRecipe } from "shared/structs/crafting-recipe";
 
 export = {
+  id: "neanderthals:campfire_recipe",
   kind: RecipeKind.Structure,
   yield: StructureID.Campfire,
   ingredients: [

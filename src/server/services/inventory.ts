@@ -116,7 +116,7 @@ export class InventoryService {
   private async dropItem(player: Player, id: GameID): Promise<void> {
     const item = ItemRegistry.get(id);
     if (!item)
-      return stopHacking(player, "invalid item ID (no corresponding item) when dropping item");
+      return stopHacking(player, `invalid item ID "${id}" (no corresponding item) when dropping item`);
     if (EXCLUSIVE_IDS.has(id))
       return stopHacking(player, "unable to drop exclusive item");
 

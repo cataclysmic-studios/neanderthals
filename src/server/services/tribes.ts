@@ -112,10 +112,10 @@ export class TribesService {
     this.tribes.delete(tribe);
 
     const [totem] = World.PlacedStructures.QueryDescendants<Model>("Model[$TotemID]");
-    if (totem) {
-      this.removeTotem(totem);
-      totem.Destroy();
-    }
+    if (!totem) return;
+
+    this.removeTotem(totem);
+    totem.Destroy();
   }
 
   private create(chief: Player, colorName: TribeColorName): void {

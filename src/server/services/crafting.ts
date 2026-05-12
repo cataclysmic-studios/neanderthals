@@ -7,14 +7,15 @@ import type { CraftingRecipe } from "shared/structs/crafting-recipe";
 
 import type { InventoryService } from "./inventory";
 import { getRecipeYieldCount, getRecipeYieldID } from "shared/utility/items";
+import { IDRegistry } from "shared/registry/id-registry";
 
 @Service()
 export class CraftingService {
   public constructor(
     private readonly inventory: InventoryService
   ) {
-    messaging.server.on(Message.Craft, (player, recipeIndex) => {
-      const recipe = RecipeRegistry.get(recipeIndex);
+    messaging.server.on(Message.Craft, (player, id) => {
+      const recipe = RecipeRegistry.get(IDRegistry.getID(id));
       if (!recipe)
         return stopHacking(player, "recipe index does not exist");
 

@@ -7,6 +7,7 @@ export const enum RecipeKind {
 }
 
 interface BaseCraftingRecipe {
+  readonly id: SerializedGameID;
   readonly ingredients: [id: SerializedGameID, count: u8][];
   readonly requiredLevel?: u8;
 }

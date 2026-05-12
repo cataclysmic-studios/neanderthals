@@ -14,6 +14,7 @@ import type { StructureConfig } from "shared/structs/structure-config";
 import type { PlaceStructurePacket } from "shared/structs/packets";
 
 import type { InventoryService } from "./inventory";
+import { RecipeKind } from "shared/structs/crafting-recipe";
 
 export interface PlayerStructureInfo {
   readonly player: Player;
@@ -45,18 +46,18 @@ export class BuildingService implements OnPlayerAdd, OnPlayerRemove {
     this.placedStructures.delete(player);
   }
 
-  private async place(player: Player, { id, recipeIndex, cframe, material }: PlaceStructurePacket): Promise<void> {
-    const recipe = RecipeRegistry.get(recipeIndex);
+  private async place(player: Player, { recipeID, cframe, material }: PlaceStructurePacket): Promise<void> {
+    const recipe = RecipeRegistry.get(IDRegistry.getID(recipeID));
     if (!recipe)
       return stopHacking(player, "recipe index does not exist");
 
-    const structureID = IDRegistry.getID(id);
-    if (recipe.yield !== structureID)
-      return stopHacking(player, "recipe yield does not match structure ID");
+    if (recipe.kind !== RecipeKind.Structure)
+      return stopHacking(player, "recipe does not yield a structure");
 
-    const structureTemplate = StructureRegistry.get<StructureModel>(structureID);
+    const id = recipe.yield;
+    const structureTemplate = StructureRegistry.get<StructureModel>(id);
     if (!structureTemplate)
-      return stopHacking(player, "no structure with ID " + structureID);
+      return stopHacking(player, "no structure with ID " + id);
 
     const success = await this.inventory.transaction(player, {
       add: [],
@@ -80,7 +81,7 @@ export class BuildingService implements OnPlayerAdd, OnPlayerRemove {
 
     structure.Parent = stackable ? World.StackableStructures : World.PlacedStructures;
     this.placedStructures.get(player)!.add(structure);
-    this.structurePlaced.Fire({ player, id: structureID, model: structure });
+    this.structurePlaced.Fire({ player, id, model: structure });
   }
 
   private canPlaceStructure(structureTemplate: Model, cframe: CFrame): boolean {

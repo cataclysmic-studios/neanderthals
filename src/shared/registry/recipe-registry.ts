@@ -2,65 +2,49 @@ import { getInstanceAtPath } from "@rbxts/flamework-meta-utils";
 
 import { Registry } from "./registry";
 import { RecipeKind, type CraftingRecipe } from "shared/structs/crafting-recipe";
-import { getRecipeYieldCount, getRecipeYieldID } from "shared/utility/items";
-
-function recipeEquals(a: CraftingRecipe, b: CraftingRecipe): boolean {
-  return a.kind === b.kind
-    && getRecipeYieldID(a) === getRecipeYieldID(b)
-    && getRecipeYieldCount(a) === getRecipeYieldCount(b);
-}
+import { getRecipeYieldID, isVanillaID } from "shared/utility/items";
 
 class RecipeRegistryClass extends Registry {
   private readonly structureRecipes = new Map<string, CraftingRecipe>;
   private readonly itemRecipes = new Map<string, CraftingRecipe>;
-  private allRecipes: CraftingRecipe[] = [];
+  private allRecipes = new Map<string, CraftingRecipe>;
 
   public register(recipe: CraftingRecipe): void {
-    this.allRecipes.push(recipe);
+    this.allRecipes.set(recipe.id, recipe);
     this.categorize(recipe);
   }
 
   public sync(recipes: CraftingRecipe[]): void {
-    this.sort(recipes);
-    this.structureRecipes.clear();
-    this.itemRecipes.clear();
-    for (const recipe of recipes)
-      this.categorize(recipe);
-  }
-
-  public sort(recipes: CraftingRecipe[] = this.allRecipes): void {
-    this.allRecipes = recipes.sort((a, b) => {
-      const aLevel = a.requiredLevel ?? 0;
-      const bLevel = b.requiredLevel ?? 0;
-      if (aLevel !== bLevel) {
-        return aLevel < bLevel;
-      }
-
-      const aID = typeIs(a.yield, "string") ? a.yield : a.yield[0];
-      const bID = typeIs(b.yield, "string") ? b.yield : b.yield[0];
-      return aID < bID;
-    });
+    for (const recipe of recipes) {
+      this.register(recipe);
+    }
   }
 
   public getAll(): CraftingRecipe[] {
-    return this.allRecipes;
+    return [...this.allRecipes].map(([_, recipe]) => recipe);
   }
 
-  public get(index: number): Maybe<CraftingRecipe> {
-    return this.allRecipes[index];
+  public getAllIDs(): GameID[] {
+    return [...this.allRecipes].map(([_, recipe]) => recipe.id);
   }
 
+  public getModded(): CraftingRecipe[] {
+    return this.getAll().filter(recipe => !isVanillaID(recipe.id));
+  }
+
+  /** **Note:** `id` here is a recipe ID, not an item/structure ID */
+  public get(id: string): Maybe<CraftingRecipe> {
+    return this.allRecipes.get(id);
+  }
+
+  /** **Note:** `id` here is a structure ID, not recipe ID */
   public getStructure(id: string): Maybe<CraftingRecipe> {
     return this.structureRecipes.get(id);
   }
 
+  /** **Note:** `id` here is an item ID, not recipe ID */
   public getItem(id: string): CraftingRecipe {
     return this.itemRecipes.get(id)!;
-  }
-
-  // TODO: replace with recipe IDs
-  public getIndex(recipe: CraftingRecipe): number {
-    return this.allRecipes.findIndex(r => recipeEquals(r, recipe));
   }
 
   public load(): void {

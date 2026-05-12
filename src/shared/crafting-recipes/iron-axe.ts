@@ -3,6 +3,7 @@ import { IRON_REQUIRED_LEVEL } from "shared/constants";
 import { RecipeKind, type CraftingRecipe } from "shared/structs/crafting-recipe";
 
 export = {
+  id: "neanderthals:iron_axe_recipe",
   kind: RecipeKind.Item,
   yield: ItemID.IronAxe,
   requiredLevel: IRON_REQUIRED_LEVEL,

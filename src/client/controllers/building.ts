@@ -148,9 +148,8 @@ export class BuildingController implements OnTick {
       return warn("Failed to place structure: current structure model has no corresponding recipe");
 
     const cframe = this.hologram!.GetPivot();
-    const recipeIndex = RecipeRegistry.getIndex(recipe);
     this.leaveBuildMode();
-    messaging.server.emit(Message.PlaceStructure, { id: IDRegistry.getIndex(id), recipeIndex, cframe, material: material.Value });
+    messaging.server.emit(Message.PlaceStructure, { recipeID: IDRegistry.getIndex(recipe.id), cframe, material: material.Value });
   }
 
   private canPlaceHologram(material: Enum.Material): boolean {

@@ -7,10 +7,11 @@ import { assets } from "shared/constants";
 import { mainScreen } from "client/constants";
 import { addViewportItem } from "client/utility";
 import { getDisplayName, getRecipeYieldID } from "shared/utility/items";
+import { StructureID } from "shared/structure-id";
 import { ItemRegistry } from "shared/registry/item-registry";
 import { StructureRegistry } from "shared/registry/structure-registry";
 import { RecipeRegistry } from "shared/registry/recipe-registry";
-import { StructureID } from "shared/structure-id";
+import { IDRegistry } from "shared/registry/id-registry";
 import { RecipeKind, type CraftingRecipe } from "shared/structs/crafting-recipe";
 
 import type { ReplicaController } from "../replication/replica";
@@ -68,7 +69,20 @@ export class CraftingUIController {
       frame.Destroy();
     }
 
-    for (const recipe of RecipeRegistry.getAll()) {
+    const recipes = RecipeRegistry.getAll()
+      .sort((a, b) => {
+        const aLevel = a.requiredLevel ?? 0;
+        const bLevel = b.requiredLevel ?? 0;
+        if (aLevel !== bLevel) {
+          return aLevel < bLevel;
+        }
+
+        const aID = getRecipeYieldID(a);
+        const bID = getRecipeYieldID(b);
+        return aID < bID;
+      });
+
+    for (const recipe of recipes) {
       if (recipe.yield === StructureID.TribeTotem) continue; // dont show totem recipe
 
       const frame = this.createRecipeFrame(recipe);
@@ -101,7 +115,7 @@ export class CraftingUIController {
     craftButton.MouseButton1Click.Connect(() => {
       if (!this.canCraft(ingredients)) return;
       if (kind === RecipeKind.Item)
-        messaging.server.emit(Message.Craft, RecipeRegistry.getIndex(recipe));
+        messaging.server.emit(Message.Craft, IDRegistry.getIndex(recipe.id));
       else if (kind === RecipeKind.Structure)
         this.building.enterBuildMode(model as StructureModel);
     });

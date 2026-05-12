@@ -1,5 +1,5 @@
 import { MessageEmitter, BuiltinMiddlewares } from "@rbxts/tether";
-import type { List, Packed, u16, u8 } from "@rbxts/serio";
+import type { List, Packed, u8, u12, u16 } from "@rbxts/serio";
 import type { Diff } from "@rbxts/diff";
 
 import type {
@@ -12,8 +12,7 @@ import type {
   AddHotbarItemPacket,
   PlaceStructurePacket,
   AudioPacket,
-  DropInteractPacket,
-  IDIndex
+  DropInteractPacket
 } from "./structs/packets";
 import type { TribeColorName } from "./constants";
 import type { PlayerData } from "./structs/player-data";
@@ -60,6 +59,8 @@ export const enum Message {
   ReadyForContent
 }
 
+type UnpackedIDIndex = u16;
+
 export interface MessageData {
   [Message.Damage]: Packed<DamagePacket>;
   [Message.DamageCreature]: Packed<CreatureDamagePacket>;
@@ -71,15 +72,15 @@ export interface MessageData {
   [Message.UpdateHunger]: u8;
   [Message.InitializeData]: undefined;
   [Message.DataUpdated]: Packed<Diff<PlayerData>>;
-  [Message.DropItem]: u16; // would use IDIndex, but no packing
+  [Message.DropItem]: UnpackedIDIndex;
   [Message.InteractWithDrop]: Packed<DropInteractPacket>;
   [Message.SpawnCreature]: Packed<CreatureSpawnPacket>;
   [Message.UpdateCreatures]: CreatureUpdatePacket;
   [Message.CreatureHealthChange]: Packed<CreatureHealthChangePacket>;
-  [Message.Consume]: u16; // would use IDIndex, but no packing
+  [Message.Consume]: UnpackedIDIndex;
   [Message.AddHotbarItem]: Packed<AddHotbarItemPacket>;
   [Message.RemoveHotbarItem]: HotbarKeyName;
-  [Message.Craft]: u8;
+  [Message.Craft]: UnpackedIDIndex;
   [Message.PlaceStructure]: Packed<PlaceStructurePacket>;
   [Message.CreateTribe]: TribeColorName;
   [Message.TribeCreated]: Player;
@@ -91,6 +92,6 @@ export interface MessageData {
   [Message.TribeTotemExists]: boolean;
   [Message.PlayAudio]: Packed<AudioPacket>;
   [Message.ReplicateAudio]: Packed<AudioPacket>;
-  [Message.SyncContent]: Packed<List<CraftingRecipe, u8>>;
+  [Message.SyncContent]: Packed<List<CraftingRecipe, u12>>;
   [Message.ReadyForContent]: undefined;
 }

@@ -33,7 +33,7 @@ export class HungerService implements OnTick, OnPlayerRemove {
       const id = IDRegistry.getID(index);
       const item = ItemRegistry.get(id);
       if (!item)
-        return stopHacking(player, "invalid item ID (no corresponding item) when consuming item");
+        return stopHacking(player, `invalid item ID "${id}" (no corresponding item) when consuming item`);
 
       if (!await inventory.has(player, id))
         return stopHacking(player, "attempt to consume item not in inventory");

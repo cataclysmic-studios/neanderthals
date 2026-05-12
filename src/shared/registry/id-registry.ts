@@ -1,6 +1,7 @@
 import { Registry } from "./registry";
 import { ItemRegistry } from "./item-registry";
 import { StructureRegistry } from "./structure-registry";
+import { RecipeRegistry } from "./recipe-registry";
 
 export class IDRegistryClass extends Registry {
   private ids: GameID[] = [];
@@ -18,9 +19,9 @@ export class IDRegistryClass extends Registry {
   public load(): void {
     const items = ItemRegistry.getAllIDs();
     const structures = StructureRegistry.getAllIDs();
-    // const recipes = RecipeRegistry.getAll();
+    const recipes = RecipeRegistry.getAllIDs();
 
-    this.ids = [...items, ...structures].sort();
+    this.ids = [...items, ...structures, ...recipes].sort();
   }
 }
 

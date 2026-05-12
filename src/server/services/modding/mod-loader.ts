@@ -51,12 +51,12 @@ export class ModLoaderService implements OnStart {
     }
 
     // sync modded content for players
-    const recipes = RecipeRegistry.getAll();
+    const moddedRecipes = RecipeRegistry.getModded();
     loaded.Connect(player => {
       if (loadedPlayers.has(player)) return;
-      messaging.client.emit(player, Message.SyncContent, recipes);
+      messaging.client.emit(player, Message.SyncContent, moddedRecipes);
     });
-    messaging.client.emit([...loadedPlayers], Message.SyncContent, recipes);
+    messaging.client.emit([...loadedPlayers], Message.SyncContent, moddedRecipes);
     IDRegistry.load();
     print(`Finished loading ${modList.size()} mod(s)!`);
   }
@@ -134,7 +134,6 @@ export class ModLoaderService implements OnStart {
       RecipeRegistry.register(recipe);
       print("Registered recipe:", recipe);
     }
-    RecipeRegistry.sort();
   }
 
   private registerItem(model: Model, descriptor: ItemDescriptor): void {
