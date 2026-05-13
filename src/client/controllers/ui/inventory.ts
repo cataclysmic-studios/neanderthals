@@ -124,6 +124,7 @@ export class InventoryUIController {
     trash.add(button.MouseButton2Click.Connect(() => {
       if (!canDrop) return;
       messaging.server.emit(Message.DropItem, idIndex);
+      this.disableHoverInfo();
     }));
     trash.add(button.MouseEnter.Connect((x, y) => {
       this.updateHoverInfo(x, y);
