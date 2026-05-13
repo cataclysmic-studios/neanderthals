@@ -49,7 +49,7 @@ export class InventoryUIController {
       const last = this.lastInventory ?? getInitialData().inventory;
       let changes = recordDiff(data.inventory as unknown as Map<number, number>, last);
       for (const [index, count] of pairs(changes)) {
-        const lastCount = last[index] ?? 0;
+        const lastCount = last.get(index) ?? 0;
         const countDiff = count - lastCount;
         changes[index] = countDiff;
       }
@@ -74,7 +74,7 @@ export class InventoryUIController {
     return this.frame.Visible;
   }
 
-  private update(changes: Record<string, Maybe<number>>, deletions: Set<number>): void {
+  private update(changes: Record<number, Maybe<number>>, deletions: Set<number>): void {
     task.spawn(() => {
       for (const index of deletions) {
         const id = IDRegistry.getID(index);
@@ -82,17 +82,17 @@ export class InventoryUIController {
         this.deleteItemButton(id);
       }
     });
-    for (const [id, diff] of pairs(changes)) {
+    for (const [index, diff] of pairs(changes)) {
+      const id = IDRegistry.getID(index);
       const info = this.buttonInfos.get(id);
-      if (info && isItemStackable(id)) {
-        const last = this.lastInventory ?? getInitialData().inventory;
-        const index = IDRegistry.getIndex(id);
-        const currentCount = last[index] ?? 0;
-        info.button.Count.Text = tostring(currentCount + (diff as number));
+      if (!info || !isItemStackable(id)) {
+        this.createItemButton(id, diff as number);
         continue;
       }
 
-      this.createItemButton(id, diff as number);
+      const last = this.lastInventory ?? getInitialData().inventory;
+      const currentCount = last.get(index) ?? 0;
+      info.button.Count.Text = tostring(currentCount + (diff as number));
     }
   }
 

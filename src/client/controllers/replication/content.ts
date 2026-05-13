@@ -16,8 +16,6 @@ export class ContentController implements OnStart {
   public onStart(): void {
     messaging.client.on(Message.SyncContent, recipes => {
       RecipeRegistry.sync(recipes);
-      ItemRegistry.load();
-      StructureRegistry.load();
       IDRegistry.load();
       this.isSynced = true;
       this.synced.Fire();

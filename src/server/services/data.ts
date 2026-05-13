@@ -1,16 +1,38 @@
-import { Service, type OnStart } from "@flamework/core";
+import { Modding, Service, type OnStart } from "@flamework/core";
 import { Players } from "@rbxts/services";
 import { createPlayerStore } from "@rbxts/lyra";
 import { createDiff } from "@rbxts/diff";
 import { $nameof } from "rbxts-transform-debug";
 import Signal from "@rbxts/lemon-signal";
 
-import type { OnPlayerAdd, OnPlayerRemove } from "../hooks";
 import { Message, messaging } from "shared/messaging";
 import { getInitialData, type PlayerData } from "shared/structs/player-data";
+import type { OnPlayerAdd, OnPlayerRemove } from "../hooks";
 
 const enum Scope {
-  Proto = "PROTO11"
+  Proto = "PROTO13"
+}
+
+declare function pairs<K extends string | number, V>(
+  object: Readonly<Record<K, V>>,
+): IterableFunction<LuaTuple<[Exclude<K, undefined>, Exclude<V, undefined>]>>;
+
+export function fixNumericKeys<T extends {}>(data: T): T {
+  if (!typeIs(data, "table"))
+    return data;
+
+  const result = {} as T;
+  for (const [key, value] of pairs(data)) {
+    const newValue = fixNumericKeys(value);
+    if (typeIs(key, "string") && tonumber(key) !== undefined) {
+      result[tonumber(key) as never] = newValue;
+      continue;
+    }
+
+    result[key] = newValue;
+  }
+
+  return result;
 }
 
 @Service()
@@ -21,7 +43,13 @@ export class DataService implements OnStart, OnPlayerAdd, OnPlayerRemove {
   private readonly store = createPlayerStore({
     name: $nameof<PlayerData>() + "_" + Scope.Proto,
     template: getInitialData(),
-    schema: (v => true) as (v: unknown) => v is Writable<PlayerData>
+    schema: (v => true) as (v: unknown) => v is Writable<PlayerData>,
+    migrationSteps: [
+      {
+        name: "fix_numeric_keys",
+        apply: fixNumericKeys
+      }
+    ]
   });
 
   public async onStart(): Promise<void> {
@@ -39,20 +67,21 @@ export class DataService implements OnStart, OnPlayerAdd, OnPlayerRemove {
 
   /** @hidden */
   public onPlayerLoad(player: Player): void {
-    const data = this.store.get(player).expect() as Writable<PlayerData>;
-    player.SetAttribute("IsDataLoaded", true);
+    const data = this.get(player).expect() as Writable<PlayerData>;
+    print(data);
     this.loaded.Fire(player, data);
-    const diff = createDiff({} as never, data);
+    const diff = createDiff(getInitialData(), data);
     messaging.client.emit(player, Message.DataUpdated, diff);
   }
 
   public async get(player: Player): Promise<PlayerData> {
-    return await this.store.get(player);
+    return fixNumericKeys(await this.store.get(player));
   }
 
   public async update(player: Player, transform: (data: DeepWritable<PlayerData>) => boolean): Promise<boolean> {
     const original = await this.get(player);
     return await this.store.update(player, data => {
+      data.inventory = fixNumericKeys(data.inventory);
       const success = transform(data);
       if (success)
         task.spawn(() => this.sendUpdate(player, original, data));

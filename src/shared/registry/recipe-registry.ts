@@ -67,4 +67,3 @@ class RecipeRegistryClass extends Registry {
 }
 
 export const RecipeRegistry = new RecipeRegistryClass;
-RecipeRegistry.load();

@@ -12,4 +12,3 @@ class StructureRegistryClass extends ContentRegistry {
 }
 
 export const StructureRegistry = new StructureRegistryClass;
-StructureRegistry.load();

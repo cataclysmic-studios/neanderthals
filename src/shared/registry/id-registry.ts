@@ -17,6 +17,9 @@ export class IDRegistryClass extends Registry {
   }
 
   public load(): void {
+    ItemRegistry.load();
+    StructureRegistry.load();
+    RecipeRegistry.load();
     const items = ItemRegistry.getAllIDs();
     const structures = StructureRegistry.getAllIDs();
     const recipes = RecipeRegistry.getAllIDs();

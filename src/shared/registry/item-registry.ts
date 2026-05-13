@@ -12,4 +12,3 @@ class ItemRegistryClass extends ContentRegistry {
 }
 
 export const ItemRegistry = new ItemRegistryClass;
-ItemRegistry.load();

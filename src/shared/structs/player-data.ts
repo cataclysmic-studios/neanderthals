@@ -1,4 +1,4 @@
-import type { u8, u12, u16, List } from "@rbxts/serio";
+import type { u8, u12, u16, HashMap } from "@rbxts/serio";
 
 import { ItemID } from "shared/item-id";
 import { IDRegistry } from "shared/registry/id-registry";
@@ -17,7 +17,7 @@ export interface EquippedGear {
 // maybe some expiration or way to delete old data
 export interface PlayerData {
   readonly hotbar: Partial<Record<HotbarKeyName, IDIndex>>;
-  readonly inventory: List<Maybe<u12>, u8>;
+  readonly inventory: HashMap<IDIndex, u12, u8>;
   readonly equippedGear: EquippedGear;
   readonly level: u8;
   readonly xp: u16;
@@ -26,7 +26,7 @@ export interface PlayerData {
 export function getInitialData(): PlayerData {
   return {
     hotbar: { One: IDRegistry.getIndex(ItemID.Rock), },
-    inventory: [],
+    inventory: new Map,
     equippedGear: {},
     xp: 0,
     level: 1
