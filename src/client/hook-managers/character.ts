@@ -15,6 +15,7 @@ export class CharacterController implements OnStart {
 
     const player = Players.LocalPlayer;
     player.CharacterAdded.Connect(character => {
+      character.WaitForChild("Humanoid");
       for (const obj of addListeners)
         task.spawn(() => obj.onCharacterAdd(character as never));
     });

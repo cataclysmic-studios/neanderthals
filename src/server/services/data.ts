@@ -68,7 +68,6 @@ export class DataService implements OnStart, OnPlayerAdd, OnPlayerRemove {
   /** @hidden */
   public onPlayerLoad(player: Player): void {
     const data = this.get(player).expect() as Writable<PlayerData>;
-    print(data);
     this.loaded.Fire(player, data);
     const diff = createDiff(getInitialData(), data);
     messaging.client.emit(player, Message.DataUpdated, diff);

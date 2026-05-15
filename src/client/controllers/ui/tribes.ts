@@ -1,7 +1,7 @@
 import { Controller } from "@flamework/core";
 import { Players, Teams } from "@rbxts/services";
 import { Trash } from "@rbxts/trash";
-import { atom, subscribe } from "@rbxts/charm";
+import { subscribe } from "@rbxts/charm";
 import Signal from "@rbxts/lemon-signal";
 
 import { Message, messaging } from "shared/messaging";
@@ -20,7 +20,9 @@ export class TribesUIController {
   public readonly toggled = new Signal<(on: boolean) => void>;
 
   private readonly frame = mainScreen.Tribes;
-  private readonly defaultButtonColor = this.frame.NoTribe.Create.BackgroundColor3;
+  private readonly tribeFrame = this.frame.Tribe;
+  private readonly noTribeFrame = this.frame.NoTribe;
+  private readonly defaultButtonColor = this.noTribeFrame.Create.BackgroundColor3;
   private readonly visibleTrash = new Trash;
 
   public constructor(
@@ -29,8 +31,7 @@ export class TribesUIController {
     private readonly tribes: TribesController,
     private readonly building: BuildingController
   ) {
-    const { visibleTrash, frame } = this;
-    const tribeFrame = frame.Tribe;
+    const { visibleTrash, frame, tribeFrame, noTribeFrame } = this;
     input.onKeyDown(Enum.KeyCode.T, () => this.toggle());
     subscribe(tribes.tribeTeam, () => this.update());
     subscribe(tribes.totemExists, exists =>
@@ -56,68 +57,66 @@ export class TribesUIController {
       if (tribeFrame.Visible) return;
       visibilityUpdate();
     });
-    frame.NoTribe.GetPropertyChangedSignal("Visible").Connect(() => {
-      if (frame.NoTribe.Visible) return;
+    noTribeFrame.GetPropertyChangedSignal("Visible").Connect(() => {
+      if (noTribeFrame.Visible) return;
       visibilityUpdate();
     });
 
     this.update();
-    character.died.Connect(() => this.update());
+    // character.died.Connect(() => this.update());
   }
 
   private update(chief?: Player): void {
     const tribeTeam = this.tribes.tribeTeam();
     if (tribeTeam === Teams.NoTribe) {
-      this.handleNoTribe();
+      this.renderNoTribe();
     } else {
-      this.handleTribe(tribeTeam, chief);
+      this.renderTribe(tribeTeam, chief);
     }
   }
 
-  private async handleTribe(tribeTeam: Team, chief?: Player): Promise<void> {
-    chief ??= await this.tribes.getChief();
+  private async renderTribe(tribeTeam: Team, chief?: Player): Promise<void> {
+    const { tribes, visibleTrash, tribeFrame } = this;
+    chief ??= await tribes.getChief();
     if (!chief) return;
-    this.frame.NoTribe.Visible = false;
+    this.noTribeFrame.Visible = false;
 
-    const { visibleTrash } = this;
     const isChief = player === chief;
-    const tribe = this.frame.Tribe;
-    tribe.Visible = true;
-    tribe.TribeName.TextColor3 = tribeTeam.TeamColor.Color;
-    tribe.TribeName.Text = tribeTeam.Name + " Tribe";
-    tribe.ChiefName.Text = ("CHIEF " + chief.Name).upper();
+    tribeFrame.Visible = true;
+    tribeFrame.TribeName.TextColor3 = tribeTeam.TeamColor.Color;
+    tribeFrame.TribeName.Text = tribeTeam.Name + " Tribe";
+    tribeFrame.ChiefName.Text = ("CHIEF " + chief.Name).upper();
 
     const is4K = mainScreen.AbsoluteSize.X >= 3840 - 1;
     const size = Enum.ThumbnailSize[is4K ? "Size352x352" : "Size150x150"];
     const [image, success] = Players.GetUserThumbnailAsync(chief.UserId, Enum.ThumbnailType.AvatarBust, size);
     if (success) {
-      tribe.ChiefAvatar.Image = image;
+      tribeFrame.ChiefAvatar.Image = image;
     }
 
-    const { tribes } = this;
     const membersTrash = visibleTrash.add(new Trash);
     const updateMembers = (members: Player[]) => {
       membersTrash.purge();
       for (const member of members) {
-        const memberFrame = visibleTrash.add(assets.UI.TribeMember.Clone());
+        const memberFrame = membersTrash.add(assets.UI.TribeMember.Clone());
         memberFrame.PlayerName.Text = member.Name;
-        memberFrame.Parent = tribe.Members;
+        memberFrame.Parent = tribeFrame.Members;
 
         if (!isChief) continue;
-        memberFrame.Kick.MouseButton1Click.Once(async () =>
+        memberFrame.Kick.MouseButton1Click.Once(() =>
           messaging.server.emit(Message.KickTribeMember, member)
         );
       }
-    }
+    };
 
     updateMembers(tribes.tribeMembers());
     visibleTrash.add(subscribe(tribes.tribeMembers, updateMembers));
 
-    const roleFrame = tribe[isChief ? "Chief" : "Member"];
+    const roleFrame = tribeFrame[isChief ? "Chief" : "Member"];
     roleFrame.Visible = true;
 
     if (isChief) {
-      const chiefFrame = roleFrame as typeof tribe.Chief;
+      const chiefFrame = roleFrame as typeof tribeFrame.Chief;
       visibleTrash.add(chiefFrame.Ally.MouseButton1Click.Connect(() => {
 
       }));
@@ -125,7 +124,7 @@ export class TribesUIController {
 
       }));
       visibleTrash.add(chiefFrame.PlaceTotem.MouseButton1Click.Connect(() => {
-        if (this.tribes.totemExists()) return;
+        if (tribes.totemExists()) return;
         this.frame.Visible = false;
         this.building.enterBuildMode(assets.Structures.TribeTotem);
       }));
@@ -136,34 +135,32 @@ export class TribesUIController {
     ));
   }
 
-  private handleNoTribe(): void {
-    const { visibleTrash } = this;
-    this.frame.Tribe.Visible = false;
+  private renderNoTribe(): void {
+    const { visibleTrash, noTribeFrame } = this;
+    this.tribeFrame.Visible = false;
 
-    const noTribe = this.frame.NoTribe;
-    noTribe.Visible = true;
+    const createButton = noTribeFrame.Create;
+    noTribeFrame.Visible = true;
+    createButton.BackgroundColor3 = GRAYED_BUTTON_COLOR;
 
-    const selectedColor = atom<Maybe<BrickColor>>(undefined);
-    noTribe.Create.BackgroundColor3 = GRAYED_BUTTON_COLOR;
-    visibleTrash.add(subscribe(selectedColor, color =>
-      noTribe.Create.BackgroundColor3 = color !== undefined ? this.defaultButtonColor : GRAYED_BUTTON_COLOR
-    ));
-
-    visibleTrash.add(noTribe.Create.MouseButton1Click.Connect(() => {
-      const color = selectedColor();
-      if (!color) return;
-
-      messaging.server.emit(Message.CreateTribe, color.Name as never);
-      noTribe.Visible = false;
-    }));
-
+    let selectedColor: Maybe<BrickColor>;
     for (const color of TRIBE_COLORS) {
       const button = visibleTrash.add(assets.UI.ColorButton.Clone());
       button.Name = color.Name;
       button.BackgroundColor3 = color.Color;
-      button.Parent = noTribe.Colors;
-      button.MouseButton1Click.Connect(() => selectedColor(color));
+      button.Parent = noTribeFrame.Colors;
+      button.MouseButton1Click.Connect(() => {
+        selectedColor = color;
+        createButton.BackgroundColor3 = color !== undefined ? this.defaultButtonColor : GRAYED_BUTTON_COLOR;
+      });
     }
+
+    visibleTrash.add(createButton.MouseButton1Click.Connect(() => {
+      if (!selectedColor) return;
+
+      messaging.server.emit(Message.CreateTribe, selectedColor.Name as never);
+      noTribeFrame.Visible = false;
+    }));
   }
 
   public toggle(on = !this.frame.Visible): void {

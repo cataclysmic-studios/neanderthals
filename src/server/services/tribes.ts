@@ -90,10 +90,10 @@ export class TribesService {
     const tribe = this.getTribeBy("chief", chief);
     if (!tribe) return;
 
-    player.Team = tribe.team;
+    const { trash, team } = tribe;
+    player.Team = team;
     tribe.members.add(player);
-    tribe.trash.add(() => this.leave(player, tribe));
-
+    trash.add(() => this.leave(player, tribe));
     this.registerTribePlayer(tribe, player);
   }
 
@@ -111,7 +111,8 @@ export class TribesService {
     tribe.trash.destroy();
     this.tribes.delete(tribe);
 
-    const [totem] = World.PlacedStructures.QueryDescendants<Model>("Model[$TotemID]");
+    if (tribe.totemID === undefined) return;
+    const [totem] = World.PlacedStructures.QueryDescendants<Model>(`Model[$TotemID = ${tribe.totemID}]`);
     if (!totem) return;
 
     this.removeTotem(totem);
@@ -150,6 +151,7 @@ export class TribesService {
   }
 
   private registerTribePlayer(tribe: Tribe, player: Player): void {
+    tribe.trash.add(player.CharacterAdded.Connect(() => this.updateTribeColors(player, tribe.team.TeamColor)));
     messaging.client.emit(player, Message.TribeTotemExists, hasTotem(tribe));
     this.updateTribeColors(player, tribe.team.TeamColor);
   }
