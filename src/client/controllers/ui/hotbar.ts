@@ -15,6 +15,7 @@ import type { CharacterController } from "../character";
 import type { InputController } from "../input";
 import type { ToolController } from "../tool";
 import { IDRegistry } from "shared/registry/id-registry";
+import { HOTBAR_SLOTS } from "shared/constants";
 
 const WHITE = new Color3(1, 1, 1);
 const DEFAULT_VIEWPORT_COLOR = Color3.fromRGB(30, 30, 30);
@@ -80,25 +81,24 @@ export class HotbarUIController {
 
     slot ??= button.Name as never;
     messaging.server.emit(Message.AddHotbarItem, { id: IDRegistry.getIndex(id), slot });
-    this.addViewportItem(button, id);
   }
 
   public removeItem(hotbarButton: HotbarButton): void {
     if (this.selectedButton === hotbarButton)
       this.selectButton(hotbarButton);
 
-    this.removeViewportItem(hotbarButton);
+    print("remove da hotbar item, slot:", hotbarButton.Name);
     messaging.server.emit(Message.RemoveHotbarItem, hotbarButton.Name as never);
   }
 
-  public update(items: PlayerData["hotbar"]): void {
+  public update(hotbar: PlayerData["hotbar"]): void {
     const { frame } = this;
-    for (const [slot, id] of pairs(items)) {
-      const button = frame[slot];
-      if (this.hasViewportItem(button))
-        this.removeViewportItem(button);
+    for (const slot of HOTBAR_SLOTS) {
+      this.removeViewportItem(frame[slot]);
+    }
 
-      if (id === undefined) continue;
+    for (const [slot, id] of pairs(hotbar)) {
+      const button = frame[slot];
       this.addViewportItem(button, IDRegistry.getID(id));
     }
   }
@@ -111,7 +111,7 @@ export class HotbarUIController {
     }
 
     const tool = this.getViewportItem(hotbarButton);
-    const otherEquipped = this.selectedButton !== hotbarButton && this.tool.hasEquipped(tool); // lol
+    const otherEquipped = this.selectedButton !== hotbarButton && this.tool.hasEquipped(tool);
     if (!tool) return;
 
     const slot = hotbarButton.Name as HotbarKeyName;

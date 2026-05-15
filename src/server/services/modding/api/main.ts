@@ -20,6 +20,6 @@ export class MainModdingAPIService {
 
   public spawnItem(id: GameID, origin: CFrame, amount = 1): number[] {
     const itemTemplate = ItemRegistry.get(id);
-    return dropItem(itemTemplate, origin, undefined, amount);
+    return dropItem(itemTemplate, origin, amount);
   }
 }

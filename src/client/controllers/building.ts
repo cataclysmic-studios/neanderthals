@@ -127,10 +127,10 @@ export class BuildingController implements OnTick {
   public leaveBuildMode(): void {
     if (!this.isInBuildMode()) return;
     this.hologram?.Destroy();
-    this.hologram = undefined;
-    this.currentStructure = undefined;
-    this.currentStructureSize = undefined;
-    this.currentStructureConfig = undefined;
+    delete this.hologram;
+    delete this.currentStructure;
+    delete this.currentStructureSize;
+    delete this.currentStructureConfig;
   }
 
   private tryPlace(): void {

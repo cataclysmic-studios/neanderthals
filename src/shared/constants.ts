@@ -1,3 +1,4 @@
+import { Modding } from "@flamework/core";
 import { ReplicatedStorage, Workspace as World } from "@rbxts/services";
 
 export const assets = ReplicatedStorage.Assets;
@@ -24,6 +25,8 @@ export const TRIBE_COLORS = [
   new BrickColor("White"),
   new BrickColor("Black")
 ] as const satisfies BrickColor[];
+
+export const HOTBAR_SLOTS = Modding.inspect<HotbarKeyName[]>();
 
 export const STRUCTURE_OVERLAP_PARAMS = new OverlapParams;
 STRUCTURE_OVERLAP_PARAMS.AddToFilter(World.PlacedStructures);

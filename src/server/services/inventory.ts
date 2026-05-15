@@ -4,11 +4,11 @@ import { Message, messaging } from "shared/messaging";
 import { dropItem, stopHacking } from "server/utility";
 import { inventoryHasSpace } from "shared/utility/data";
 import { ItemRegistry } from "shared/registry/item-registry";
+import { IDRegistry } from "shared/registry/id-registry";
 import { EXCLUSIVE_IDS } from "shared/item-id";
 import type { PlayerData } from "shared/structs/player-data";
 
 import type { DataService } from "./data";
-import { IDRegistry } from "shared/registry/id-registry";
 
 const DROP_OFFSET = vector.create(0, 1.5, 0);
 
@@ -154,12 +154,12 @@ export class InventoryService {
     return true;
   }
 
-  private removeHotbarItem(data: DeepWritable<PlayerData>, slot: HotbarKeyName): boolean {
+  public removeHotbarItem(data: DeepWritable<PlayerData>, slot: HotbarKeyName): boolean {
     const index = data.hotbar[slot];
     if (index === undefined)
       return false;
 
-    data.hotbar[slot] = undefined;
+    delete data.hotbar[slot];
     data.inventory.set(index, 1);
     return true;
   }

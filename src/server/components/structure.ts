@@ -73,7 +73,7 @@ export class Structure extends CreatesDropsComponent<Attributes, StructureModel>
     this.alive = false;
     this.aliveTrash.purge();
     this.shakeTween?.Destroy();
-    this.shakeTween = undefined;
+    delete this.shakeTween;
 
     const ownerID = this.attributes.Structure_OwnerID;
     const id = this.attributes.ID;
@@ -142,7 +142,7 @@ export class Structure extends CreatesDropsComponent<Attributes, StructureModel>
         this.shakeTween = TweenBuilder.forModel(this.instance)
           .info(SHAKE_TWEEN_INFO)
           .property("Value", origin.add(SHAKE_RIGHT_OFFSET))
-          .onCompleted(() => this.shakeTween = undefined)
+          .onCompleted(() => delete this.shakeTween)
           .play();
       })
       .play();

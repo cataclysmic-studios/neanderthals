@@ -45,7 +45,7 @@ export class ToolController {
     this.trash.purge();
 
     if (!this.equipped) return;
-    this.equipped = undefined;
+    delete this.equipped;
     messaging.server.emit(Message.UnequipTool);
   }
 

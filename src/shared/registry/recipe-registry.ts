@@ -43,8 +43,8 @@ class RecipeRegistryClass extends Registry {
   }
 
   /** **Note:** `id` here is an item ID, not recipe ID */
-  public getItem(id: string): CraftingRecipe {
-    return this.itemRecipes.get(id)!;
+  public getItem(id: string): Maybe<CraftingRecipe> {
+    return this.itemRecipes.get(id);
   }
 
   public load(): void {

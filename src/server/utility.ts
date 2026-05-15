@@ -16,13 +16,16 @@ let cumulativeDropID = 0;
 
 /**
  * Creates a dropped item of the given item, origin, radius, and amount.
+ *
  * @param itemTemplate The item template to clone and drop.
  * @param origin The CFrame where the item should be dropped.
+ * @param amount The number of items to spawn. If not specified, only one item will be spawned.
  * @param radius An optional Vector3 which specifies the range from the origin where the item could be spawned.
  * If not specified, the item will be spawned at the origin.
- * @param amount The number of items to spawn. If not specified, only one item will be spawned.
+ *
+ * @returns An array of the DropIDs of the dropped items. DropIDs are unique identifiers for each dropped item.
  */
-export function dropItem(itemTemplate: PVInstance, origin: CFrame, radius: Vector3 = vector.zero, amount = 1): number[] {
+export function dropItem(itemTemplate: PVInstance, origin: CFrame, amount = 1, radius: Vector3 = vector.zero): number[] {
   const droppedIDs: number[] = [];
   for (const _ of $range(1, amount)) {
     task.spawn(() => {

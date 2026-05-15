@@ -5,6 +5,14 @@ interface DisplayNameOptions {
   readonly uppercase?: boolean;
 }
 
+export function isToolItem(item: Model): item is ToolItem;
+export function isToolItem(id: GameID): boolean;
+export function isToolItem(id: GameID | Model): boolean {
+  const item = typeIs(id, "string") ? ItemRegistry.get(id) : id;
+  const attributes = item.GetAttributes();
+  return "StructureDamage" in attributes || "EntityDamage" in attributes;
+}
+
 export function isVanillaID(id: string): boolean {
   return id.sub(1, 13) === "neanderthals:";
 }

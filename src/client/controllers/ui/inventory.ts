@@ -124,7 +124,6 @@ export class InventoryUIController {
     trash.add(button.MouseButton2Click.Connect(() => {
       if (!canDrop) return;
       messaging.server.emit(Message.DropItem, idIndex);
-      this.disableHoverInfo();
     }));
     trash.add(button.MouseEnter.Connect((x, y) => {
       this.updateHoverInfo(x, y);
@@ -132,6 +131,10 @@ export class InventoryUIController {
     }));
     trash.add(button.MouseLeave.Connect(() => this.disableHoverInfo()));
     trash.add(button.MouseMoved.Connect((x, y) => this.updateHoverInfo(x, y)));
+    trash.add(button.Destroying.Connect(() => {
+      if (this.hoverInfo.ID.Text !== id) return;
+      this.disableHoverInfo();
+    }));
     button.Parent = this.itemContainer;
 
     this.buttonInfos.set(id, { button, trash });

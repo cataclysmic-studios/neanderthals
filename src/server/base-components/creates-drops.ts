@@ -11,7 +11,7 @@ export abstract class CreatesDropsComponent<A extends {} = {}, I extends PVInsta
 
     for (const [id, count] of drops) {
       const item = ItemRegistry.get(id);
-      dropItem(item, pivot, radius, count);
+      dropItem(item, pivot, count, radius);
     }
   }
 }

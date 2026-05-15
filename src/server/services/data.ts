@@ -1,4 +1,4 @@
-import { Modding, Service, type OnStart } from "@flamework/core";
+import { Service, type OnStart } from "@flamework/core";
 import { Players } from "@rbxts/services";
 import { createPlayerStore } from "@rbxts/lyra";
 import { createDiff } from "@rbxts/diff";
@@ -43,13 +43,7 @@ export class DataService implements OnStart, OnPlayerAdd, OnPlayerRemove {
   private readonly store = createPlayerStore({
     name: $nameof<PlayerData>() + "_" + Scope.Proto,
     template: getInitialData(),
-    schema: (v => true) as (v: unknown) => v is Writable<PlayerData>,
-    migrationSteps: [
-      {
-        name: "fix_numeric_keys",
-        apply: fixNumericKeys
-      }
-    ]
+    schema: (v => true) as (v: unknown) => v is Writable<PlayerData>
   });
 
   public async onStart(): Promise<void> {

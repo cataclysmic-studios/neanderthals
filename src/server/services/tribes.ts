@@ -82,7 +82,7 @@ export class TribesService {
     const tribe = this.getTribeBy("totemID", totemID);
     if (!tribe) return;
 
-    tribe.totemID = undefined;
+    delete tribe.totemID;
     messaging.client.emit(getPlayers(tribe), Message.TribeTotemExists, false);
   }
 
@@ -157,7 +157,7 @@ export class TribesService {
   }
 
   private updateTribeColors(player: Player, color: BrickColor): void {
-    const character = player.Character;
+    const character = player.Character as CharacterModel;
     if (!character) return;
 
     const bodyColors = character.BodyColors;

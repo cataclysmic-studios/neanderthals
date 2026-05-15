@@ -106,7 +106,7 @@ export class CreatureSpawn extends CreatesDropsComponent<Attributes, BasePart> i
       this.levels.addXP(killer, config.xp);
       this.createDrops(config.drops, creature.PrimaryPart!.CFrame);
       creature.Destroy();
-      this.creature = undefined;
+      delete this.creature;
     }
 
     cumulativeCreatureID--;
