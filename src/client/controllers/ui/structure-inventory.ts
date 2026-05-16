@@ -1,4 +1,4 @@
-import { Controller, type OnStart } from "@flamework/core";
+import { Controller } from "@flamework/core";
 import { applyDiff } from "@rbxts/diff";
 
 import { Message, messaging } from "shared/messaging";
@@ -13,7 +13,7 @@ import type { PlayerInventoryUIController } from "./player-inventory";
 import type { HotbarUIController } from "./hotbar";
 
 @Controller()
-export class StructureInventoryController extends InventoryUIController<"StructureInventory"> implements OnStart {
+export class StructureInventoryController extends InventoryUIController<"StructureInventory"> {
   private readonly inventories = new Map<number, Map<number, number>>;
   private current?: number;
 
@@ -33,10 +33,6 @@ export class StructureInventoryController extends InventoryUIController<"Structu
     });
   }
 
-  public onStart(): void {
-
-  }
-
   public setStructure(placementID: number, id: string): void {
     this.current = placementID;
     this.frame.Title.Text = StructureRegistry.get(id).Name.upper();
@@ -44,6 +40,7 @@ export class StructureInventoryController extends InventoryUIController<"Structu
   }
 
   public toggle(on: boolean): void {
+    if (this.frame.Visible === on) return;
     this.hotbar.toggle(!on);
     this.inventoryUI.toggle(on);
     this.frame.Visible = on;

@@ -10,7 +10,7 @@ import { getInitialData, type PlayerData } from "shared/structs/player-data";
 import type { OnPlayerAdd, OnPlayerRemove } from "../hooks";
 
 const enum Scope {
-  Proto = "PROTO13"
+  Proto = "PROTO14"
 }
 
 declare function pairs<K extends string | number, V>(

@@ -5,10 +5,12 @@ import { creatureStorage } from "./replication/creature";
 
 import type { CharacterController } from "./character";
 
+type InputCallback = (key: Enum.KeyCode) => void;
+
 @Controller()
 export class InputController implements OnStart {
-  private readonly keyDownCallbacks = new Map<Enum.KeyCode, Set<(key: Enum.KeyCode) => void>>;
-  private readonly keyUpCallbacks = new Map<Enum.KeyCode, Set<(key: Enum.KeyCode) => void>>;
+  private readonly keyDownCallbacks = new Map<Enum.KeyCode, InputCallback[]>;
+  private readonly keyUpCallbacks = new Map<Enum.KeyCode, InputCallback[]>;
 
   public constructor(
     private readonly character: CharacterController,
@@ -42,14 +44,14 @@ export class InputController implements OnStart {
   }
 
   public onKeyDown(key: Enum.KeyCode, callback: () => void): void {
-    const callbacks = this.keyDownCallbacks.get(key) ?? new Set;
-    callbacks.add(callback);
+    const callbacks = this.keyDownCallbacks.get(key) ?? [];
+    callbacks.push(callback);
     this.keyDownCallbacks.set(key, callbacks);
   }
 
   public onKeyUp(key: Enum.KeyCode, callback: () => void): void {
-    const callbacks = this.keyUpCallbacks.get(key) ?? new Set;
-    callbacks.add(callback);
+    const callbacks = this.keyUpCallbacks.get(key) ?? [];
+    callbacks.push(callback);
     this.keyUpCallbacks.set(key, callbacks);
   }
 
