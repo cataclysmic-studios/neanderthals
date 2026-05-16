@@ -16,7 +16,6 @@ import { RecipeKind, type CraftingRecipe } from "shared/structs/crafting-recipe"
 
 import type { ReplicaController } from "../replication/replica";
 import type { BuildingController } from "../building";
-import type { PlayerInventoryUIController } from "./player-inventory";
 import type { ContentController } from "../replication/content";
 
 const DEFAULT_TEXT_COLOR = new Color3(1, 1, 1);
@@ -39,10 +38,8 @@ export class CraftingUIController {
   public constructor(
     private readonly replica: ReplicaController,
     private readonly building: BuildingController,
-    content: ContentController,
-    inventoryUI: PlayerInventoryUIController
+    content: ContentController
   ) {
-    inventoryUI.toggled.Connect(on => this.frame.Visible = on);
     replica.updated.Connect(({ level }) => {
       for (const [{ ingredients, requiredLevel }, frame] of this.frames) {
         const color = this.getCraftButtonColor(ingredients);
@@ -63,9 +60,14 @@ export class CraftingUIController {
     content.synced.Connect(() => this.rerenderRecipeFrames());
   }
 
+  public toggle(on: boolean): void {
+    this.frame.Visible = on;
+  }
+
   private rerenderRecipeFrames(): void {
-    for (const [recipe, frame] of this.frames) {
-      this.frames.delete(recipe);
+    const { frames } = this;
+    for (const [recipe, frame] of frames) {
+      frames.delete(recipe);
       frame.Destroy();
     }
 
@@ -88,7 +90,7 @@ export class CraftingUIController {
       const frame = this.createRecipeFrame(recipe);
       if (!frame) continue;
 
-      this.frames.set(recipe, frame);
+      frames.set(recipe, frame);
     }
   }
 

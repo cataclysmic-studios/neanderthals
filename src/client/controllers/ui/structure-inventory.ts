@@ -10,6 +10,7 @@ import { InventoryUIController } from "./inventory";
 import type { InputController } from "../input";
 import type { HoverInfoUIController } from "./hover-info";
 import type { MainUIController } from "./main";
+import type { CraftingUIController } from "./crafting";
 import type { PlayerInventoryUIController } from "./player-inventory";
 import type { HotbarUIController } from "./hotbar";
 
@@ -22,6 +23,7 @@ export class StructureInventoryUIController extends InventoryUIController<"Struc
     input: InputController,
     hoverInfo: HoverInfoUIController,
     private readonly mainUI: MainUIController,
+    private readonly craftingUI: CraftingUIController,
     private readonly inventoryUI: PlayerInventoryUIController,
     private readonly hotbar: HotbarUIController
   ) {
@@ -46,6 +48,7 @@ export class StructureInventoryUIController extends InventoryUIController<"Struc
     this.hotbar.toggle(!on);
     this.mainUI.toggle(!on);
     this.inventoryUI.toggle(on);
+    this.craftingUI.toggle(!on);
     this.frame.Visible = on;
   }
 
