@@ -70,9 +70,7 @@ export abstract class InventoryUIController {
   }
 
   protected update(newInventory: Map<number, number>): void {
-    const last = this.lastInventory;
     const { changed, removed } = createDiff(this.lastInventory, newInventory);
-    print(changed, removed);
     this.lastInventory = newInventory;
 
     if (removed) {
@@ -91,8 +89,7 @@ export abstract class InventoryUIController {
         const item = ItemRegistry.get(id);
         const info = this.buttonInfos.get(id);
         if (info && isItemStackable(item)) {
-          const oldCount = last.get(index) ?? 0;
-          info.button.Count.Text = tostring(oldCount + diff);
+          info.button.Count.Text = tostring(diff);
           continue;
         }
 
