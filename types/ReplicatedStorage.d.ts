@@ -41,7 +41,8 @@ interface ReplicatedStorage extends Instance {
     };
     Structures: Folder & {
       TribeTotem: StructureModel;
-
+      Raft: StructureModel;
+      Crate: StructureModel;
       WoodWall: StructureModel;
       WoodGate: StructureModel;
       Campfire: StructureModel;

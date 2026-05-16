@@ -9,17 +9,19 @@ import { IDRegistry } from "shared/registry/id-registry";
 import { InventoryUIController } from "./inventory";
 import type { InputController } from "../input";
 import type { HoverInfoUIController } from "./hover-info";
+import type { MainUIController } from "./main";
 import type { PlayerInventoryUIController } from "./player-inventory";
 import type { HotbarUIController } from "./hotbar";
 
 @Controller()
-export class StructureInventoryController extends InventoryUIController<"StructureInventory"> {
+export class StructureInventoryUIController extends InventoryUIController<"StructureInventory"> {
   private readonly inventories = new Map<number, Map<number, number>>;
   private current?: number;
 
   public constructor(
     input: InputController,
     hoverInfo: HoverInfoUIController,
+    private readonly mainUI: MainUIController,
     private readonly inventoryUI: PlayerInventoryUIController,
     private readonly hotbar: HotbarUIController
   ) {
@@ -42,6 +44,7 @@ export class StructureInventoryController extends InventoryUIController<"Structu
   public toggle(on: boolean): void {
     if (this.frame.Visible === on) return;
     this.hotbar.toggle(!on);
+    this.mainUI.toggle(!on);
     this.inventoryUI.toggle(on);
     this.frame.Visible = on;
   }

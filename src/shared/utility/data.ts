@@ -37,6 +37,11 @@ export function calculateBagSpace(hotbar: PlayerData["hotbar"], inventory: Playe
   return items.reduce((sum, [index, count]) => {
     const id = IDRegistry.getID(index);
     const item = ItemRegistry.get(id);
+    if (!item) {
+      warn(`Failed to calculate bag space: could not find item '${id}' (index ${index}) in registry`);
+      return 0;
+    }
+
     const attributeName = "BagSpace";
     const bagSpaceUsed = item.GetAttribute<number>("BagSpace");
     if (bagSpaceUsed === undefined) {
