@@ -7,7 +7,7 @@ import { Message, messaging } from "shared/messaging";
 import { assets } from "shared/constants";
 import { mainScreen } from "client/constants";
 import { recordDiff } from "shared/utility";
-import { getDisplayName, isItemStackable } from "shared/utility/items";
+import { getDisplayName, isItemStackable, isToolItem } from "shared/utility/items";
 import { addViewportItem } from "client/utility";
 import { getInitialData, PlayerData } from "shared/structs/player-data";
 import { IDRegistry } from "shared/registry/id-registry";
@@ -109,7 +109,7 @@ export class InventoryUIController {
     addViewportItem(button.Viewport, id);
 
     const isConsumable = itemTemplate.GetAttribute<boolean>("Consumable") ?? false;
-    const isTool = itemTemplate.GetAttribute("ToolTier") !== undefined;
+    const isTool = isToolItem(itemTemplate);
     const canDrop = !EXCLUSIVE_IDS.has(id);
     button.Name = itemTemplate.Name;
     button.Count.Text = tostring(count);
@@ -131,10 +131,11 @@ export class InventoryUIController {
     }));
     trash.add(button.MouseLeave.Connect(() => this.disableHoverInfo()));
     trash.add(button.MouseMoved.Connect((x, y) => this.updateHoverInfo(x, y)));
-    trash.add(button.Destroying.Connect(() => {
+    trash.add(() => {
+      if (this.hoverInfo.GroupTransparency >= 1) return;
       if (this.hoverInfo.ID.Text !== id) return;
       this.disableHoverInfo();
-    }));
+    });
     button.Parent = this.itemContainer;
 
     this.buttonInfos.set(id, { button, trash });

@@ -10,7 +10,7 @@ export function isToolItem(id: GameID): boolean;
 export function isToolItem(id: GameID | Model): boolean {
   const item = typeIs(id, "string") ? ItemRegistry.get(id) : id;
   const attributes = item.GetAttributes();
-  return "StructureDamage" in attributes || "EntityDamage" in attributes;
+  return "ToolTier" in attributes && "StructureDamage" in attributes && "EntityDamage" in attributes;
 }
 
 export function isVanillaID(id: string): boolean {
