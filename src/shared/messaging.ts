@@ -12,7 +12,8 @@ import type {
   AddHotbarItemPacket,
   PlaceStructurePacket,
   AudioPacket,
-  DropInteractPacket
+  DropInteractPacket,
+  AudioStopPacket
 } from "./structs/packets";
 import type { TribeColorName } from "./constants";
 import type { PlayerData } from "./structs/player-data";
@@ -55,8 +56,10 @@ export const enum Message {
   TribeTotemExists,
   PlayAudio,
   ReplicateAudio,
+  ReplicateAudioStopGlobal,
   SyncContent,
-  ReadyForContent
+  ReadyForContent,
+  WeatherUpdate
 }
 
 type UnpackedIDIndex = u16;
@@ -92,6 +95,8 @@ export interface MessageData {
   [Message.TribeTotemExists]: boolean;
   [Message.PlayAudio]: Packed<AudioPacket>;
   [Message.ReplicateAudio]: Packed<AudioPacket>;
+  [Message.ReplicateAudioStopGlobal]: Packed<AudioStopPacket>;
   [Message.SyncContent]: Packed<List<CraftingRecipe, u12>>;
   [Message.ReadyForContent]: undefined;
+  [Message.WeatherUpdate]: u8;
 }

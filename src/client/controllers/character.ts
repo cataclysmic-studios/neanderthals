@@ -40,7 +40,7 @@ export class CharacterController implements OnRender, OnCharacterAdd {
 
   public isAlive(): boolean {
     const humanoid = this.getHumanoid();
-    return player.Character !== undefined
+    return this.get() !== undefined
       && humanoid !== undefined
       && humanoid.Health > 0;
   }
@@ -50,8 +50,8 @@ export class CharacterController implements OnRender, OnCharacterAdd {
   }
 
   public async waitFor(): Promise<CharacterModel> {
-    return promisifyEvent<[model: CharacterModel]>(player.CharacterAdded)
-      .then(([model]) => model);
+    const [model] = await promisifyEvent(player.CharacterAdded);
+    return model as CharacterModel;
   }
 
   public async mustGet(): Promise<CharacterModel> {

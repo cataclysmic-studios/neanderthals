@@ -1,7 +1,7 @@
 import { Service, type OnStart } from "@flamework/core";
 
 import { Message, messaging } from "shared/messaging";
-import { PlayAudioOptions } from "shared/structs/packets";
+import type { PlayAudioOptions } from "shared/structs/packets";
 
 const RNG = new Random;
 
@@ -21,5 +21,9 @@ export class AudioService implements OnStart {
     const { speed = 1 } = options;
     const randomizedSpeed = RNG.NextNumber(speed - interval, speed + interval);
     messaging.client.emit(to, Message.ReplicateAudio, { name, ...options, speed: randomizedSpeed });
+  }
+
+  public stopGlobal(to: Player | Player[], name: AudioName, fadeTime?: number): void {
+    messaging.client.emit(to, Message.ReplicateAudioStopGlobal, { name, fadeTime });
   }
 }

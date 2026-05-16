@@ -12,10 +12,16 @@ export interface PlayAudioOptions {
   readonly parent?: Instance;
   readonly volume?: f24;
   readonly speed?: f32;
+  readonly fadeTime?: f24;
 }
 
 export interface AudioPacket extends PlayAudioOptions {
   readonly name: AudioName;
+}
+
+export interface AudioStopPacket {
+  readonly name: AudioName;
+  readonly fadeTime?: f24;
 }
 
 export interface DropInteractPacket {

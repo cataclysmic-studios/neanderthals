@@ -32,13 +32,13 @@ interface ReplicatedStorage extends Instance {
     };
     NaturalStructures: Folder & {
       Tree: StructureModel;
-      Bush: StructureModel
+      Bush: StructureModel;
       Rock: StructureModel;
       ["Big Rock"]: StructureModel;
       ["Iron Node"]: StructureModel;
       ["Gold Node"]: StructureModel;
       ["Flux Cluster"]: StructureModel;
-    }
+    };
     Structures: Folder & {
       TribeTotem: StructureModel;
 
@@ -53,6 +53,8 @@ interface ReplicatedStorage extends Instance {
       RockHit: Sound;
       WoodHit: Sound;
       LeafHit: Sound;
+      RainLoop: Sound;
+      ThunderLoop: Sound;
     };
     UI: Folder & {
       DamageIndicator: Part & {
@@ -79,6 +81,6 @@ interface ReplicatedStorage extends Instance {
       InventoryItem: ItemButton;
       CraftingRecipeFrame: RecipeFrame;
       IngredientFrame: IngredientFrame;
-    }
+    };
   };
 }

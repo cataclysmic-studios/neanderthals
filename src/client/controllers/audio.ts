@@ -6,8 +6,9 @@ import { assets } from "shared/constants";
 import type { PlayAudioOptions } from "shared/structs/packets";
 
 import type { CharacterController } from "./character";
+import { TweenBuilder } from "@rbxts/twin";
 
-const RNG = new Random
+const RNG = new Random;
 
 @Controller()
 export class AudioController implements OnStart {
@@ -16,8 +17,11 @@ export class AudioController implements OnStart {
   ) { }
 
   public onStart(): void {
-    messaging.client.on(Message.ReplicateAudio, ({ name, parent, volume }) =>
-      this.replicate(name, { parent, volume })
+    messaging.client.on(Message.ReplicateAudio, options =>
+      this.replicate(options.name, options)
+    );
+    messaging.client.on(Message.ReplicateAudioStopGlobal, ({ name, fadeTime }) =>
+      this.stopGlobal(name, fadeTime)
     );
   }
 
@@ -57,11 +61,33 @@ export class AudioController implements OnStart {
     return sound;
   }
 
-  private replicate(name: AudioName, { parent = SoundService, volume, speed }: PlayAudioOptions = {}): Sound {
+  private stopGlobal(name: AudioName, fadeTime?: number): void {
+    const audio = SoundService.FindFirstChild<Sound>(name);
+    if (!audio)
+      return warn(`Attempted to stop global audio "${name}" but it was not found in SoundService.`);
+
+    if (fadeTime !== undefined) {
+      TweenBuilder.for(audio)
+        .time(fadeTime)
+        .property("Volume", 0)
+        .onCompleted(() => audio.Destroy())
+        .play();
+    } else {
+      audio.Destroy();
+    }
+  }
+
+  private replicate(name: AudioName, { parent = SoundService, volume, speed, fadeTime }: PlayAudioOptions = {}): Sound {
     const template = assets.Audio.WaitForChild(name) as Sound;
     const sound = template.Clone();
-    if (volume !== undefined) {
-      sound.Volume = volume;
+    const finalVolume = volume ?? sound.Volume;
+    if (fadeTime !== undefined) {
+      TweenBuilder.for(sound)
+        .time(fadeTime)
+        .property("Volume", finalVolume)
+        .play();
+    } else {
+      sound.Volume = finalVolume;
     }
     if (speed !== undefined) {
       sound.PlaybackSpeed = speed;
