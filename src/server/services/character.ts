@@ -1,4 +1,4 @@
-import { Modding, Service } from "@flamework/core";
+import { Service } from "@flamework/core";
 import { Workspace as World } from "@rbxts/services";
 import Signal from "@rbxts/lemon-signal";
 
@@ -8,11 +8,11 @@ import { IDRegistry } from "shared/registry/id-registry";
 import { isToolItem } from "shared/utility/items";
 import { dropItem } from "server/utility";
 import { EXCLUSIVE_IDS } from "shared/item-id";
+import { HOTBAR_SLOTS } from "shared/constants";
 import type { OnPlayerAdd } from "server/hooks";
 
 import type { DataService } from "./data";
 import type { InventoryService } from "./inventory";
-import { HOTBAR_SLOTS } from "shared/constants";
 
 interface RecyclingData {
   readonly recycledGear: number[];
@@ -76,7 +76,6 @@ export class CharacterService implements OnPlayerAdd {
     for (const [index, count] of items) {
       const id = IDRegistry.getID(index);
       if (EXCLUSIVE_IDS.has(id)) continue;
-      if (count > 1) continue;
       if (!isToolItem(id)) continue;
 
       recycledGear.push(index);
@@ -85,9 +84,9 @@ export class CharacterService implements OnPlayerAdd {
 
       const { ingredients } = recipe;
       if (ingredients.isEmpty()) continue;
-      for (const [id, count] of ingredients) {
+      for (const [id, ingredientCount] of ingredients) {
         const scrappedCount = scrapped.get(id) ?? 0;
-        scrapped.set(id, scrappedCount + count);
+        scrapped.set(id, scrappedCount + (count * ingredientCount));
       }
     }
 
