@@ -87,7 +87,6 @@ export class HotbarUIController {
     if (this.selectedButton === hotbarButton)
       this.selectButton(hotbarButton);
 
-    print("remove da hotbar item, slot:", hotbarButton.Name);
     messaging.server.emit(Message.RemoveHotbarItem, hotbarButton.Name as never);
   }
 

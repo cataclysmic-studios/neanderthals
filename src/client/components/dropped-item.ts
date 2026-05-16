@@ -60,10 +60,12 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
     promptUI.Parent = instance;
 
     const id = this.attributes.DropID;
+    const isConsumable = this.attributes.Consumable;
     const prompt = this.prompt = this.components.addComponent<DroppedItemPrompt>(promptUI);
     trash.add(prompt.consumed.Connect(async eat => {
-      if (eat && !this.attributes.Consumable) return;
+      if (eat && !isConsumable) return;
       if (!eat && !inventoryHasSpace(this.replica.data)) return;
+      if (!this.character.isAlive()) return;
       await this.pickUpAnimation();
       messaging.server.emit(Message.InteractWithDrop, { id, eat });
     }));

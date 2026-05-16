@@ -58,10 +58,14 @@ export class DroppedItem extends DestroyableComponent<DroppedItemAttributes, Mod
     let freezeThread: Maybe<thread> = trash.add(queueFreeze());
     trash.add(task.delay(DECAY_TIME, () => this.destroy()));
 
+    const isConsumable = this.attributes.Consumable;
     trash.add(messaging.server.on(Message.InteractWithDrop, (player, { id, eat }) => {
       if (id !== this.dropID) return;
+
+      const humanoid = player.Character?.FindFirstChildOfClass("Humanoid");
+      if (!humanoid || humanoid.Health <= 0) return;
       if (eat) {
-        if (!this.attributes.Consumable) return;
+        if (!isConsumable) return;
         return this.consume(player);
       }
 
