@@ -14,14 +14,18 @@ interface ItemFrameInfo {
   readonly trash: Trash;
 }
 
-export abstract class InventoryUIController {
+type MainFrameName = ExtractKeys<PlayerGui["Main"], Frame & {
+  Content: ScrollingFrame;
+}>;
+
+export abstract class InventoryUIController<K extends MainFrameName = MainFrameName> {
   protected readonly buttonInfos = new Map<string, ItemFrameInfo>;
   protected readonly itemContainer: ScrollingFrame;
 
   private lastInventory = new Map<number, number>;
 
   public constructor(
-    protected readonly frame: Frame & { Content: ScrollingFrame; },
+    protected readonly frame: PlayerGui["Main"][K],
     private readonly hoverInfo: HoverInfoUIController
   ) {
     this.itemContainer = frame.Content;

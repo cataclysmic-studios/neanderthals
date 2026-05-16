@@ -1,8 +1,9 @@
 import { Controller, type OnStart } from "@flamework/core";
-import { applyDiff, createDiff } from "@rbxts/diff";
+import { applyDiff } from "@rbxts/diff";
 
 import { Message, messaging } from "shared/messaging";
 import { mainScreen } from "client/constants";
+import { StructureRegistry } from "shared/registry/structure-registry";
 import { IDRegistry } from "shared/registry/id-registry";
 
 import { InventoryUIController } from "./inventory";
@@ -12,7 +13,7 @@ import type { PlayerInventoryUIController } from "./player-inventory";
 import type { HotbarUIController } from "./hotbar";
 
 @Controller()
-export class StructureInventoryController extends InventoryUIController implements OnStart {
+export class StructureInventoryController extends InventoryUIController<"StructureInventory"> implements OnStart {
   private readonly inventories = new Map<number, Map<number, number>>;
   private current?: number;
 
@@ -36,8 +37,9 @@ export class StructureInventoryController extends InventoryUIController implemen
 
   }
 
-  public setStructure(id: number): void {
-    this.current = id;
+  public setStructure(placementID: number, id: string): void {
+    this.current = placementID;
+    this.frame.Title.Text = StructureRegistry.get(id).Name.upper();
     this.update(this.getInventory());
   }
 

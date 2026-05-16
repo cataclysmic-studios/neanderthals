@@ -52,6 +52,7 @@ interface PlayerGui extends BasePlayerGui {
       Separator: Frame;
     };
     StructureInventory: Frame & {
+      Title: TextLabel;
       Content: ScrollingFrame;
       Separator: Frame;
     };
