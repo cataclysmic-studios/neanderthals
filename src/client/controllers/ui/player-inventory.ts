@@ -1,13 +1,12 @@
 import { Controller } from "@flamework/core";
 import { Trash } from "@rbxts/trash";
-import { TweenBuilder } from "@rbxts/twin";
 import Signal from "@rbxts/lemon-signal";
 
 import { Message, messaging } from "shared/messaging";
 import { assets } from "shared/constants";
 import { mainScreen } from "client/constants";
 import { recordDiff } from "shared/utility";
-import { getDisplayName, isItemStackable, isToolItem } from "shared/utility/items";
+import { isItemStackable, isToolItem } from "shared/utility/items";
 import { addViewportItem } from "client/utility";
 import { getInitialData, type PlayerData } from "shared/structs/player-data";
 import { IDRegistry } from "shared/registry/id-registry";
@@ -17,20 +16,17 @@ import { EXCLUSIVE_IDS } from "shared/item-id";
 import type { ReplicaController } from "../replication/replica";
 import type { InputController } from "../input";
 import type { HotbarUIController } from "./hotbar";
+import type { HoverInfoUIController } from "./hover-info";
 
 interface ItemFrameInfo {
   readonly button: ItemButton;
   readonly trash: Trash;
 }
 
-const HOVER_INFO_FADE_DURATION = 0.1;
-
 @Controller()
 export class PlayerInventoryUIController {
   public readonly toggled = new Signal<(on: boolean) => void>;
 
-  private readonly hoverInfo = mainScreen.HoverInfo;
-  private readonly baseHoverInfoPosition = this.hoverInfo.Position;
   private readonly frame: PlayerGui["Main"]["Inventory"];
   private readonly itemContainer: ScrollingFrame;
   private readonly buttonInfos = new Map<string, ItemFrameInfo>;
@@ -39,6 +35,7 @@ export class PlayerInventoryUIController {
   public constructor(
     replica: ReplicaController,
     input: InputController,
+    private readonly hoverInfo: HoverInfoUIController,
     private readonly hotbar: HotbarUIController
   ) {
     const frame = this.frame = mainScreen.Inventory;
@@ -114,6 +111,7 @@ export class PlayerInventoryUIController {
     button.Name = itemTemplate.Name;
     button.Count.Text = tostring(count);
 
+    const { hoverInfo } = this;
     const idIndex = IDRegistry.getIndex(id);
     trash.add(button.MouseButton1Click.Connect(() => {
       if (isConsumable)
@@ -126,45 +124,18 @@ export class PlayerInventoryUIController {
       messaging.server.emit(Message.DropItem, idIndex);
     }));
     trash.add(button.MouseEnter.Connect((x, y) => {
-      this.updateHoverInfo(x, y);
-      this.enableHoverInfo(itemTemplate);
+      hoverInfo.updatePosition(x, y);
+      hoverInfo.enable(itemTemplate);
     }));
-    trash.add(button.MouseLeave.Connect(() => this.disableHoverInfo()));
-    trash.add(button.MouseMoved.Connect((x, y) => this.updateHoverInfo(x, y)));
+    trash.add(button.MouseLeave.Connect(() => hoverInfo.disable()));
+    trash.add(button.MouseMoved.Connect((x, y) => hoverInfo.updatePosition(x, y)));
     trash.add(() => {
-      if (this.hoverInfo.GroupTransparency >= 1) return;
-      if (this.hoverInfo.ID.Text !== id) return;
-      this.disableHoverInfo();
+      if (hoverInfo.getCurrent() !== itemTemplate) return;
+      hoverInfo.disable();
     });
     button.Parent = this.itemContainer;
 
     this.buttonInfos.set(id, { button, trash });
     return button;
-  }
-
-  private enableHoverInfo(item: Model): void {
-    const { hoverInfo } = this;
-    hoverInfo.Title.Text = getDisplayName(item);
-    hoverInfo.ID.Text = item.GetAttribute<string>("ID")!;
-    this.tweenHoverInfoTransparency(0);
-  }
-
-  private disableHoverInfo(): void {
-    this.tweenHoverInfoTransparency(1);
-  }
-
-  private tweenHoverInfoTransparency(transparency: number): void {
-    TweenBuilder.for(this.hoverInfo)
-      .time(HOVER_INFO_FADE_DURATION)
-      .property("GroupTransparency", transparency)
-      .play();
-    TweenBuilder.for(this.hoverInfo.UIStroke)
-      .time(HOVER_INFO_FADE_DURATION)
-      .property("Transparency", math.max(transparency, 0.6))
-      .play();
-  }
-
-  private updateHoverInfo(x: number, y: number): void {
-    this.hoverInfo.Position = this.baseHoverInfoPosition.add(UDim2.fromOffset(x, y));
   }
 }
