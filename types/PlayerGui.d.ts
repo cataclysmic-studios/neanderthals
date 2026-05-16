@@ -51,6 +51,10 @@ interface PlayerGui extends BasePlayerGui {
       Content: ScrollingFrame;
       Separator: Frame;
     };
+    StructureInventory: Frame & {
+      Content: ScrollingFrame;
+      Separator: Frame;
+    };
     Crafting: Frame & {
       Content: ScrollingFrame;
       Separator: Frame;

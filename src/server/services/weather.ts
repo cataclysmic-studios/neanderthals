@@ -24,7 +24,7 @@ export class WeatherService implements OnPlayerAdd, OnFixed {
   ) { }
 
   public onPlayerAdd(player: Player): void {
-    messaging.client.emit(player, Message.WeatherUpdate, this.current);
+    messaging.client.emit(player, Message.UpdateWeather, this.current);
   }
 
   public onFixed(dt: number): void {
@@ -64,7 +64,7 @@ export class WeatherService implements OnPlayerAdd, OnFixed {
     this.current = weather;
     this.updateWeatherAudio();
     this.transitionWeather(weather);
-    messaging.client.emitAll(Message.WeatherUpdate, weather);
+    messaging.client.emitAll(Message.UpdateWeather, weather);
   }
 
   private updateWeatherAudio(): void {

@@ -9,18 +9,20 @@ import { isValidStructureDistance } from "shared/utility";
 import { StructureRegistry } from "shared/registry/structure-registry";
 import { RecipeRegistry } from "shared/registry/recipe-registry";
 import { IDRegistry } from "shared/registry/id-registry";
+import { RecipeKind } from "shared/structs/crafting-recipe";
 import { STRUCTURE_OVERLAP_PARAMS } from "shared/constants";
 import type { StructureConfig } from "shared/structs/structure-config";
 import type { PlaceStructurePacket } from "shared/structs/packets";
 
 import type { InventoryService } from "./inventory";
-import { RecipeKind } from "shared/structs/crafting-recipe";
 
 export interface PlayerStructureInfo {
   readonly player: Player;
   readonly id: string;
   readonly model: Model;
 }
+
+let cumulativeID = 0;
 
 @Service()
 export class BuildingService implements OnPlayerAdd, OnPlayerRemove {
@@ -72,7 +74,9 @@ export class BuildingService implements OnPlayerAdd, OnPlayerRemove {
 
     const structure = structureTemplate.Clone();
     structure.PivotTo(cframe);
-    structure.SetAttribute("Structure_OwnerID", player.UserId);
+    structure.SetAttribute("PlacementID", cumulativeID++);
+    structure.SetAttribute("OwnerID", player.UserId);
+
     if (!noAnchor) {
       for (const part of structure.QueryDescendants<BasePart>("BasePart[Anchored = false]")) {
         part.Anchored = true;

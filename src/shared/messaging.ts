@@ -13,7 +13,9 @@ import type {
   PlaceStructurePacket,
   AudioPacket,
   DropInteractPacket,
-  AudioStopPacket
+  AudioStopPacket,
+  UpdateStructureInventoryPacket,
+  TakeFromStructureInventoryPacket
 } from "./structs/packets";
 import type { TribeColorName } from "./constants";
 import type { PlayerData } from "./structs/player-data";
@@ -59,7 +61,9 @@ export const enum Message {
   ReplicateAudioStopGlobal,
   SyncContent,
   ReadyForContent,
-  WeatherUpdate
+  UpdateWeather,
+  UpdateStructureInventory,
+  TakeFromStructureInventory
 }
 
 type UnpackedIDIndex = u16;
@@ -98,5 +102,7 @@ export interface MessageData {
   [Message.ReplicateAudioStopGlobal]: Packed<AudioStopPacket>;
   [Message.SyncContent]: Packed<List<CraftingRecipe, u12>>;
   [Message.ReadyForContent]: undefined;
-  [Message.WeatherUpdate]: u8;
+  [Message.UpdateWeather]: u8;
+  [Message.UpdateStructureInventory]: Packed<UpdateStructureInventoryPacket>;
+  [Message.TakeFromStructureInventory]: Packed<TakeFromStructureInventoryPacket>;
 }

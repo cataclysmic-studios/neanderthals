@@ -25,7 +25,8 @@ interface PartInfo {
 
 interface Attributes {
   readonly ID?: string;
-  readonly Structure_OwnerID?: number;
+  readonly OwnerID?: number;
+  readonly PlacementID?: number;
 }
 
 @Component({
@@ -75,7 +76,7 @@ export class Structure extends CreatesDropsComponent<Attributes, StructureModel>
     this.shakeTween?.Destroy();
     delete this.shakeTween;
 
-    const ownerID = this.attributes.Structure_OwnerID;
+    const ownerID = this.attributes.OwnerID;
     const id = this.attributes.ID;
     if (ownerID !== undefined && id !== undefined) {
       const player = Players.GetPlayerByUserId(ownerID);

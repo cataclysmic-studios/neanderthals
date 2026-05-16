@@ -1,8 +1,11 @@
-import type { u8, u12, u16, i16, f16, f24, f32, Vector, List, Transform, String, Packed } from "@rbxts/serio";
+import { Diff } from "@rbxts/diff";
+import type { u8, u12, u16, i16, f16, f24, f32, Vector, List, Transform, String, Packed, HashMap } from "@rbxts/serio";
 
 export type DropID = u12;
 export type CreatureID = u12;
 export type IDIndex = u12;
+export type PlacedStructureID = u16;
+export type ItemCount = u16;
 export type SerializedGameID = String<u8>;
 
 type IntegralPosition = Vector<i16>;
@@ -27,6 +30,16 @@ export interface AudioStopPacket {
 export interface DropInteractPacket {
   readonly id: DropID;
   readonly eat: boolean;
+}
+
+export interface UpdateStructureInventoryPacket {
+  readonly structureID: PlacedStructureID;
+  readonly diff: Diff<HashMap<IDIndex, ItemCount, u12>>;
+}
+
+export interface TakeFromStructureInventoryPacket {
+  readonly structureID: PlacedStructureID;
+  readonly itemID: IDIndex;
 }
 
 export interface PlaceStructurePacket {

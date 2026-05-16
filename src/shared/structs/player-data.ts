@@ -2,7 +2,7 @@ import type { u8, u12, u16, HashMap } from "@rbxts/serio";
 
 import { ItemID } from "shared/item-id";
 import { IDRegistry } from "shared/registry/id-registry";
-import type { IDIndex } from "./packets";
+import type { IDIndex, ItemCount } from "./packets";
 
 export interface EquippedGear {
   readonly head?: IDIndex;
@@ -17,7 +17,7 @@ export interface EquippedGear {
 // maybe some expiration or way to delete old data
 export interface PlayerData {
   readonly hotbar: Partial<Record<HotbarKeyName, IDIndex>>;
-  readonly inventory: HashMap<IDIndex, u12, u8>;
+  readonly inventory: HashMap<IDIndex, ItemCount, u12>;
   readonly equippedGear: EquippedGear;
   readonly level: u8;
   readonly xp: u16;

@@ -71,23 +71,8 @@ export class HotbarUIController {
     }
   }
 
-  public addItem(id: string, slot?: HotbarKeyName): void {
-    const button = slot !== undefined
-      ? this.frame[slot]
-      : this.getNextEmptyHotbarButton();
-
-    if (!button) return;
-    if (this.hasViewportItem(button)) return;
-
-    slot ??= button.Name as never;
-    messaging.server.emit(Message.AddHotbarItem, { id: IDRegistry.getIndex(id), slot });
-  }
-
-  public removeItem(hotbarButton: HotbarButton): void {
-    if (this.selectedButton === hotbarButton)
-      this.selectButton(hotbarButton);
-
-    messaging.server.emit(Message.RemoveHotbarItem, hotbarButton.Name as never);
+  public toggle(on: boolean): void {
+    this.frame.Visible = on;
   }
 
   public update(hotbar: PlayerData["hotbar"]): void {
@@ -102,9 +87,28 @@ export class HotbarUIController {
     }
   }
 
-  public selectButton(hotbarButton: HotbarButton): void;
-  public selectButton(hotbarSlot: HotbarKeyName): void;
-  public selectButton(hotbarButton: HotbarButton | HotbarKeyName): void {
+  public addItem(id: string, slot?: HotbarKeyName): void {
+    const button = slot !== undefined
+      ? this.frame[slot]
+      : this.getNextEmptyHotbarButton();
+
+    if (!button) return;
+    if (this.hasViewportItem(button)) return;
+
+    slot ??= button.Name as never;
+    messaging.server.emit(Message.AddHotbarItem, { id: IDRegistry.getIndex(id), slot });
+  }
+
+  private removeItem(hotbarButton: HotbarButton): void {
+    if (this.selectedButton === hotbarButton)
+      this.selectButton(hotbarButton);
+
+    messaging.server.emit(Message.RemoveHotbarItem, hotbarButton.Name as never);
+  }
+
+  private selectButton(hotbarButton: HotbarButton): void;
+  private selectButton(hotbarSlot: HotbarKeyName): void;
+  private selectButton(hotbarButton: HotbarButton | HotbarKeyName): void {
     if (typeIs(hotbarButton, "string")) {
       hotbarButton = this.frame[hotbarButton];
     }
