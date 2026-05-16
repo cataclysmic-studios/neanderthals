@@ -14,7 +14,7 @@ import type { ReplicaController } from "../replication/replica";
 import type { CharacterController } from "../character";
 import type { ActionButtonsUIController } from "./action-buttons";
 import type { HotbarUIController } from "./hotbar";
-import type { InventoryUIController } from "./inventory";
+import type { PlayerInventoryUIController } from "./player-inventory";
 import type { TribesUIController } from "./tribes";
 
 const { floor } = math;
@@ -37,7 +37,7 @@ export class MainUIController implements OnCharacterAdd {
     private readonly character: CharacterController,
     private readonly actionButtonsUI: ActionButtonsUIController,
     hotbarUI: HotbarUIController,
-    inventoryUI: InventoryUIController,
+    inventoryUI: PlayerInventoryUIController,
     tribesUI: TribesUIController
   ) {
     messaging.client.on(Message.UpdateHunger, hunger => this.updateStats(this.hunger = hunger));

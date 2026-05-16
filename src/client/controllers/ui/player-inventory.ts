@@ -9,7 +9,7 @@ import { mainScreen } from "client/constants";
 import { recordDiff } from "shared/utility";
 import { getDisplayName, isItemStackable, isToolItem } from "shared/utility/items";
 import { addViewportItem } from "client/utility";
-import { getInitialData, PlayerData } from "shared/structs/player-data";
+import { getInitialData, type PlayerData } from "shared/structs/player-data";
 import { IDRegistry } from "shared/registry/id-registry";
 import { ItemRegistry } from "shared/registry/item-registry";
 import { EXCLUSIVE_IDS } from "shared/item-id";
@@ -26,7 +26,7 @@ interface ItemFrameInfo {
 const HOVER_INFO_FADE_DURATION = 0.1;
 
 @Controller()
-export class InventoryUIController {
+export class PlayerInventoryUIController {
   public readonly toggled = new Signal<(on: boolean) => void>;
 
   private readonly hoverInfo = mainScreen.HoverInfo;

@@ -16,7 +16,7 @@ import { RecipeKind, type CraftingRecipe } from "shared/structs/crafting-recipe"
 
 import type { ReplicaController } from "../replication/replica";
 import type { BuildingController } from "../building";
-import type { InventoryUIController } from "./inventory";
+import type { PlayerInventoryUIController } from "./player-inventory";
 import type { ContentController } from "../replication/content";
 
 const DEFAULT_TEXT_COLOR = new Color3(1, 1, 1);
@@ -40,7 +40,7 @@ export class CraftingUIController {
     private readonly replica: ReplicaController,
     private readonly building: BuildingController,
     content: ContentController,
-    inventoryUI: InventoryUIController
+    inventoryUI: PlayerInventoryUIController
   ) {
     inventoryUI.toggled.Connect(on => this.frame.Visible = on);
     replica.updated.Connect(({ level }) => {

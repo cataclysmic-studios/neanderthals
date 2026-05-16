@@ -4,7 +4,7 @@ import { getChildrenOfType } from "@rbxts/instance-utility";
 
 import { mainScreen } from "client/constants";
 
-import type { InventoryUIController } from "./inventory";
+import type { PlayerInventoryUIController } from "./player-inventory";
 import type { TribesUIController } from "./tribes";
 
 const TWEEN_INFO = new TweenInfo(0.12);
@@ -13,11 +13,11 @@ const TWEEN_INFO = new TweenInfo(0.12);
 export class ActionButtonsUIController {
   private readonly frame = mainScreen.ActionButtons;
 
-  public constructor(inventoryUI: InventoryUIController, tribesUI: TribesUIController) {
+  public constructor(inventoryUI: PlayerInventoryUIController, tribesUI: TribesUIController) {
     const inventory = this.frame.Inventory;
     const tribes = this.frame.Tribes;
     inventory.MouseButton1Click.Connect(() => inventoryUI.toggle());
-    tribes.MouseButton1Click.Connect(() => tribesUI.toggle()) // open tribes UI
+    tribes.MouseButton1Click.Connect(() => tribesUI.toggle()); // open tribes UI
 
     const buttons = getChildrenOfType(this.frame, "GuiButton");
     for (const button of buttons)
